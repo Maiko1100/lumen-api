@@ -37,8 +37,16 @@ class gCalendarController extends Controller
         $meeting->startDate = $startDate;
         $meeting->startTime = $startTime;
         $meeting->endTime = $endTime;
-        $test = MailController::sendMail($meeting);
-        Log::info($test. " test ");
+        MailController::sendMail($meeting);
+
+        $meeting2 = new \stdClass();
+        $meeting2->template = 'mails.appointment.appointmentThijs';
+        $meeting2->subject = 'Appointment made';
+        $meeting2->email = 'info@ttmtax.nl';
+        $meeting2->startDate = $startDate;
+        $meeting2->startTime = $startTime;
+        $meeting2->endTime = $endTime;
+        MailController::sendMail($meeting2);
 
         $event = Event::find($meeting->eventId);
         $event->name = 'Tax Advice meeting with ' . $meeting->firstName ." " . $meeting->lastName ;
