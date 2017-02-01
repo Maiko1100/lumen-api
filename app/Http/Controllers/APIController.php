@@ -10,7 +10,7 @@ class APIController extends Controller
     /**
      * Get root url.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response dit is een test commit
      */
     public function getIndex(Application $app)
     {
