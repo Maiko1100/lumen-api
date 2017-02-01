@@ -13,9 +13,8 @@ class UserTableSeeder extends Seeder
     {
         DB::table('books')->insert([
             'name' => 'John Doe',
-            'email' => 'johndoe@example.com',
-            'password' => app('hash')->make('johndoe'),
-            'remember_token' => str_random(10),
-        ]);
+            'year' => 'johndoe@example.com',
+            'author' => app('hash')->make('johndoe'),
+]);
     }
 }
