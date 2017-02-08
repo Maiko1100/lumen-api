@@ -61,5 +61,25 @@ $api->version('v1', function ($api) {
 //            'as' => 'api.auth.invalidate'
 //        ]);
     });
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->get('/houses', [
+            'uses' => 'App\Http\Controllers\HouseController@getHouses',
+            'as' => 'api.books'
+        ]);
+        $api->post('/houses/add', [
+            'uses' => 'App\Http\Controllers\HouseController@addHouse',
+            'as' => 'api.books.add'
+        ]);
+        $api->post('/house/delete', [
+            'uses' => 'App\Http\Controllers\BookController@deleteBook',
+            'as' => 'api.book.refresh'
+        ]);
+//        $api->delete('/auth/invalidate', [
+//            'uses' => 'App\Http\Controllers\Auth\AuthController@deleteInvalidate',
+//            'as' => 'api.auth.invalidate'
+//        ]);
+    });
 
 });
