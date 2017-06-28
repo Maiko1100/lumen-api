@@ -15,6 +15,11 @@ $api = $app->make(Dingo\Api\Routing\Router::class);
 
 $api->version('v1', function ($api) {
 
+    $api->get('/test', [
+        'uses' => 'App\Http\Controllers\Controller@test',
+        'as' => 'api.test'
+    ]);
+
     $api->post('/auth/login', [
         'as' => 'api.auth.login',
         'uses' => 'App\Http\Controllers\Auth\AuthController@postLogin',
@@ -81,5 +86,6 @@ $api->version('v1', function ($api) {
 //            'as' => 'api.auth.invalidate'
 //        ]);
     });
+
 
 });

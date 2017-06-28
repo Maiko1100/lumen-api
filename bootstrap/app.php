@@ -124,6 +124,8 @@ $app->register(Zeek\LumenDingoAdapter\Providers\LumenDingoAdapterServiceProvider
 
 // Lumen Generator disabled it on production if you want
 $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
+$app->register(Intervention\Image\ImageServiceProviderLumen::class);
+//class_alias('Intervention\Image\ImageServiceProviderLumen::class', 'Image');
 
 /*
 |--------------------------------------------------------------------------
