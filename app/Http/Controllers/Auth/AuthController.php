@@ -37,7 +37,9 @@ class AuthController extends Controller
         }
 
         // All good so return the token
-        return $this->onAuthorized($token);
+        $user = $this->getUserForLogin($token);
+
+        return $this->onAuthorized($token , $user);
 
     }
 
@@ -84,14 +86,13 @@ class AuthController extends Controller
      *
      * @return JsonResponse
      */
-    protected function onAuthorized($token)
+    protected function onAuthorized($token, $user)
     {
-      //  $user = $this->getUser();
         return new JsonResponse([
-            'message' => 'token_generated',
-            'data' => [
-                'token' => $token,
-            ]
+             'message' => 'token_generated',
+             'token' => $token,
+             'user' => $user
+
         ]);
     }
 
@@ -144,10 +145,9 @@ class AuthController extends Controller
         $newToken = $token->refresh();
 
         return new JsonResponse([
-            'message' => 'token_refreshed',
-            'data' => [
+
                 'token' => $newToken
-            ]
+
         ]);
     }
 
@@ -160,7 +160,15 @@ class AuthController extends Controller
     {
         return new JsonResponse([
             'message' => 'authenticated_user',
-            'data' => JWTAuth::parseToken()->authenticate()
+            'user' => JWTAuth::parseToken()->authenticate()
         ]);
+    }
+
+    public function getUserForLogin($token)
+    {
+        $user = JWTAuth::toUser($token);
+
+        return $user;
+
     }
 }
