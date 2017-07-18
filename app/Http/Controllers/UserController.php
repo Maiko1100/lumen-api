@@ -1,14 +1,10 @@
-<?php
+<?php 
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\User as User;
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Auth\AuthController;
-
-class UserController extends Controller
+class UserController extends Controller 
 {
+
     public function addUser(Request $request)
     {
         $auth = new AuthController();
@@ -42,4 +38,7 @@ class UserController extends Controller
 
         return ($login);
     }
+  
 }
+
+?>

@@ -16,8 +16,8 @@ $api = $app->make(Dingo\Api\Routing\Router::class);
 $api->version('v1', function ($api) {
 
     $api->get('/test', [
-        'uses' => 'App\Http\Controllers\Controller@test',
-        'as' => 'api.test'
+        'uses' => 'App\Http\Controllers\QuestionController@index',
+        'as' => 'api.questioncontroller'
     ]);
 
     $api->post('/auth/login', [

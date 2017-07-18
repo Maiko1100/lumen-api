@@ -12,23 +12,17 @@ class User extends Model implements
     AuthenticatableContract,
     AuthorizableContract
 {
+
+
     use Authenticatable, Authorizable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'name',
-        'email',
-    ];
+    protected $table = 'user';
+    public $timestamps = true;
 
-    /**
-     * The attributes excluded from the model's JSON form.
-     *
-     * @var array
-     */
+    protected $primaryKey = 'person_id'; // or null
+
+    public $incrementing = false;
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -53,4 +47,40 @@ class User extends Model implements
     {
         return [];
     }
+
+    public function getPerson()
+    {
+        return $this->hasOne('App\Person','person_id','id');
+    }
+
+    public function getPartner()
+    {
+        return $this->hasOne('App\Partner','person_id','partner_id');
+    }
+
+    public function getUserFiles()
+    {
+        $userFiles = array();
+        $useryears = $this->hasMany('App\UserYear','person_id')->get();
+
+        foreach ($useryears as $useryear) {
+            array_push($userFiles,$useryear->getUserFiles()->get());
+        }
+
+        return $userFiles;
+    }
+
+    public function getEmployeeFiles()
+    {
+        $employeeFiles = array();
+        $useryears = $this->hasMany('App\UserYear','person_id')->get();
+
+        foreach ($useryears as $useryear) {
+            array_push($employeeFiles,$useryear->getEmployeeFiles()->get());
+        }
+
+        return $employeeFiles;
+    }
+
+
 }
