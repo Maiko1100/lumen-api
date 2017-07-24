@@ -1,6 +1,9 @@
 <?php 
 
 namespace App\Http\Controllers;
+use App\Category as Category;
+
+use Illuminate\Http\JsonResponse;
 
 class CategoryController extends Controller 
 {
@@ -14,7 +17,7 @@ class CategoryController extends Controller
   {
       $categories = Category::get();
 
-      return new JsonResponse(['categories' => $categories]);
+      return $categories;
   }
 
 

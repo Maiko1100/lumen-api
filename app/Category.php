@@ -10,6 +10,9 @@ class Category extends Model
     protected $table = 'category';
     public $timestamps = false;
 
-
+    public function getQuestions()
+    {
+        return $this->hasmany('App\Question','category','id');
+    }
 
 }

@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 use App\UserQuestion as UserQuestion;
 use App\User as User;
-use App\UserData as UserData;
+use App\Question as Question;
 use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\CategoryController;
+use App\Category as Category;
+
 class QuestionController extends Controller 
 {
 
@@ -13,25 +16,49 @@ class QuestionController extends Controller
    *
    * @return Response
    */
-  public function index()
+  public function getQuestions()
   {
+    $categoryController = new CategoryController();
+    $categories = $categoryController->getCategories();
 
-    $Question = User::find(1)->get()->first();
-//    $category = $Question->getCategory()->first();
-//    $bindings = User::find(1)->getPartner()->getBindings();
-
-
-//
-//        foreach ($useryears as $useryear){
-//
-//            $useryear->getUserFiles()->get();
-//
-//            }
+    $questionaire = [];
 
 
-      return new JsonResponse([
-                                'bindings' => $Question
-                        ]);
+    foreach ($categories as $category){
+
+
+        $questions = $category->getQuestions()->get();
+
+        foreach ($questions as $question){
+
+            $q = [];
+
+            if($question->answer_option == 1){
+
+                $question_options = $question->getOptions()->get();
+
+                array_push($q, $question_options);
+
+                $question['answer_options'] = $q;
+
+            }
+
+            $category['questions'] = $questions;
+
+        }
+
+
+
+        array_push($questionaire,$category);
+    }
+
+
+
+
+
+
+
+      return new JsonResponse($questionaire);
 
   }
 

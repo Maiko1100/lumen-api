@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\AuthController;
 use App\Person as Person;
 use App\User as User;
+use Illuminate\Http\JsonResponse;
 
 
 class UserController extends Controller 
