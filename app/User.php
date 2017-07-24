@@ -81,6 +81,10 @@ class User extends Model implements
 
         return $employeeFiles;
     }
+    public function getUserQuestions()
+    {
+        return $this->hasOne('App\Partner','person_id','partner_id');
+    }
 
 
 }

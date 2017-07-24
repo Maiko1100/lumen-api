@@ -25,5 +25,9 @@ class Question extends Model
         return $this->hasOne('App\Question','id','parent');
     }
 
+    public function getCategory()
+    {
+        return $this->hasOne('App\Category','id','category');
+    }
 
 }

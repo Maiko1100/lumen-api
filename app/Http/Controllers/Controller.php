@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Partner;
-use App\User2;
+use App\Question;
 use Laravel\Lumen\Routing\Controller as BaseController;
 
 use Illuminate\Http\JsonResponse;
@@ -12,9 +12,8 @@ class Controller extends BaseController
 {
     public function test() {
 
-        $partner =  Partner::where('person_id', 2)->first();
-        $person = $partner->getPerson();
+        $question =  Question::get();
 
-        return new JsonResponse(['partner' => $person]);
+        return new JsonResponse(['partner' => $question]);
     }
 }
