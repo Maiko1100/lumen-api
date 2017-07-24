@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+use App\Http\Controllers\Auth\AuthController;
+use App\Person as Person;
+use App\User as User;
+
+
 class UserController extends Controller 
 {
 
@@ -11,9 +17,12 @@ class UserController extends Controller
 
         $credentials = $this->getCredentials($request);
 
-        $user = new User();
+        $person = new Person();
+        $person->first_name = $request->input('name');
+        $person->save();
 
-        $user->name = $request->input('name');
+        $user = new User();
+        $user->person_id = $person->id;
         $user->email = $credentials['email'];
         $user->password = app('hash')->make($credentials['password']);
         $user->save();

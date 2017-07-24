@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\UserQuestion as UserQuestion;
-use App\Question as Question;
+use App\User as User;
 use App\UserData as UserData;
 use Illuminate\Http\JsonResponse;
 class QuestionController extends Controller 
@@ -16,8 +16,8 @@ class QuestionController extends Controller
   public function index()
   {
 
-    $Question = Question::find(1)->get()->first();
-    $category = $Question->getCategory()->first();
+    $Question = User::find(1)->get()->first();
+//    $category = $Question->getCategory()->first();
 //    $bindings = User::find(1)->getPartner()->getBindings();
 
 
@@ -30,7 +30,7 @@ class QuestionController extends Controller
 
 
       return new JsonResponse([
-                                'bindings' => $category
+                                'bindings' => $Question
                         ]);
 
   }

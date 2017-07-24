@@ -53,9 +53,9 @@ $api->version('v1', function ($api) {
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {
-        $api->get('/books', [
-            'uses' => 'App\Http\Controllers\BookController@getBooks',
-            'as' => 'api.books'
+        $api->get('/files', [
+            'uses' => 'App\Http\Controllers\UserFileController@getFiles',
+            'as' => 'api.files'
         ]);
         $api->post('/books/add', [
             'uses' => 'App\Http\Controllers\BookController@addBook',
