@@ -20,9 +20,9 @@ class Question extends Model
         return $this->belongsToMany('App\QuestionOption','question_has_question_option','question_id','question_option_id');
     }
 
-    public function getParent()
+    public function getChilds()
     {
-        return $this->hasOne('App\Question','id','parent');
+        return $this->hasMany('App\Question','parent','id');
     }
 
     public function getCategory()

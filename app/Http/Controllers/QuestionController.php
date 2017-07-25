@@ -7,6 +7,7 @@ use App\Question as Question;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\CategoryController;
 use App\Category as Category;
+use phpDocumentor\Reflection\Types\Null_;
 
 class QuestionController extends Controller 
 {
@@ -26,42 +27,48 @@ class QuestionController extends Controller
 
     foreach ($categories as $category){
 
-
         $questions = $category->getQuestions()->get();
 
-        foreach ($questions as $question){
+        $q = array();
 
-            $q = [];
+        foreach ($questions as $question) {
+            if(empty($question->parent)) {
 
-            if($question->answer_option == 1){
-
-                $question_options = $question->getOptions()->get();
-
-                array_push($q, $question_options);
-
-                $question['answer_options'] = $q;
-
+                $this->getChildren($question);
+                array_push($q, $question);
             }
-
-            $category['questions'] = $questions;
-
         }
 
-
-
+        $category['questions'] = $q;
         array_push($questionaire,$category);
     }
-
-
-
-
-
-
 
       return new JsonResponse($questionaire);
 
   }
 
+    function getChildren($question) {
+
+        if($question->answer_option == 1){
+            $question['answer_options'] = $question->getOptions()->get();
+        }
+
+        if ($question->has_childs) {
+
+            $children = [];
+
+            forEach($question->getChilds()->get() as $child) {
+                array_push($children, $child);
+                $this->getChildren($child);
+
+            }
+
+            $question['children'] = $children;
+
+        } else {
+            return $question;
+        }
+    }
 
   
 }
