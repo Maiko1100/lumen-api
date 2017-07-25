@@ -88,10 +88,13 @@ class AuthController extends Controller
      */
     protected function onAuthorized($token, $user)
     {
+        $person = $user->getPerson()->first();
+
         return new JsonResponse([
              'message' => 'token_generated',
              'token' => $token,
-             'user' => $user
+             'user' => $user,
+             'person' => $person
 
         ]);
     }

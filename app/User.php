@@ -50,7 +50,7 @@ class User extends Model implements
 
     public function getPerson()
     {
-        return $this->hasOne('App\Person','person_id','id');
+        return $this->hasOne('App\Person','id','person_id');
     }
 
     public function getPartner()
