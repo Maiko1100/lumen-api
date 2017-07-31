@@ -75,6 +75,16 @@ $api->version('v1', function ($api) {
 //            'as' => 'api.auth.invalidate'
 //        ]);
     });
+
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->get('/userYear', [
+            'uses' => 'App\Http\Controllers\UserYearController@getUserYears',
+            'as' => 'api.useryears'
+        ]);
+    });
+
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {

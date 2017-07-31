@@ -20,4 +20,8 @@ class UserYear extends Model
         return $this->hasMany('App\EmployeeFile');
     }
 
+    public function getYears() {
+        return $this->belongsTo('App\User','person_id','id');
+    }
+
 }

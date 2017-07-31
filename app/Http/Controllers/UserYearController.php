@@ -2,8 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\UserYear;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 class UserYearController extends Controller 
 {
+
+    public function getUserYears() {
+        $user = JWTAuth::parseToken()->authenticate();
+        $userYears = UserYear::where("person_id", "=", $user->person_id)->get();
+
+        return new JsonResponse($userYears);
+    }
 
   /**
    * Display a listing of the resource.
