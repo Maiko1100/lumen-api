@@ -2,8 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
+use App\Year as Year;
+
 class YearController extends Controller 
 {
+
+    public function getYears() {
+        $years = Year::get();
+
+        $y = array();
+
+        foreach($years as $year) {
+            array_push($y, $year->id);
+        }
+
+        return new JsonResponse($y);
+    }
 
   /**
    * Display a listing of the resource.
