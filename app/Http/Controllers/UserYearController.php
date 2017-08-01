@@ -13,11 +13,11 @@ class UserYearController extends Controller
 
     public function getUserYears(Request $request) {
         $user = JWTAuth::parseToken()->authenticate();
-        $userYears = UserYear::where("person_id", "=", $user->person_id)
+        $userYear = UserYear::where("person_id", "=", $user->person_id)
             ->where("year_id", "=", $request->input('year'))
             ->get();
 
-        return new JsonResponse(array_shift($userYears));
+        return new JsonResponse($userYear->toArray()[0]);
     }
 
   /**

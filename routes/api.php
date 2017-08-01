@@ -75,7 +75,7 @@ $api->version('v1', function ($api) {
 //            'as' => 'api.auth.invalidate'
 //        ]);
     });
-
+//
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {
