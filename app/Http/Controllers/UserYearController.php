@@ -11,9 +11,11 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class UserYearController extends Controller 
 {
 
-    public function getUserYears() {
+    public function getUserYears(Request $request) {
         $user = JWTAuth::parseToken()->authenticate();
-        $userYears = UserYear::where("person_id", "=", $user->person_id)->get();
+        $userYears = UserYear::where("person_id", "=", $user->person_id)
+            ->where("year_id", "=", $request->input('year'))
+            ->get();
 
         return new JsonResponse($userYears);
     }
