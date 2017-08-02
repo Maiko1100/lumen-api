@@ -79,9 +79,13 @@ $api->version('v1', function ($api) {
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {
-        $api->get('/userYear', [
+        $api->get('/userYears', [
             'uses' => 'App\Http\Controllers\UserYearController@getUserYears',
             'as' => 'api.useryears'
+        ]);
+        $api->get('/userYear', [
+            'uses' => 'App\Http\Controllers\UserYearController@getUserYear',
+            'as' => 'api.useryear'
         ]);
     });
 

@@ -8,10 +8,24 @@ use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-class UserYearController extends Controller 
+class UserYearController extends Controller
 {
 
-    public function getUserYears(Request $request) {
+    public function getUserYears() {
+        $user = JWTAuth::parseToken()->authenticate();
+        $userYears = UserYear::where("person_id", "=", $user->person_id)->get();
+
+        $userYearsArray = [];
+        $ua = $userYears->toArray();
+
+        foreach ($userYears as $userYear) {
+            $userYearsArray[$userYear->year_id] = $userYear->status;
+        }
+
+        return new JsonResponse($userYearsArray);
+    }
+
+    public function getUserYear(Request $request) {
         $user = JWTAuth::parseToken()->authenticate();
         $userYear = UserYear::where("person_id", "=", $user->person_id)
             ->where("year_id", "=", $request->input('year'))
