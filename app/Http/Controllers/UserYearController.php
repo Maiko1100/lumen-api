@@ -17,7 +17,14 @@ class UserYearController extends Controller
             ->where("year_id", "=", $request->input('year'))
             ->get();
 
-        return new JsonResponse($userYear->toArray()[0]);
+        $userYearArray = $userYear->toArray();
+
+        $output = NULL;
+        if(array_key_exists(0, $userYearArray)) {
+            $output = $userYearArray[0];
+        }
+
+        return new JsonResponse($output);
     }
 
   /**
