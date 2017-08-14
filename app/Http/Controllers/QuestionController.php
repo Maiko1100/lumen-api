@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\CategoryController;
 use App\Category as Category;
 use phpDocumentor\Reflection\Types\Null_;
+use Illuminate\Http\Request;
 
 class QuestionController extends Controller 
 {
@@ -17,13 +18,13 @@ class QuestionController extends Controller
    *
    * @return Response
    */
-  public function getQuestions()
+  public function getQuestions(Request $request)
   {
+      $year = $request->input('year');
     $categoryController = new CategoryController();
-    $categories = $categoryController->getCategories();
+    $categories = $categoryController->getCategoriesByYear($year);
 
     $questionaire = [];
-
 
     foreach ($categories as $category){
 
@@ -35,6 +36,13 @@ class QuestionController extends Controller
             if(empty($question->parent)) {
 
                 $this->getChildren($question);
+
+                unset($question['answer_option']);
+                unset($question['year_id']);
+                unset($question['parent']);
+                unset($question['is_static']);
+                unset($question['has_childs']);
+
                 array_push($q, $question);
             }
         }
@@ -50,7 +58,9 @@ class QuestionController extends Controller
     function getChildren($question) {
 
         if($question->answer_option == 1){
-            $question['answer_options'] = $question->getOptions()->get();
+            $question['answer_options'] = $question->getOptions()->pluck('text')->toArray();
+        } else {
+            $question['answer_options'] = null;
         }
 
         if ($question->has_childs) {
@@ -66,6 +76,14 @@ class QuestionController extends Controller
             $question['children'] = $children;
 
         } else {
+            unset($question['answer_option']);
+            unset($question['year_id']);
+            unset($question['parent']);
+            unset($question['is_static']);
+            unset($question['has_childs']);
+
+            $question['children'] = null;
+
             return $question;
         }
     }

@@ -20,8 +20,11 @@ class CategoryController extends Controller
       return $categories;
   }
 
+  public function getCategoriesByYear($year) {
+      $categories = Category::where("year_id", "=", $year)->get();
 
-
+      return $categories;
+  }
   
 }
 

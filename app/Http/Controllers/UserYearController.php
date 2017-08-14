@@ -16,7 +16,6 @@ class UserYearController extends Controller
         $userYears = UserYear::where("person_id", "=", $user->person_id)->get();
 
         $userYearsArray = [];
-        $ua = $userYears->toArray();
 
         foreach ($userYears as $userYear) {
             $userYearsArray[$userYear->year_id] = $userYear->status;
