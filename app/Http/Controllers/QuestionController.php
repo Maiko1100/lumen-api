@@ -1,6 +1,7 @@
-<?php 
+<?php
 
 namespace App\Http\Controllers;
+
 use App\UserQuestion as UserQuestion;
 use App\User as User;
 use App\Question as Question;
@@ -9,55 +10,55 @@ use App\Http\Controllers\CategoryController;
 use App\Category as Category;
 use phpDocumentor\Reflection\Types\Null_;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use App\UserYear;
 
-class QuestionController extends Controller 
+class QuestionController extends Controller
 {
 
-  /**
-   * Display a listing of the resource.
-   *
-   * @return Response
-   */
-  public function getQuestions(Request $request)
-  {
-      $year = $request->input('year');
-    $categoryController = new CategoryController();
-    $categories = $categoryController->getCategoriesByYear($year);
+    /**
+     * Display a listing of the resource.
+     *
+     * @return Response
+     */
+    public function getQuestions(Request $request)
+    {
+        $year = $request->input('year');
+        $categoryController = new CategoryController();
+        $categories = $categoryController->getCategoriesByYear($year);
 
-    $questionaire = [];
+        $questionaire = [];
 
-    foreach ($categories as $category){
+        foreach ($categories as $category) {
 
-        $questions = $category->getQuestions()->get();
+            $questions = $category->getQuestions()
+                ->leftjoin('user_question', 'question.id', 'user_question.question_id')
+                ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
+                ->select('question.id', 'question.text', 'question.category', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'user_question.question_answer as answer', 'user_question.approved', 'feedback.text as feedback')
+                ->get();
 
-        $q = array();
+            $q = array();
 
-        foreach ($questions as $question) {
-            if(empty($question->parent)) {
+            foreach ($questions as $question) {
+                if (empty($question->parent)) {
 
-                $this->getChildren($question);
+                    $this->getChildren($question);
 
-                unset($question['answer_option']);
-                unset($question['year_id']);
-                unset($question['parent']);
-                unset($question['is_static']);
-                unset($question['has_childs']);
-
-                array_push($q, $question);
+                    array_push($q, $question);
+                }
             }
+
+            $category['questions'] = $q;
+            array_push($questionaire, $category);
         }
 
-        $category['questions'] = $q;
-        array_push($questionaire,$category);
+        return new JsonResponse($questionaire);
+
     }
 
-      return new JsonResponse($questionaire);
-
-  }
-
-    function getChildren($question) {
-
-        if($question->answer_option == 1){
+    function getChildren($question)
+    {
+        if ($question->answer_option == 1) {
             $question['answer_options'] = $question->getOptions()->pluck('text')->toArray();
         } else {
             $question['answer_options'] = null;
@@ -67,19 +68,26 @@ class QuestionController extends Controller
 
             $children = [];
 
-            forEach($question->getChilds()->get() as $child) {
+            $childs = $question->getChilds()
+                ->leftjoin('user_question', 'question.id', 'user_question.question_id')
+                ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
+                ->select('question.id', 'question.text', 'question.category', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'user_question.question_answer as answer', 'user_question.approved', 'feedback.text as feedback')
+                ->get();
+
+            forEach ($childs as $child) {
                 array_push($children, $child);
                 $this->getChildren($child);
 
+                unset($question['answer_option']);
+                unset($question['parent']);
+                unset($question['has_childs']);
             }
 
             $question['children'] = $children;
 
         } else {
             unset($question['answer_option']);
-            unset($question['year_id']);
             unset($question['parent']);
-            unset($question['is_static']);
             unset($question['has_childs']);
 
             $question['children'] = null;
@@ -88,7 +96,36 @@ class QuestionController extends Controller
         }
     }
 
-  
+    public function saveQuestion(Request $request) {
+        $user = JWTAuth::parseToken()->authenticate();
+        $year = $request->input('year');
+        $questionId = $request->input('id');
+        $answer = $request->input('answer');
+        $userYear = UserYear::where("person_id", "=", $user->person_id)
+            ->where("year_id", "=", $year)->first();
+
+        $existingQuestion = $this->checkQuestion($userYear, $questionId);
+
+        if(isset($existingQuestion)) {
+            $existingQuestion->question_answer = $answer;
+            $existingQuestion->save();
+        } else {
+            $userQuestion = new UserQuestion();
+            $userQuestion->user_year_id = $userYear->id;
+            $userQuestion->question_id = $questionId;
+            $userQuestion->question_answer = $answer;
+
+            $userQuestion->save();
+        }
+
+        return $year;
+
+    }
+
+    public function checkQuestion($userYear, $questionId) {
+        return UserQuestion::where("user_year_id", "=", $userYear->id)->where("question_id", "=", $questionId)->first();
+    }
+
 }
 
 ?>

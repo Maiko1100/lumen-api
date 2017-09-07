@@ -20,11 +20,6 @@ $api->version('v1', function ($api) {
         'as' => 'api.yearcontroller'
     ]);
 
-    $api->get('/question', [
-        'uses' => 'App\Http\Controllers\QuestionController@getQuestions',
-        'as' => 'api.questioncontroller'
-    ]);
-
     $api->post('/auth/login', [
         'as' => 'api.auth.login',
         'uses' => 'App\Http\Controllers\Auth\AuthController@postLogin',
@@ -86,6 +81,20 @@ $api->version('v1', function ($api) {
         $api->get('/userYear', [
             'uses' => 'App\Http\Controllers\UserYearController@getUserYear',
             'as' => 'api.useryear'
+        ]);
+    });
+
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->get('/question', [
+            'uses' => 'App\Http\Controllers\QuestionController@getQuestions',
+            'as' => 'api.questioncontroller'
+        ]);
+
+        $api->post('/question/save', [
+            'uses' => 'App\Http\Controllers\QuestionController@saveQuestion',
+            'as' => 'api.questioncontroller'
         ]);
     });
 
