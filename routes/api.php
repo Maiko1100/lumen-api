@@ -119,7 +119,7 @@ $api->version('v1', function ($api) {
 //        ]);
     });
 
-    $api->post('/pay', [
+    $api->post('/create', [
         'uses' => 'App\Http\Controllers\OrderController@create',
         'as' => 'api.order.create'
     ]);
