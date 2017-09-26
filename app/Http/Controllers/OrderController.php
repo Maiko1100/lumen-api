@@ -46,7 +46,12 @@ class OrderController extends Controller {
         $payment = $this->mollie->payments->get($paymentId);
 
         Order::where("payment_id", "=", $paymentId)
-            ->update(['payment_status' => $payment->status]);
+            ->update(
+                [
+                    'payment_status' => $payment->status,
+                    'accepted' => date('Y-m-d H:i:s')
+                ]
+            );
     }
 
 }
