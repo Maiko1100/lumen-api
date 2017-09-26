@@ -12,7 +12,7 @@ class OrderController extends Controller {
     private $webhook;
 
     function __construct () {
-        $this->mollie = $mollie = new Mollie_API_Client;
+        $this->mollie = $mollie = new Mollie_API_Client();
         $this->mollie->setApiKey("test_WnsRunp5ceShQe4maVaFNxjwQERMMB");
         $this->webhook = "http://test-ttmtax-api.kcps.nl/mollie-webhook";
     }
@@ -44,7 +44,7 @@ class OrderController extends Controller {
     function webhook (Request $request) {
         $payment = $this->mollie->payments->get($request->input('id'));
 
-        $order = Order::where("user_id", "=", $payment->customerId)
+        Order::where("user_id", "=", $payment->customerId)
             ->update(['payment_status' => $payment->status]);
     }
 
