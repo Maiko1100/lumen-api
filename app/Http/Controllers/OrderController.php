@@ -34,6 +34,7 @@ class OrderController extends Controller {
         $order->user_id = $user->person_id;
         $order->service_name = $service;
         $order->price = $amount;
+        $order->payment_id = $payment->id;
         $order->payment_status = $payment->status;
         $order->created = date('Y-m-d H:i:s');
         $order->save();
@@ -42,9 +43,10 @@ class OrderController extends Controller {
     }
 
     function webhook (Request $request) {
-        $payment = $this->mollie->payments->get($request->input('id'));
+        $paymentId = $request->input('id');
+        $payment = $this->mollie->payments->get($paymentId);
 
-        Order::where("user_id", "=", $payment->customerId)
+        Order::where("payment_id", "=", $paymentId)
             ->update(['payment_status' => $payment->status]);
     }
 
