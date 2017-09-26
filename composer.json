@@ -9,7 +9,8 @@
         "laravel/lumen-framework": "5.3.*",
         "vlucas/phpdotenv": "~2.2",
         "krisanalfa/lumen-dingo-adapter": "^0.0.1",
-        "intervention/image": "^2.3"
+        "intervention/image": "^2.3",
+        "mollie/mollie-api-php": "1.9.*"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

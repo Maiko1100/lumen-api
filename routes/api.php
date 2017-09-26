@@ -119,5 +119,10 @@ $api->version('v1', function ($api) {
 //        ]);
     });
 
+    $api->post('/pay', [
+        'uses' => 'App\Http\Controllers\Mollie@payment',
+        'as' => 'api.mollie'
+    ]);
+
 
 });
