@@ -120,9 +120,13 @@ $api->version('v1', function ($api) {
     });
 
     $api->post('/pay', [
-        'uses' => 'App\Http\Controllers\Mollie@payment',
-        'as' => 'api.mollie'
+        'uses' => 'App\Http\Controllers\OrderController@create',
+        'as' => 'api.order.create'
     ]);
 
+    $api->post('/mollie-webhook', [
+        'uses' => 'App\Http\Controllers\OrderController@webhook',
+        'as' => 'api.order.webhook'
+    ]);
 
 });
