@@ -26,8 +26,7 @@ class OrderController extends Controller {
             "amount"      => $amount, //10.00
             "description" => $service, //"Test Description"
             "redirectUrl" => $request->input('redirectURL'), //"http://test-ttmtax.kcps.nl/paymentSuccessful/"
-            "webhookUrl"  => $this->webhook,
-            "customerId" => $user->person_id
+            "webhookUrl"  => $this->webhook
         ));
 
         $order = new Order();
