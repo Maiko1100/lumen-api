@@ -55,9 +55,17 @@ class UserYearController extends Controller
    *
    * @return Response
    */
-  public function create()
+  public function create(Request $request)
   {
-    
+      $user = JWTAuth::parseToken()->authenticate();
+
+      $userYear = new UserYear();
+      $userYear->person_id = $user->person_id;
+      $userYear->year_id = $request->input('year');
+      $userYear->package = $request->input('package');
+      $userYear->status = 0;
+
+      return new Response(var_export($userYear->save()));
   }
 
   /**

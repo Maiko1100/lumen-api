@@ -82,6 +82,10 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserYearController@getUserYear',
             'as' => 'api.useryear'
         ]);
+        $api->post('/userYear/create', [
+            'uses' => 'App\Http\Controllers\UserYearController@create',
+            'as' => 'api.useryear.create'
+        ]);
     });
 
     $api->group([
