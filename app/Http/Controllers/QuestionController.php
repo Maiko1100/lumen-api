@@ -12,6 +12,9 @@ use phpDocumentor\Reflection\Types\Null_;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\UserYear;
+use Intervention\Image\Facades\Image as Image;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class QuestionController extends Controller
 {
@@ -105,17 +108,36 @@ class QuestionController extends Controller
             ->where("year_id", "=", $year)->first();
 
         $existingQuestion = $this->checkQuestion($userYear, $questionId);
+        $question_type = Question::where("id", "=", $questionId)->select('type')->first();
+        var_dump($answer);
+        if($question_type->type == "5"){
 
-        if(isset($existingQuestion)) {
-            $existingQuestion->question_answer = $answer;
-            $existingQuestion->save();
-        } else {
-            $userQuestion = new UserQuestion();
-            $userQuestion->user_year_id = $userYear->id;
-            $userQuestion->question_id = $questionId;
-            $userQuestion->question_answer = $answer;
 
-            $userQuestion->save();
+
+            foreach($answer as $answe ) {
+
+                $file = $request->file($answe);
+
+//                $doc = Image::make($answe['preview']);
+                Storage::put("test4.png",$file) ;
+
+
+            }
+            return "test";
+        }else {
+
+
+            if (isset($existingQuestion)) {
+                $existingQuestion->question_answer = $answer;
+                $existingQuestion->save();
+            } else {
+                $userQuestion = new UserQuestion();
+                $userQuestion->user_year_id = $userYear->id;
+                $userQuestion->question_id = $questionId;
+                $userQuestion->question_answer = $answer;
+
+                $userQuestion->save();
+            }
         }
 
         return $year;
