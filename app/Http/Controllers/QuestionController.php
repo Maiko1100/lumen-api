@@ -109,7 +109,10 @@ class QuestionController extends Controller
 
         $existingQuestion = $this->checkQuestion($userYear, $questionId);
         $question_type = Question::where("id", "=", $questionId)->select('type')->first();
-        var_dump($answer);
+        $file = $request->file('file');
+        var_dump($request->file('file'));
+        Storage::put('images', $file) ;
+        exit;
         if($question_type->type == "5"){
 
 
