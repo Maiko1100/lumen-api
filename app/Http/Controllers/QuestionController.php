@@ -99,7 +99,8 @@ class QuestionController extends Controller
         }
     }
 
-    public function saveQuestion(Request $request) {
+    public function saveFileQuestion(Request $request)
+    {
         $user = JWTAuth::parseToken()->authenticate();
         $year = $request->input('year');
         $questionId = $request->input('id');
@@ -108,46 +109,61 @@ class QuestionController extends Controller
             ->where("year_id", "=", $year)->first();
 
         $existingQuestion = $this->checkQuestion($userYear, $questionId);
-        $question_type = Question::where("id", "=", $questionId)->select('type')->first();
         $file = $request->file('file');
-        var_dump($request->file('file'));
-        Storage::put('images', $file) ;
-        exit;
-        if($question_type->type == "5"){
+
+        var_dump($file);
+
+        Storage::putFileAs('userDocuments/' . $user->person_id, $file, $file->getClientOriginalName());
+
+        $filePath = 'userDocuments/' . $user->person_id . "/" . $file->getClientOriginalName();
+
+        if (isset($existingQuestion)) {
+            $existingQuestion->question_answer = $filePath;
+            $existingQuestion->save();
+        } else {
+            $userQuestion = new UserQuestion();
+            $userQuestion->user_year_id = $userYear->id;
+            $userQuestion->question_id = $questionId;
+            $userQuestion->question_answer = $filePath;
+
+            $userQuestion->save();
+        }
 
 
+        return $year;
 
-            foreach($answer as $answe ) {
-
-                $file = $request->file($answe);
-
-//                $doc = Image::make($answe['preview']);
-                Storage::put("test4.png",$file) ;
+    }
 
 
-            }
-            return "test";
-        }else {
+    public function saveQuestion(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $year = $request->input('year');
+        $questionId = $request->input('id');
+        $answer = $request->input('answer');
+        $userYear = UserYear::where("person_id", "=", $user->person_id)
+            ->where("year_id", "=", $year)->first();
 
+        $existingQuestion = $this->checkQuestion($userYear, $questionId);
 
-            if (isset($existingQuestion)) {
-                $existingQuestion->question_answer = $answer;
-                $existingQuestion->save();
-            } else {
-                $userQuestion = new UserQuestion();
-                $userQuestion->user_year_id = $userYear->id;
-                $userQuestion->question_id = $questionId;
-                $userQuestion->question_answer = $answer;
+        if (isset($existingQuestion)) {
+            $existingQuestion->question_answer = $answer;
+            $existingQuestion->save();
+        } else {
+            $userQuestion = new UserQuestion();
+            $userQuestion->user_year_id = $userYear->id;
+            $userQuestion->question_id = $questionId;
+            $userQuestion->question_answer = $answer;
 
-                $userQuestion->save();
-            }
+            $userQuestion->save();
         }
 
         return $year;
 
     }
 
-    public function checkQuestion($userYear, $questionId) {
+    public function checkQuestion($userYear, $questionId)
+    {
         return UserQuestion::where("user_year_id", "=", $userYear->id)->where("question_id", "=", $questionId)->first();
     }
 
