@@ -49,6 +49,10 @@ $api->version('v1', function ($api) {
             'as' => 'api.auth.invalidate'
         ]);
     });
+    $api->get('/file/get', [
+        'uses' => 'App\Http\Controllers\UserFileController@getFile',
+        'as' => 'api.files'
+    ]);
 
     $api->group([
         'middleware' => 'api.auth',
@@ -57,6 +61,7 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserFileController@getFiles',
             'as' => 'api.files'
         ]);
+
         $api->post('/books/add', [
             'uses' => 'App\Http\Controllers\BookController@addBook',
             'as' => 'api.books.add'
