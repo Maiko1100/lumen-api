@@ -133,21 +133,19 @@ class QuestionController extends Controller
 
         $file = $request->file('file');
 
-        Storage::putFileAs('/' . $user->person_id, $file, $file->getClientOriginalName());
-        exit;
+        Storage::putFileAs('userDocuments/' . $user->person_id, $file, $file->getClientOriginalName());
 
-//        $userFile = new UserFile();
-//        $userFile->user_year_id = $userYear->id;
-//        $userFile->question_id = $questionId;
-//        $userFile->name = $file->getClientOriginalName();
-//        $userFile->type = 0;
-//
-//        $userFile->save();
+        $userFile = new UserFile();
+        $userFile->user_year_id = $userYear->id;
+        $userFile->question_id = $questionId;
+        $userFile->name = $file->getClientOriginalName();
+        $userFile->type = 0;
+
+        $userFile->save();
 
         return $year;
 
     }
-
 
     public function saveQuestion(Request $request)
     {
