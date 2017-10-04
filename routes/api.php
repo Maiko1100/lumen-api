@@ -133,4 +133,13 @@ $api->version('v1', function ($api) {
         'as' => 'api.order.webhook'
     ]);
 
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->get('/customers', [
+            'uses' => 'App\Http\Controllers\UserController@getAllCustomers',
+            'as' => 'api.users.customers'
+        ]);
+    });
+
 });

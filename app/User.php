@@ -63,7 +63,6 @@ class User extends Model implements
         $userFiles = array();
         $useryears = $this->hasMany('App\UserYear','person_id')->get();
 
-
         return $useryears[0]->getUserFiles()->get();;
     }
 

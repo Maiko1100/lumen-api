@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Person as Person;
 use App\User as User;
 use Illuminate\Http\JsonResponse;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 
 class UserController extends Controller 
@@ -36,7 +37,6 @@ class UserController extends Controller
 
     protected function getCredentials(Request $request)
     {
-
         $header = $request->header('Authorization');
         $loginarray = explode(':',base64_decode(substr($header,6)));
 
@@ -45,8 +45,18 @@ class UserController extends Controller
             'password'=> $loginarray[1]
         ];
 
-
         return ($login);
+    }
+
+    public function getAllCustomers() {
+        // Check if user is admin
+        $user = JWTAuth::parseToken()->authenticate();
+         if($user->role == 2 || $user->role == 3) {
+            $customers = User::where("role", "=", 1)->orWhere("role", "=", 0)->get();
+            return $customers;
+         } else {
+             return "You are not authorized to do this call";
+         }
     }
   
 }
