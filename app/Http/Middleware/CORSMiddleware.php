@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Response;
+use Log;
+
 
 class CORSMiddleware
 {
@@ -24,7 +26,15 @@ class CORSMiddleware
             $response = $next($request);
         }
 
-        if (0 === strpos($request->headers->get('Content-Type'), 'multipart/form')){
+//        var_dump(strpos($response->headers->get('content-type'), 'application/pdf') == true);
+//        exit;
+        if($response->headers->get('content-type') == 'image/png' || $response->headers->get('content-type') == 'application/pdf') {
+
+            $response = $next($request);
+            $response->headers->set('Access-Control-Allow-Origin' , '*');
+            $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, DELETE');
+            $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Requested-With, Application');
+
             return $response;
         }
 

@@ -24,7 +24,7 @@ class UserFileController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $personId = $user->person_id;
         $filename = $request->input('fileName');
-        $fullpath="{$personId}/{$filename}.png";
+        $fullpath="app/userDocuments/{$personId}/{$filename}";
 
         return response()->download(storage_path($fullpath), null, [], null);
 
