@@ -49,10 +49,8 @@ $api->version('v1', function ($api) {
             'as' => 'api.auth.invalidate'
         ]);
     });
-    $api->get('/file/get', [
-        'uses' => 'App\Http\Controllers\UserFileController@getFile',
-        'as' => 'api.files'
-    ]);
+
+
 
     $api->group([
         'middleware' => 'api.auth',
@@ -62,14 +60,11 @@ $api->version('v1', function ($api) {
             'as' => 'api.files'
         ]);
 
-        $api->post('/books/add', [
-            'uses' => 'App\Http\Controllers\BookController@addBook',
-            'as' => 'api.books.add'
+        $api->post('/file/get', [
+            'uses' => 'App\Http\Controllers\UserFileController@getFile',
+            'as' => 'api.file.get'
         ]);
-        $api->post('/book/delete', [
-            'uses' => 'App\Http\Controllers\BookController@deleteBook',
-            'as' => 'api.book.refresh'
-        ]);
+
 //        $api->delete('/auth/invalidate', [
 //            'uses' => 'App\Http\Controllers\Auth\AuthController@deleteInvalidate',
 //            'as' => 'api.auth.invalidate'
@@ -141,6 +136,10 @@ $api->version('v1', function ($api) {
     $api->post('/mollie-webhook', [
         'uses' => 'App\Http\Controllers\OrderController@webhook',
         'as' => 'api.order.webhook'
+    ]);
+    $api->get('/attachement/actions/test', [
+        'uses' => 'App\Http\Controllers\BookController@deleteBook',
+        'as' => 'attachement.actions.test'
     ]);
 
 });

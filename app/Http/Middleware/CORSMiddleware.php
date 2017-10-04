@@ -24,6 +24,10 @@ class CORSMiddleware
             $response = $next($request);
         }
 
+        if (0 === strpos($request->headers->get('Content-Type'), 'multipart/form')){
+            return $response;
+        }
+
         return $this->addCorsHeaders($request, $response);
     }
 
