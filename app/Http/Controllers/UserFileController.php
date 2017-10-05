@@ -11,11 +11,9 @@ class UserFileController extends Controller
 {
     public function getFiles()
     {
-
         $user = JWTAuth::parseToken()->authenticate();
-
         $files = $user->getUserFiles();
-
+        
         return $files;
     }
 
