@@ -131,20 +131,21 @@ class QuestionController extends Controller
         $userYear = UserYear::where("person_id", "=", $user->person_id)
             ->where("year_id", "=", $year)->first();
 
-        $file = $request->file('file');
+        $files = $request->file('files');
 
-        Storage::putFileAs('userDocuments/' . $user->person_id, $file, $file->getClientOriginalName());
+        foreach ($files as $file){
 
-        $userFile = new UserFile();
-        $userFile->user_year_id = $userYear->id;
-        $userFile->question_id = $questionId;
-        $userFile->name = $file->getClientOriginalName();
-        $userFile->type = 0;
+            Storage::putFileAs('userDocuments/' . $user->person_id, $file, $file->getClientOriginalName());
 
-        $userFile->save();
+            $userFile = new UserFile();
+            $userFile->user_year_id = $userYear->id;
+            $userFile->question_id = $questionId;
+            $userFile->name = $file->getClientOriginalName();
+            $userFile->type = 10;
 
+            $userFile->save();
+        }
         return $year;
-
     }
 
     public function saveQuestion(Request $request)
