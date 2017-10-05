@@ -131,11 +131,9 @@ class QuestionController extends Controller
         $userYear = UserYear::where("person_id", "=", $user->person_id)
             ->where("year_id", "=", $year)->first();
 
-        $files = $request->file('files');
-
-        foreach ($files as $file){
-
-            Storage::putFileAs('userDocuments/' . $user->person_id, $file, $file->getClientOriginalName());
+        foreach ($request->file('files') as $file){
+            $pinfo = pathinfo($file->getClientOriginalName());
+            Storage::putFileAs('userDocuments/' . $user->person_id, $file, $pinfo['filename'] . "_" . date("YmdHis") . $pinfo['extension']);
 
             $userFile = new UserFile();
             $userFile->user_year_id = $userYear->id;
