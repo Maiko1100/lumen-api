@@ -43,11 +43,15 @@ class QuestionController extends Controller
         foreach ($categories as $category) {
 
             $questions = $category->getQuestions()
-                ->leftjoin('user_question', 'question.id', 'user_question.question_id')
+                ->leftjoin('user_question', function($join) use ($userYear) {
+                    $join->on('question.id', '=', 'user_question.question_id');
+                    $join->on('user_question.user_year_id', "=", DB::raw($userYear->id));
+                })
                 ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
-                ->leftjoin('user_file', 'question.id', 'user_file.question_id')
-                ->where('user_question.user_year_id', "=", $userYear->id)
-                ->orWhere('user_file.user_year_id', "=", $userYear->id)
+                ->leftjoin('user_file', function($join) use ($userYear) {
+                    $join->on('question.id', '=', 'user_file.question_id');
+                    $join->on('user_file.user_year_id', "=", DB::raw($userYear->id));
+                })
                 ->groupBy('question.id')
                 ->select('question.id', 'question.text', 'question.category', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback')
                 ->orderBy('question.id', 'asc')
@@ -58,6 +62,9 @@ class QuestionController extends Controller
             foreach ($questions as $question) {
                 if (strpos($question->file_names, '|;|') !== false) {
                     $question->file_names = explode('|;|', $question->file_names);
+                }
+                if ($question->file_names === null) {
+                    $question->file_names = [];
                 }
                 if (empty($question->parent)) {
 
@@ -88,11 +95,15 @@ class QuestionController extends Controller
             $children = [];
 
             $childs = $question->getChilds()
-                ->leftjoin('user_question', 'question.id', 'user_question.question_id')
+                ->leftjoin('user_question', function($join) use ($userYear) {
+                    $join->on('question.id', '=', 'user_question.question_id');
+                    $join->on('user_question.user_year_id', "=", DB::raw($userYear->id));
+                })
                 ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
-                ->leftjoin('user_file', 'question.id', 'user_file.question_id')
-                ->where('user_question.user_year_id', "=", $userYear->id)
-                ->orWhere('user_file.user_year_id', "=", $userYear->id)
+                ->leftjoin('user_file', function($join) use ($userYear) {
+                    $join->on('question.id', '=', 'user_file.question_id');
+                    $join->on('user_file.user_year_id', "=", DB::raw($userYear->id));
+                })
                 ->groupBy('question.id')
                 ->select('question.id', 'question.text', 'question.category', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback')
                 ->orderBy('question.id', 'asc')
@@ -101,6 +112,9 @@ class QuestionController extends Controller
             forEach ($childs as $child) {
                 if (strpos($child->file_names, '|;|') !== false) {
                     $child->file_names = explode('|;|', $question->file_names);
+                }
+                if ($child->file_names === null) {
+                    $child->file_names = [];
                 }
                 array_push($children, $child);
                 $this->getChildren($child, $userYear);
