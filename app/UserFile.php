@@ -8,6 +8,6 @@ class UserFile extends Model
 {
 
     protected $table = 'user_file';
-    public $timestamps = false;
+    public $timestamps = true;
 
 }
