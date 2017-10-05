@@ -26,9 +26,14 @@ class CORSMiddleware
             $response = $next($request);
         }
 
-//        var_dump(strpos($response->headers->get('content-type'), 'application/pdf') == true);
-//        exit;
-        if($response->headers->get('content-type') == 'image/png' || $response->headers->get('content-type') == 'application/pdf') {
+        $supportedFiles = [
+            'image/png',
+            'image/jpg',
+            'image/jpeg',
+            'application/pdf'
+        ];
+
+        if(in_array($response->headers->get('content-type'), $supportedFiles)) {
 
             $response = $next($request);
             $response->headers->set('Access-Control-Allow-Origin' , '*');
