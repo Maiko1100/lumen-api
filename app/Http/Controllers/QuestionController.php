@@ -151,6 +151,7 @@ class QuestionController extends Controller
 
             $userFile = new UserFile();
             $userFile->user_year_id = $userYear->id;
+            $userFile->person_id = $user->person_id;
             $userFile->question_id = $questionId;
             $userFile->name = $file->getClientOriginalName();
             $userFile->type = 10;

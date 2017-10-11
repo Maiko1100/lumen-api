@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Response;
+use App\UserYear as UserYear;
 
 class UserFileController extends Controller
 {
@@ -48,6 +49,29 @@ class UserFileController extends Controller
 
 
     }
+
+    public function saveFile(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $file = $request->file('file');
+        $fileName= $file->getClientOriginalName();
+        $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
+
+
+            Storage::putFileAs('userDocuments/' . $user->person_id, $file, $fileName);
+
+            $userFile = new UserFile();
+            $userFile->name = $fileName;
+            $userFile->type = 1;
+            $userFile->user_year_id = $userYear->id;
+            $userFile->person_id = $user->person_id;
+
+            $userFile->save();
+
+        return $userFile;
+
+    }
+
 
 
 }

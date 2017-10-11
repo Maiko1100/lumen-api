@@ -60,11 +60,9 @@ class User extends Model implements
 
     public function getUserFiles()
     {
-        $userFiles = array();
-        $useryears = $this->hasMany('App\UserYear','person_id')->get();
+        $userFiles = $this->hasMany('App\UserFile','person_id')->get();
 
-
-        return $useryears[0]->getUserFiles()->get();;
+        return $userFiles;
     }
 
     public function getEmployeeFiles()

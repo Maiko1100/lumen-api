@@ -68,6 +68,10 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserFileController@deleteFile',
             'as' => 'api.file.delete'
         ]);
+        $api->post('/file/save', [
+            'uses' => 'App\Http\Controllers\UserFileController@saveFile',
+            'as' => 'api.file.save'
+        ]);
 
 //        $api->delete('/auth/invalidate', [
 //            'uses' => 'App\Http\Controllers\Auth\AuthController@deleteInvalidate',
