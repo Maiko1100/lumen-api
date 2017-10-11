@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Http\Controllers;
 
@@ -8,9 +8,10 @@ use App\Person as Person;
 use App\User as User;
 use Illuminate\Http\JsonResponse;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\UserYear as UserYear;
+use Illuminate\Support\Facades\DB;
 
-
-class UserController extends Controller 
+class UserController extends Controller
 {
 
     public function addUser(Request $request)
@@ -38,7 +39,7 @@ class UserController extends Controller
     protected function getCredentials(Request $request)
     {
         $header = $request->header('Authorization');
-        $loginarray = explode(':',base64_decode(substr($header,6)));
+        $loginarray = explode(':', base64_decode(substr($header, 6)));
 
         $login = [
             'email'=> $loginarray[0],
@@ -48,17 +49,30 @@ class UserController extends Controller
         return ($login);
     }
 
-    public function getAllCustomers() {
+    public function getAllCustomers()
+    {
         // Check if user is admin
         $user = JWTAuth::parseToken()->authenticate();
-         if($user->role == 2 || $user->role == 3) {
-            $customers = User::where("role", "=", 1)->orWhere("role", "=", 0)->get();
-            return $customers;
-         } else {
-             return "You are not authorized to do this call";
-         }
-    }
-  
-}
+        if ($user->role == 2 || $user->role == 3) {
+            $customers = User::where("role", "=", 1)->orWhere("role", "=", 0)
+            ->join('person', 'person_id', '=', 'person.id')->get();
 
-?>
+            return $customers;
+        } else {
+            return "You are not authorized to do this call";
+        }
+    }
+
+    public function getAllCases()
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        if ($user->role == 2 || $user->role == 3) {
+            $cases = DB::table('user_year')
+                ->join('person', 'person_id', '=', 'person.id')->get();
+
+            return $cases;
+        } else {
+            return "You are not authorized to do this call";
+        }
+    }
+}

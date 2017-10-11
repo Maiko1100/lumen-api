@@ -140,6 +140,10 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserController@getAllCustomers',
             'as' => 'api.users.customers'
         ]);
+        
+        $api->get('/customers/cases', [
+            'uses' => 'App\Http\Controllers\UserController@getAllCases',
+            'as' => 'api.users.customers.cases'
+        ]);
     });
-
 });
