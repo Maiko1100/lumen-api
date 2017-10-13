@@ -68,7 +68,8 @@ class UserController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         if ($user->role == 2 || $user->role == 3) {
             $cases = DB::table('user_year')
-                ->join('person', 'person_id', '=', 'person.id')->get();
+                ->join('person', 'user_year.person_id', '=', 'person.id')
+                ->select('user_year.year_id','user_year.package','user_year.status','user_year.id','person.id as person_id', 'person.first_name' , 'person.last_name', 'person.passport','person.bsn','person.dob')->get();
 
             return $cases;
         } else {
