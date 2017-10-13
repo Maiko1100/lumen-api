@@ -10,5 +10,8 @@ class Child extends Model
     protected $table = 'child';
     public $timestamps = false;
 
-
+    public function getInfo()
+    {
+        return $this->hasOne('App\Person','id','person_id');
+    }
 }

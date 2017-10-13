@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Psy\Util\Json;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\UserYear;
+use App\Child;
 use Intervention\Image\Facades\Image as Image;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -32,6 +33,17 @@ class QuestionController extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
         $year = $request->input('year');
+
+        $partner = $user->getPartner()
+            ->first()
+            ->getInfo()
+            ->first();
+
+        $children = [];
+        foreach ($user->getChildren()->get() as $child) {
+            array_push($children, $child->getInfo()->first());
+        }
+
         $userYear = UserYear::where("person_id", "=", $user->person_id)
             ->where("year_id", "=", $year)
             ->first();
@@ -61,14 +73,15 @@ class QuestionController extends Controller
                         $join->on('question.id', '=', 'user_file.question_id');
                         $join->on('user_file.user_year_id', "=", DB::raw($userYear->id));
                     })
-                    ->join('user_year', 'user_question.user_year_id', 'user_year.id')
-                    ->join('user', 'user_year.person_id', 'user.person_id')
-                    ->leftjoin('partner', 'user.person_id', 'partner.user_id')
-                    ->join('person as personpartner', 'partner.person_id', 'personpartner.id')
-                    ->leftjoin('child', 'user.person_id', 'child.user_id')
-                    ->join('person as personchild', 'child.person_id', 'personchild.id')
+//                    ->leftjoin('user_year', 'user_question.user_year_id', 'user_year.id')
+//                    ->leftjoin('user', 'user_year.person_id', 'user.person_id')
+//                    ->leftjoin('partner', 'user.person_id', 'partner.user_id')
+//                    ->leftjoin('person as personpartner', 'partner.person_id', 'personpartner.id')
+//                    ->leftjoin('child', 'user.person_id', 'child.user_id')
+//                    ->leftjoin('person as personchild', 'child.person_id', 'personchild.id')
                     ->groupBy('question.id')
-                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'user_question.question_answer as answer', 'personpartner.first_name as partner_first_name', DB::raw("group_concat(`personchild`.`first_name` SEPARATOR '|;|') as `child_first_name`"), DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback')
+                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback')
+//                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'user_question.question_answer as answer', 'personpartner.first_name as partner_first_name', DB::raw("group_concat(`personchild`.`first_name` SEPARATOR '|;|') as `child_first_name`"), DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback')
                     ->orderBy('question.id', 'asc')
                     ->get();
 
@@ -114,7 +127,11 @@ class QuestionController extends Controller
             );
         }
 
-        return new JsonResponse($questionaire);
+        return new Response(array(
+            "categories" => $questionaire,
+            "partner" => $partner,
+            "children" => $children
+        ));
 
     }
 
