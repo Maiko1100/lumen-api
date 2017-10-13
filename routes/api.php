@@ -50,6 +50,8 @@ $api->version('v1', function ($api) {
         ]);
     });
 
+
+
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {
@@ -57,14 +59,20 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserFileController@getFiles',
             'as' => 'api.files'
         ]);
-        $api->post('/books/add', [
-            'uses' => 'App\Http\Controllers\BookController@addBook',
-            'as' => 'api.books.add'
+
+        $api->post('/file/get', [
+            'uses' => 'App\Http\Controllers\UserFileController@getFile',
+            'as' => 'api.file.get'
         ]);
-        $api->post('/book/delete', [
-            'uses' => 'App\Http\Controllers\BookController@deleteBook',
-            'as' => 'api.book.refresh'
+        $api->post('/file/delete', [
+            'uses' => 'App\Http\Controllers\UserFileController@deleteFile',
+            'as' => 'api.file.delete'
         ]);
+        $api->post('/file/save', [
+            'uses' => 'App\Http\Controllers\UserFileController@saveFile',
+            'as' => 'api.file.save'
+        ]);
+
 //        $api->delete('/auth/invalidate', [
 //            'uses' => 'App\Http\Controllers\Auth\AuthController@deleteInvalidate',
 //            'as' => 'api.auth.invalidate'
@@ -100,6 +108,11 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\QuestionController@saveQuestion',
             'as' => 'api.questioncontroller'
         ]);
+
+        $api->post('/question/save-file', [
+            'uses' => 'App\Http\Controllers\QuestionController@saveFileQuestion',
+            'as' => 'api.question.savefile'
+        ]);
     });
 
     $api->group([
@@ -131,6 +144,10 @@ $api->version('v1', function ($api) {
     $api->post('/mollie-webhook', [
         'uses' => 'App\Http\Controllers\OrderController@webhook',
         'as' => 'api.order.webhook'
+    ]);
+    $api->get('/attachement/actions/test', [
+        'uses' => 'App\Http\Controllers\BookController@deleteBook',
+        'as' => 'attachement.actions.test'
     ]);
 
     $api->group([

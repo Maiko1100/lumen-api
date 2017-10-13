@@ -55,15 +55,19 @@ class User extends Model implements
 
     public function getPartner()
     {
-        return $this->hasOne('App\Partner','person_id','partner_id');
+        return $this->hasOne('App\Partner','user_id','person_id');
+    }
+
+    public function getChildren()
+    {
+        return $this->hasMany('App\Child','user_id','person_id');
     }
 
     public function getUserFiles()
     {
-        $userFiles = array();
-        $useryears = $this->hasMany('App\UserYear','person_id')->get();
+        $userFiles = $this->hasMany('App\UserFile','person_id')->get();
 
-        return $useryears[0]->getUserFiles()->get();;
+        return $userFiles;
     }
 
     public function getEmployeeFiles()

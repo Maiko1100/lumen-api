@@ -15,4 +15,9 @@ class Partner extends Model
         return $this->hasOne('App\Person', 'person_id');
     }
 
+    public function getInfo()
+    {
+        return $this->hasOne('App\Person','id','person_id');
+    }
+
 }

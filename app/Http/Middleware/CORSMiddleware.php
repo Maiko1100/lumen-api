@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Response;
+use Log;
+
 
 class CORSMiddleware
 {
@@ -22,6 +24,23 @@ class CORSMiddleware
             $response = $this->createEmptyResponse();
         } else {
             $response = $next($request);
+        }
+
+        $supportedFiles = [
+            'image/png',
+            'image/jpg',
+            'image/jpeg',
+            'application/pdf'
+        ];
+
+        if(in_array($response->headers->get('content-type'), $supportedFiles)) {
+
+            $response = $next($request);
+            $response->headers->set('Access-Control-Allow-Origin' , '*');
+            $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, DELETE');
+            $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Requested-With, Application');
+
+            return $response;
         }
 
         return $this->addCorsHeaders($request, $response);
