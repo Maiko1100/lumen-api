@@ -126,6 +126,15 @@ $api->version('v1', function ($api) {
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {
+        $api->post('/partner/save', [
+            'uses' => 'App\Http\Controllers\PartnerController@savePartner',
+            'as' => 'api.PartnerController.save'
+        ]);
+    });
+
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
         $api->get('/houses', [
             'uses' => 'App\Http\Controllers\HouseController@getHouses',
             'as' => 'api.books'
