@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Response;
+use App\Child as Child;
+use App\Person as Person;
+use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 class ChildController extends Controller
 {
 
@@ -15,7 +21,7 @@ class ChildController extends Controller
 
     }
 
-    public function saveChild() {
+    public function saveChild(Request $request) {
 
         $user = JWTAuth::parseToken()->authenticate();
 
@@ -23,10 +29,30 @@ class ChildController extends Controller
         $answer = $request->input('answer');
         $id = $request->input('person_id');
 
-        if(){
 
+        if(empty($id)){
+            $person = new Person();
+            $person->$field = $answer;
+            $person->save();
 
+            $child = new Child();
+            $child->person_id = $person->id;
+            $child->user_id = $user->person_id;
+            $child->save();
+
+            return response($child->person_id);
+        }else{
+            Person::where("id", "=", $id)
+                ->update(
+                    [
+                        $field => $answer
+                    ]
+                );
+            return response($id);
         }
+
+
+
     }
 
 }

@@ -114,6 +114,14 @@ $api->version('v1', function ($api) {
             'as' => 'api.question.savefile'
         ]);
     });
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->post('/child/save', [
+            'uses' => 'App\Http\Controllers\ChildController@saveChild',
+            'as' => 'api.ChildController.save'
+        ]);
+    });
 
     $api->group([
         'middleware' => 'api.auth',
