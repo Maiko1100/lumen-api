@@ -109,9 +109,9 @@ $api->version('v1', function ($api) {
             'as' => 'api.questioncontroller'
         ]);
 
-        $api->post('/question/save-file', [
-            'uses' => 'App\Http\Controllers\QuestionController@saveFileQuestion',
-            'as' => 'api.question.savefile'
+        $api->post('/question/file/save', [
+            'uses' => 'App\Http\Controllers\UserFileController@saveQuestionFile',
+            'as' => 'api.question.file.save'
         ]);
     });
     $api->group([

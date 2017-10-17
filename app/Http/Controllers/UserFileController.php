@@ -50,6 +50,31 @@ class UserFileController extends Controller
 
     }
 
+    public function saveQuestionFile(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $year = $request->input('year');
+        $questionId = $request->input('id');
+        $userYear = UserYear::where("person_id", "=", $user->person_id)
+            ->where("year_id", "=", $year)->first();
+
+        foreach ($request->file('files') as $file){
+            $pinfo = pathinfo($file->getClientOriginalName());
+            $newName = $pinfo['filename'] . "_" . date("YmdHis") . "." . $pinfo['extension'];
+            Storage::putFileAs('userDocuments/' . $user->person_id, $file, $newName);
+
+            $userFile = new UserFile();
+            $userFile->user_year_id = $userYear->id;
+            $userFile->person_id = $user->person_id;
+            $userFile->question_id = $questionId;
+            $userFile->name = $newName;
+            $userFile->type = 10;
+
+            $userFile->save();
+        }
+        return $newName;
+    }
+
     public function saveFile(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();

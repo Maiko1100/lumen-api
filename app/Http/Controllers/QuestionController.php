@@ -174,30 +174,6 @@ class QuestionController extends Controller
         }
     }
 
-    public function saveFileQuestion(Request $request)
-    {
-        $user = JWTAuth::parseToken()->authenticate();
-        $year = $request->input('year');
-        $questionId = $request->input('id');
-        $userYear = UserYear::where("person_id", "=", $user->person_id)
-            ->where("year_id", "=", $year)->first();
-
-        foreach ($request->file('files') as $file){
-            $pinfo = pathinfo($file->getClientOriginalName());
-            Storage::putFileAs('userDocuments/' . $user->person_id, $file, $pinfo['filename'] . "_" . date("YmdHis") . $pinfo['extension']);
-
-            $userFile = new UserFile();
-            $userFile->user_year_id = $userYear->id;
-            $userFile->person_id = $user->person_id;
-            $userFile->question_id = $questionId;
-            $userFile->name = $file->getClientOriginalName();
-            $userFile->type = 10;
-
-            $userFile->save();
-        }
-        return $year;
-    }
-
     public function saveQuestion(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();

@@ -29,7 +29,6 @@ class ChildController extends Controller
         $answer = $request->input('answer');
         $id = $request->input('personId');
 
-
         if(empty($id)){
             $person = new Person();
             $person->$field = $answer;
