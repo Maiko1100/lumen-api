@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Http\Controllers;
 
@@ -9,17 +9,18 @@ use App\Person as Person;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-class PartnerController extends Controller 
+class PartnerController extends Controller
 {
 
-    public function savePartner(Request $request) {
+    public function savePartner(Request $request)
+    {
 
         $user = JWTAuth::parseToken()->authenticate();
         $field = $request->input('field');
         $answer = $request->input('answer');
         $id = $request->input('personId');
 
-        if(empty($id)){
+        if (empty($id)) {
             $person = new Person();
             $person->$field = $answer;
             $person->save();
@@ -30,7 +31,7 @@ class PartnerController extends Controller
             $partner->save();
 
             return response($partner->person_id);
-        }else{
+        } else {
             Person::where("id", "=", $id)
                 ->update(
                     [
@@ -40,6 +41,7 @@ class PartnerController extends Controller
             return response($id);
         }
     }
+
 
 }
 

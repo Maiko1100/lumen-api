@@ -77,6 +77,8 @@ $app->withFacades();
 
 $app->withEloquent();
 
+$app->register(App\Providers\AppServiceProvider::class);
+$app->register(\Illuminate\Mail\MailServiceProvider::class);
 /*
 |--------------------------------------------------------------------------
 | Register Container Bindings
@@ -101,6 +103,8 @@ $app->singleton('filesystem', function ($app) {
     return $app->loadComponent('filesystems', 'Illuminate\Filesystem\FilesystemServiceProvider', 'filesystem');
 });
 
+
+$app->configure('mail');
 /*
 |--------------------------------------------------------------------------
 | Register Middleware

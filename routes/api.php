@@ -28,7 +28,10 @@ $api->version('v1', function ($api) {
         'as' => 'api.user.create',
         'uses' => 'App\Http\Controllers\UserController@addUser',
     ]);
-
+    $api->post('/test', [
+        'as' => 'api.controller.test',
+        'uses' => 'App\Http\Controllers\Controller@test',
+    ]);
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {
