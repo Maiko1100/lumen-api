@@ -12,16 +12,24 @@ class Controller extends BaseController
 {
     public function test() {
 
-        $data = [
-            'hendrik' => 'henk',
-            'email' => 'maiko@kcps.nl'
+//        $data = [
+//            'hendrik' => 'henk',
+//            'email' => 'maiko@kcps.nl'
+//
+//        ];
+//
+//        Mail::send('mails.testmail', $data, function ($message) use ($data) {
+//            $message->to($data['email'], '')->subject('Do-not-reply:Afspraak');
+//            $message->from('maiko@kcps.nl', 'Maiko');
+//        });
+//        return 'send';
 
-        ];
+        $question = Question::find(1);
 
-        Mail::send('mails.testmail', $data, function ($message) use ($data) {
-            $message->to($data['email'], '')->subject('Do-not-reply:Afspraak');
-            $message->from('maiko@kcps.nl', 'Maiko');
-        });
-        return 'send';
+        $questionable = $question->questionable;
+
+
+
+        return $question->questionable->year_id;
     }
 }

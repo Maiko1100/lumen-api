@@ -30,4 +30,14 @@ class Question extends Model
         return $this->hasOne('App\Category', 'id', 'category');
     }
 
+    public function getGenre()
+    {
+        return $this->hasOne('App\QuestionGenre', 'id', 'question_genre_id');
+    }
+
+    public function questionable()
+    {
+        return $this->morphTo();
+    }
+
 }

@@ -129,6 +129,19 @@ $api->version('v1', function ($api) {
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {
+        $api->post('/questionplus/create', [
+            'uses' => 'App\Http\Controllers\QuestionPlusController@create',
+            'as' => 'api.QuestionPlusController.create'
+        ]);
+        $api->post('/questionplus/delete', [
+            'uses' => 'App\Http\Controllers\QuestionPlusController@delete',
+            'as' => 'api.QuestionPlusController.delete'
+        ]);
+    });
+
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
         $api->post('/partner/save', [
             'uses' => 'App\Http\Controllers\PartnerController@savePartner',
             'as' => 'api.PartnerController.save'
