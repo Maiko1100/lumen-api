@@ -59,12 +59,9 @@ class QuestionController extends Controller
                         $join->on('user_file.user_year_id', "=", DB::raw($userYear->id));
                     })
                     ->groupBy('question.id')
-                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback')
+                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.has_error', 'user_question.approved', 'feedback.text as feedback')
                     ->orderBy('question.id', 'asc')
                     ->get();
-
-//                    echo json_encode($questions);
-//                    exit;
 
                 $q = array();
 
@@ -101,8 +98,6 @@ class QuestionController extends Controller
 
         return new Response(array(
             "categories" => $questionaire
-//            "partner" => $partner,
-//            "kids" => $kids
         ));
 
     }
@@ -150,7 +145,11 @@ class QuestionController extends Controller
                     array_push($children, $child);
                     $this->getChildren($child, $userYear);
 
+                    unset($question['has_error']);
+                    unset($question['approved']);
+                    unset($question['feedback']);
                     unset($question['answer_option']);
+                    unset($question['answer_options']);
                     unset($question['parent']);
                     unset($question['has_childs']);
                 }
@@ -167,7 +166,7 @@ class QuestionController extends Controller
                         $join->on('user_file.user_year_id', "=", DB::raw($userYear->id));
                     })
                     ->groupBy('question.id')
-                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback')
+                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.has_error', 'user_question.approved', 'feedback.text as feedback')
                     ->orderBy('question.id', 'asc')
                     ->get();
 
