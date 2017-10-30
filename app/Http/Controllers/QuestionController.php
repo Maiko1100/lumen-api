@@ -2,23 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\UserQuestion as UserQuestion;
-use App\User as User;
-use App\Question as Question;
-use App\UserFile as UserFile;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
-use App\Http\Controllers\CategoryController;
-use App\Category as Category;
-use phpDocumentor\Reflection\Types\Null_;
 use Illuminate\Http\Request;
-use Psy\Util\Json;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\UserYear;
-use App\Child;
-use Intervention\Image\Facades\Image as Image;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
 class QuestionController extends Controller
@@ -68,10 +55,12 @@ class QuestionController extends Controller
                 foreach ($questions as $question) {
                     if (strpos($question->file_names, '|;|') !== false) {
                         $question->file_names = explode('|;|', $question->file_names);
-                    }
-                    if ($question->file_names === null) {
+                    } else if ($question->file_names === null) {
                         $question->file_names = [];
+                    } else {
+                        $question->file_names = [$question->file_names];
                     }
+
                     if (empty($question->parent)) {
                         $this->getChildren($question, $userYear);
 
@@ -199,83 +188,6 @@ class QuestionController extends Controller
             return $question;
         }
     }
-
-    public function saveQuestion(Request $request)
-    {
-        $user = JWTAuth::parseToken()->authenticate();
-        $year = $request->input('year');
-        $questionId = $request->input('id');
-        $answer = $request->input('answer');
-        $qpid = $request->input('qpid');
-        $userYear = UserYear::where("person_id", "=", $user->person_id)
-            ->where("year_id", "=", $year)->first();
-
-        $isProfile = Question::where("id", "=", $questionId)
-            ->first()
-            ->getGenre()
-            ->first()
-            ->isProfile == 1;
-
-        if (isset($qpid)) {
-
-            if (isset($isProfile)) {
-                $existingQuestion = $this->checkPlusQuestion($questionId, $qpid, $userYear);
-            } else {
-                $existingQuestion = $this->checkPlusQuestion($questionId, $qpid);
-            }
-
-            if (isset($existingQuestion)) {
-                $existingQuestion->question_answer = $answer;
-                $existingQuestion->save();
-            } else {
-                $userQuestion = new UserQuestion();
-                $userQuestion->person_id = $user->person_id;
-                $userQuestion->user_year_id = $userYear->id;
-                $userQuestion->question_id = $questionId;
-                $userQuestion->question_answer = $answer;
-                $userQuestion->question_plus_id = $qpid;
-
-                $userQuestion->save();
-            }
-        } else {
-            $existingQuestion = $this->checkQuestion($userYear, $questionId);
-            if (isset($existingQuestion)) {
-                $existingQuestion->question_answer = $answer;
-                $existingQuestion->save();
-            } else {
-                $userQuestion = new UserQuestion();
-                $userQuestion->person_id = $user->person_id;
-                $userQuestion->user_year_id = $userYear->id;
-                $userQuestion->question_id = $questionId;
-                $userQuestion->question_answer = $answer;
-
-                $userQuestion->save();
-            }
-        }
-
-        return $year;
-
-    }
-
-    public function checkQuestion($userYear, $questionId)
-    {
-        return UserQuestion::where("user_year_id", "=", $userYear->id)->where("question_id", "=", $questionId)->first();
-    }
-
-    public function checkPlusQuestion ($questionId, $qpid, $userYear = NULL) {
-        if (isset($userYear)) {
-            return UserQuestion::where("question_id", "=", $questionId)
-                ->where("question_plus_id", "=", $qpid)
-                ->where("user_year_id", "=", $userYear->id)
-                ->first();
-        } else {
-            return UserQuestion::where("question_id", "=", $questionId)
-                ->where("question_plus_id", "=", $qpid)
-                ->where("user_year_id", "IS", "NULL")
-                ->first();
-        }
-    }
-
 }
 
 ?>

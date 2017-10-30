@@ -108,8 +108,8 @@ $api->version('v1', function ($api) {
         ]);
 
         $api->post('/question/save', [
-            'uses' => 'App\Http\Controllers\QuestionController@saveQuestion',
-            'as' => 'api.questioncontroller'
+            'uses' => 'App\Http\Controllers\UserQuestionController@save',
+            'as' => 'api.userquestion.save'
         ]);
 
         $api->post('/question/file/save', [
