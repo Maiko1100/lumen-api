@@ -108,7 +108,7 @@ class QuestionController extends Controller
                 $childs = $question->getChilds()
                     ->leftjoin('user_question', 'question.id', 'user_question.question_id')
                     ->groupBy('question.id')
-                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', DB::raw("group_concat(`user_question`.`question_plus_id` SEPARATOR '|;|') as `qpids`"), DB::raw("group_concat(`user_question`.`question_answer` SEPARATOR '|;|') as `answers`"))
+                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', DB::raw("group_concat(`user_question`.`question_plus_id` SEPARATOR '|;|') as `qpids`"), DB::raw("group_concat(`user_question`.`question_answer` SEPARATOR '|;|') as `answers`"), DB::raw("group_concat(`user_question`.`has_error` SEPARATOR '|;|') as `has_errors`"), DB::raw("group_concat(`user_question`.`approved` SEPARATOR '|;|') as `approveds`"))
                     ->orderBy('question.id', 'asc')
                     ->get();
 
@@ -116,16 +116,26 @@ class QuestionController extends Controller
                     if (strpos($child->qpids, '|;|') !== false) {
                         $child->qpids = array_map('intval', explode('|;|', $child->qpids));
                         $child->answers = explode('|;|', $child->answers);
+                        $child->has_errors = array_map('intval', explode('|;|', $child->has_errors));
+                        $child->approveds = array_map('intval', explode('|;|', $child->approveds));
                     }else if ($child->qpids === null) {
                         $child->qpids = [];
                         $child->answers = [];
+                        $child->has_errors = [];
+                        $child->approveds = [];
                     } else {
                         $child->qpids = [$child->qpids];
                         $child->answers = [$child->answers];
+                        $child->has_errors = [$child->has_errors];
+                        $child->approveds = [$child->approveds];
                     }
 
                     for ($i = 0; $i < count($child->qpids); $i++) {
-                        $answers[$child->qpids[$i]][$child->id] = $child->answers[$i];
+                        $answers[$child->qpids[$i]][$child->id] = array(
+                            "answer" => $child->answers[$i],
+                            "has_error" => $child->has_errors[$i],
+                            "approved" => $child->approveds[$i]
+                        );
                     }
 
                     unset($child['qpids']);
