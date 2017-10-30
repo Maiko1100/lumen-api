@@ -32,21 +32,50 @@ class QuestionController extends Controller
     public function getQuestions(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
-        $year = $request->input('year');
+        // var_dump($request->user_year);
 
-        $partner = $user->getPartner()
+        if (empty($request->input('user_year'))) {
+            $year = $request->input('year');
+
+            $partner = $user->getPartner()
             ->first()
             ->getInfo()
             ->first();
 
-        $children = [];
-        foreach ($user->getChildren()->get() as $child) {
-            array_push($children, $child->getInfo()->first());
-        }
+            $children = [];
+            foreach ($user->getChildren()->get() as $child) {
+                array_push($children, $child->getInfo()->first());
+            }
 
-        $userYear = UserYear::where("person_id", "=", $user->person_id)
+            $userYear = UserYear::where("person_id", "=", $user->person_id)
             ->where("year_id", "=", $year)
             ->first();
+        } else {
+            if ($user->role == 2 || $user->role == 3) {
+                $userYear = UserYear::where("id", "=", $request->input('user_year'))
+                    ->first();
+
+                $year = $userYear->year_id;
+                    
+
+
+                $userToReview = User::where("person_id", "=", $userYear->person_id)
+                    ->first();
+
+
+                $partner = $userToReview->getPartner()
+                    ->first()
+                    ->getInfo()
+                    ->first();
+
+                $children = [];
+                foreach ($userToReview->getChildren()->get() as $child) {
+                    array_push($children, $child->getInfo()->first());
+                }
+            }
+        }
+
+
 
         $categoryController = new CategoryController();
         $categories = $categoryController->getCategoriesByYear($year);
@@ -54,7 +83,6 @@ class QuestionController extends Controller
         $questionaire = [];
 
         foreach ($categories as $category) {
-
             $groups = $category
                 ->getGroups()
                 ->get();
@@ -62,14 +90,13 @@ class QuestionController extends Controller
             $g = array();
 
             foreach ($groups as $group) {
-
                 $questions = $group->getQuestions()
-                    ->leftjoin('user_question', function($join) use ($userYear) {
+                    ->leftjoin('user_question', function ($join) use ($userYear) {
                         $join->on('question.id', '=', 'user_question.question_id');
                         $join->on('user_question.user_year_id', "=", DB::raw($userYear->id));
                     })
                     ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
-                    ->leftjoin('user_file', function($join) use ($userYear) {
+                    ->leftjoin('user_file', function ($join) use ($userYear) {
                         $join->on('question.id', '=', 'user_file.question_id');
                         $join->on('user_file.user_year_id', "=", DB::raw($userYear->id));
                     })
@@ -88,7 +115,6 @@ class QuestionController extends Controller
                 $q = array();
 
                 foreach ($questions as $question) {
-
                     if (strpos($question->child_first_name, '|;|') !== false) {
                         $question->child_first_name = explode('|;|', $question->child_first_name);
                     }
@@ -103,7 +129,6 @@ class QuestionController extends Controller
                         $question->file_names = [];
                     }
                     if (empty($question->parent)) {
-
                         $this->getChildren($question, $userYear);
 
                         array_push($q, $question);
@@ -132,7 +157,6 @@ class QuestionController extends Controller
             "partner" => $partner,
             "children" => $children
         ));
-
     }
 
     function getChildren($question, $userYear)
@@ -144,16 +168,15 @@ class QuestionController extends Controller
         }
 
         if ($question->has_childs) {
-
             $children = [];
 
             $childs = $question->getChilds()
-                ->leftjoin('user_question', function($join) use ($userYear) {
+                ->leftjoin('user_question', function ($join) use ($userYear) {
                     $join->on('question.id', '=', 'user_question.question_id');
                     $join->on('user_question.user_year_id', "=", DB::raw($userYear->id));
                 })
                 ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
-                ->leftjoin('user_file', function($join) use ($userYear) {
+                ->leftjoin('user_file', function ($join) use ($userYear) {
                     $join->on('question.id', '=', 'user_file.question_id');
                     $join->on('user_file.user_year_id', "=", DB::raw($userYear->id));
                 })
@@ -162,7 +185,7 @@ class QuestionController extends Controller
                 ->orderBy('question.id', 'asc')
                 ->get();
 
-            forEach ($childs as $child) {
+            foreach ($childs as $child) {
                 if (strpos($child->file_names, '|;|') !== false) {
                     $child->file_names = explode('|;|', $question->file_names);
                 }
@@ -178,7 +201,6 @@ class QuestionController extends Controller
             }
 
             $question['children'] = $children;
-
         } else {
             unset($question['answer_option']);
             unset($question['parent']);
@@ -198,7 +220,7 @@ class QuestionController extends Controller
         $userYear = UserYear::where("person_id", "=", $user->person_id)
             ->where("year_id", "=", $year)->first();
 
-        foreach ($request->file('files') as $file){
+        foreach ($request->file('files') as $file) {
             $pinfo = pathinfo($file->getClientOriginalName());
             Storage::putFileAs('userDocuments/' . $user->person_id, $file, $pinfo['filename'] . "_" . date("YmdHis") . $pinfo['extension']);
 
@@ -238,14 +260,10 @@ class QuestionController extends Controller
         }
 
         return $year;
-
     }
 
     public function checkQuestion($userYear, $questionId)
     {
         return UserQuestion::where("user_year_id", "=", $userYear->id)->where("question_id", "=", $questionId)->first();
     }
-
 }
-
-?>
