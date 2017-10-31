@@ -63,13 +63,38 @@ class UserController extends Controller
         }
     }
 
+    public function getAllEmployees()
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        if ($user->role == 3) {
+            $employees = User::where("role", "=", 2)
+            ->join('person', 'person_id', '=', 'person.id')->get();
+            return $employees;
+        } else {
+            return "You are not authorized to do this call";
+        }
+    }
+
+    public function assignEmployee(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        if ($user->role == 3) {
+            // assign employee to case
+            $caseId = $request->input('caseId');
+            $employeeId = $request->input('employeeId');
+            
+        } else {
+            return "You are not authorized to do this call";
+        }
+    }
+
     public function getAllCases()
     {
         $user = JWTAuth::parseToken()->authenticate();
         if ($user->role == 2 || $user->role == 3) {
             $cases = DB::table('user_year')
                 ->join('person', 'user_year.person_id', '=', 'person.id')
-                ->select('user_year.year_id','user_year.package','user_year.status','user_year.id','person.id as person_id', 'person.first_name' , 'person.last_name', 'person.passport','person.bsn','person.dob')->get();
+                ->select('user_year.year_id', 'user_year.package', 'user_year.status', 'user_year.id', 'person.id as person_id', 'person.first_name', 'person.last_name', 'person.passport', 'person.bsn', 'person.dob')->get();
 
             return $cases;
         } else {
