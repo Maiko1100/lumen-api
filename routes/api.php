@@ -102,7 +102,7 @@ $api->version('v1', function ($api) {
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {
-        $api->get('/question', [
+        $api->post('/question', [
             'uses' => 'App\Http\Controllers\QuestionController@getQuestions',
             'as' => 'api.questioncontroller'
         ]);
