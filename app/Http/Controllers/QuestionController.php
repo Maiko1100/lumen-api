@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Question;
+use App\UserQuestion;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -76,7 +78,7 @@ class QuestionController extends Controller
                     }
 
                     if (empty($question->parent)) {
-                        $this->getChildren($question, $userYear, $userYearEmpty);
+                        $this->getChildren($question, $userYear, $userYearEmpty, false);
 
                         if ($userYearEmpty) {
                             unset($question->admin_note);
@@ -109,7 +111,7 @@ class QuestionController extends Controller
 
     }
 
-    function getChildren($question, $userYear, $userYearEmpty)
+    function getChildren($question, $userYear, $userYearEmpty, $plusChild)
     {
         if ($question->answer_option == 1) {
             $question['answer_options'] = $question->getOptions()->pluck('text')->toArray();
@@ -118,51 +120,71 @@ class QuestionController extends Controller
         }
 
         if ($question->has_childs) {
-
             $children = [];
-
             if ($question->type === 8) {
-                $answers = [];
+                $userQuestions = Question::from(DB::raw("(select * from `question`) `questions`"))
+                    ->crossjoin(DB::raw("(select @pv := " . $question->id . ") `initialisation`"))
+                    ->whereraw("find_in_set(`parent`, @pv) > 0 and @pv := concat(@pv, ',', `questions`.`id`)")
+                    ->leftjoin('question_plus', 'question_plus.question_id', DB::raw($question->id))
+                    ->leftjoin('user_question', function($join) use ($userYear) {
+                        $join->on('question_plus.id', '=', 'user_question.question_plus_id');
+                        $join->on('user_question.question_id', "=", 'questions.id');
+                    })
+                    ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
+                    ->groupBy('questions.id')
+                    ->select('questions.id', DB::raw("group_concat(`question_plus`.`id` SEPARATOR '|;|') as `qpids`"), DB::raw("group_concat(IFNULL(`user_question`.`question_answer`, '') SEPARATOR '|;|') as `answers`"), DB::raw("group_concat(IFNULL(`user_question`.`approved`, 0) SEPARATOR '|;|') as `approveds`"), DB::raw("group_concat(IFNULL(`feedback`.`text`, '') SEPARATOR '|;|') as `feedbacks`"), DB::raw("group_concat(IFNULL(`feedback`.`admin_note`, '') SEPARATOR '|;|') as `admin_notes`"))
+                    ->get();
+
+                $answers = null;
+                foreach($userQuestions as $userQuestion) {
+                    if (strpos($userQuestion['qpids'], '|;|') !== false) {
+                        $userQuestion['qpids'] = array_map('intval', explode('|;|', $userQuestion['qpids']));
+                        $userQuestion['answers'] = explode('|;|', $userQuestion['answers']);
+                        $userQuestion['approveds'] = array_map('intval', explode('|;|', $userQuestion['approveds']));
+                        $userQuestion['feedbacks'] = explode('|;|', $userQuestion['feedbacks']);
+                        $userQuestion['admin_notes'] = explode('|;|', $userQuestion['admin_notes']);
+                    } else if ($userQuestion['qpids'] === null) {
+                        $userQuestion['qpids'] = [];
+                        $userQuestion['answers'] = [];
+                        $userQuestion['approveds'] = [];
+                        $userQuestion['feedbacks'] = [];
+                        $userQuestion['admin_notes'] = [];
+                    } else {
+                        $userQuestion['qpids'] = [$userQuestion['qpids']];
+                        $userQuestion['answers'] = [$userQuestion['answers']];
+                        $userQuestion['approveds'] = [(int)$userQuestion['approveds']];
+                        $userQuestion['feedbacks'] = [$userQuestion['feedbacks']];
+                        $userQuestion['admin_notes'] = [$userQuestion['admin_notes']];
+                    }
+                    for ($i = 0; $i < count($userQuestion['qpids']); $i++) {
+                        $answers[$userQuestion['qpids'][$i]][$userQuestion['id']] = array(
+                            "answer" => $userQuestion['answers'][$i],
+                            "approved" => $userQuestion['approveds'][$i],
+                            "feedback" => $userQuestion['feedbacks'][$i]
+                        );
+
+                        if (!$userYearEmpty) {
+                            $answers[$userQuestion['qpids'][$i]][$userQuestion['id']]["admin_note"] = $userQuestion['admin_notes'][$i];
+                        }
+                    }
+                }
+
+                unset($question['answer']);
+
                 $childs = $question->getChilds()
-                    ->leftjoin('user_question', 'question.id', 'user_question.question_id')
+                    ->leftjoin('question_plus', 'question.parent', 'question_plus.question_id')
+                    ->leftjoin('user_question', function($join) use ($userYear) {
+                        $join->on('question_plus.id', '=', 'user_question.question_plus_id');
+                        $join->on('question.id', "=", 'user_question.question_id');
+                    })
                     ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
                     ->groupBy('question.id')
-                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', DB::raw("group_concat(`user_question`.`question_plus_id` SEPARATOR '|;|') as `qpids`"), DB::raw("group_concat(`user_question`.`question_answer` SEPARATOR '|;|') as `answers`"), DB::raw("group_concat(`user_question`.`approved` SEPARATOR '|;|') as `approveds`"), DB::raw("group_concat(IFNULL(`feedback`.`text`, '') SEPARATOR '|;|') as `feedbacks`"), DB::raw("group_concat(IFNULL(`feedback`.`admin_note`, '') SEPARATOR '|;|') as `admin_notes`"))
+                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', DB::raw("group_concat(`question_plus`.`id` SEPARATOR '|;|') as `qpids`"), DB::raw("group_concat(IFNULL(`user_question`.`question_answer`, '') SEPARATOR '|;|') as `answers`"), DB::raw("group_concat(IFNULL(`user_question`.`approved`, 0) SEPARATOR '|;|') as `approveds`"), DB::raw("group_concat(IFNULL(`feedback`.`text`, '') SEPARATOR '|;|') as `feedbacks`"), DB::raw("group_concat(IFNULL(`feedback`.`admin_note`, '') SEPARATOR '|;|') as `admin_notes`"))
                     ->orderBy('question.id', 'asc')
                     ->get();
 
                 forEach ($childs as $child) {
-                    if (strpos($child->qpids, '|;|') !== false) {
-                        $child->qpids = array_map('intval', explode('|;|', $child->qpids));
-                        $child->answers = explode('|;|', $child->answers);
-                        $child->approveds = array_map('intval', explode('|;|', $child->approveds));
-                        $child->feedbacks = explode('|;|', $child->feedbacks);
-                        $child->admin_notes = explode('|;|', $child->admin_notes);
-                    }else if ($child->qpids === null) {
-                        $child->qpids = [];
-                        $child->answers = [];
-                        $child->approveds = [];
-                        $child->feedbacks = [];
-                        $child->admin_notes = [];
-                    } else {
-                        $child->qpids = [$child->qpids];
-                        $child->answers = [$child->answers];
-                        $child->approveds = [$child->approveds];
-                        $child->feedbacks = [$child->feedbacks];
-                        $child->admin_notes = [$child->admin_notes];
-                    }
-
-                    for ($i = 0; $i < count($child->qpids); $i++) {
-                        $answers[$child->qpids[$i]][$child->id] = array(
-                            "answer" => $child->answers[$i],
-                            "approved" => $child->approveds[$i],
-                            "feedback" => $child->feedbacks[$i]
-                        );
-
-                        if (!$userYearEmpty) {
-                            $answers[$child->qpids[$i]][$child->id]["admin_note"] = $child->admin_notes[$i];
-                        }
-                    }
+                    $this->getChildren($child, $userYear, $userYearEmpty, true);
 
                     unset($child['qpids']);
                     unset($child['answers']);
@@ -171,15 +193,15 @@ class QuestionController extends Controller
                     unset($child['admin_notes']);
 
                     array_push($children, $child);
-                    $this->getChildren($child, $userYear, $userYearEmpty);
-
-                    unset($question['approved']);
-                    unset($question['feedback']);
-                    unset($question['answer_option']);
-                    unset($question['answer_options']);
-                    unset($question['parent']);
-                    unset($question['has_childs']);
                 }
+
+                unset($question['approved']);
+                unset($question['feedback']);
+                unset($question['answer_option']);
+                unset($question['answer_options']);
+                unset($question['parent']);
+                unset($question['has_childs']);
+
                 $question['answers'] = $answers;
             } else {
                 $childs = $question->getChilds()
@@ -206,11 +228,17 @@ class QuestionController extends Controller
                     }
 
                     array_push($children, $child);
-                    $this->getChildren($child, $userYear, $userYearEmpty);
+                    $this->getChildren($child, $userYear, $userYearEmpty, $plusChild);
 
                     unset($question['answer_option']);
                     unset($question['parent']);
                     unset($question['has_childs']);
+
+                    if ($plusChild) {
+                        unset($question['answer']);
+                        unset($question['approved']);
+                        unset($question['feedback']);
+                    }
                 }
             }
 

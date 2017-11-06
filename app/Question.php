@@ -35,6 +35,14 @@ class Question extends Model
         return $this->hasOne('App\QuestionGenre', 'id', 'question_genre_id');
     }
 
+    public function question_pluses(){
+        return $this->hasMany('App\QuestionPlus', 'question_id', 'id');
+    }
+
+    public function question_plus_user_questions() {
+        return $this->hasManyThrough('App\UserQuestion', 'App\QuestionPlus', 'question_id', 'question_plus_id');
+    }
+
     public function questionable()
     {
         return $this->morphTo();
