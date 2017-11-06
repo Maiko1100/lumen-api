@@ -42,7 +42,7 @@ class UserFileController extends Controller
             $userfile = UserFile::where("user_year.person_id", "=", $user->person_id)->where('name', "=", $filename)
                 ->join("user_year", "user_file.user_year_id", "user_year.id");
             $userfile->delete();
-            return new Response('file deleted');
+            return $user->getUserFiles();
         } else {
             return new Response('file does not exist');
         }
@@ -159,24 +159,59 @@ class UserFileController extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
         $file = $request->file('file');
-        $fileName= $file->getClientOriginalName();
+        $fileName = $file->getClientOriginalName();
+        $person_id = $request->input('person_id');
+
+        $userFile = new UserFile();
+        $userFile->name = $fileName;
+
+
         $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
+        Storage::putFileAs('userDocuments/' . $user->person_id, $file, $fileName);
+        $userFile->type = 1;
+        $userFile->person_id = $user->person_id;
+        $userFile->user_year_id = $userYear->id;
+        $userFile->save();
 
+        return $user->getUserFiles();
 
-            Storage::putFileAs('userDocuments/' . $user->person_id, $file, $fileName);
+    }
 
-            $userFile = new UserFile();
-            $userFile->name = $fileName;
-            $userFile->type = 1;
-            $userFile->user_year_id = $userYear->id;
-            $userFile->person_id = $user->person_id;
+    public function getReport(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
+        $personId = $user->person_id;
+        $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', 9)->first();
+        $filename = $userFile->name;
+        $fullpath = "app/userDocuments/{$personId}/{$filename}";
 
-            $userFile->save();
+        return response()->download(storage_path($fullpath), null, [], null);
+    }
+
+    public function saveReport(Request $request)
+    {
+        $file = $request->file('file');
+        $person_id = $request->input('person_id');
+        $userYear = UserYear::where('user_year.person_id', "=", $person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
+        $person = Person::where('person_id','=',$person_id)->first();
+        $fileName = 'TaxReport'.'_'.$person->first_name.'_'.$person->last_name.'_'.$request->input('year');
+
+        Storage::putFileAs('userDocuments/' . $person_id, $file, $fileName);
+
+        $userFile = new UserFile();
+        $userFile->name = $fileName;
+        $userFile->type = 9;
+        $userFile->person_id = $person_id;
+        $userYear->status = 5;
+        $userYear->save();
+
+        $userFile->user_year_id = $userYear->id;
+        $userFile->save();
 
         return $userFile;
 
     }
-
 
 
 }

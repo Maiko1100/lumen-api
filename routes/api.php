@@ -75,6 +75,10 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserFileController@saveFile',
             'as' => 'api.file.save'
         ]);
+        $api->get('/report/get', [
+            'uses' => 'App\Http\Controllers\UserFileController@getReport',
+            'as' => 'api.file.get'
+        ]);
 
 //        $api->delete('/auth/invalidate', [
 //            'uses' => 'App\Http\Controllers\Auth\AuthController@deleteInvalidate',
@@ -95,6 +99,10 @@ $api->version('v1', function ($api) {
         ]);
         $api->post('/userYear/create', [
             'uses' => 'App\Http\Controllers\UserYearController@create',
+            'as' => 'api.useryear.create'
+        ]);
+        $api->post('/useryear/report/agree', [
+            'uses' => 'App\Http\Controllers\UserYearController@reportAgreed',
             'as' => 'api.useryear.create'
         ]);
     });
@@ -183,4 +191,27 @@ $api->version('v1', function ($api) {
         'as' => 'attachement.actions.test'
     ]);
 
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->get('/customers', [
+            'uses' => 'App\Http\Controllers\UserController@getAllCustomers',
+            'as' => 'api.users.customers'
+        ]);
+
+        $api->get('/users/employees', [
+            'uses' => 'App\Http\Controllers\UserController@getAllEmployees',
+            'as' => 'api.users.users.employees'
+        ]);
+
+        $api->post('/users/employees/assign', [
+            'uses' => 'App\Http\Controllers\UserController@assignEmployee',
+            'as' => 'api.users.users.employees.assign'
+        ]);
+        
+        $api->get('/customers/cases', [
+            'uses' => 'App\Http\Controllers\UserController@getAllCases',
+            'as' => 'api.users.customers.cases'
+        ]);
+    });
 });

@@ -16,7 +16,6 @@ class QuestionController extends Controller
     public function getQuestions(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
-
         $userYearEmpty = empty($request->input('user_year'));
 
         if ($userYearEmpty) {
@@ -42,7 +41,6 @@ class QuestionController extends Controller
         $questionaire = [];
 
         foreach ($categories as $category) {
-
             $groups = $category
                 ->getGroups()
                 ->get();
@@ -50,14 +48,13 @@ class QuestionController extends Controller
             $g = array();
 
             foreach ($groups as $group) {
-
                 $questions = $group->getQuestions()
-                    ->leftjoin('user_question', function($join) use ($userYear) {
+                    ->leftjoin('user_question', function ($join) use ($userYear) {
                         $join->on('question.id', '=', 'user_question.question_id');
                         $join->on('user_question.user_year_id', "=", DB::raw($userYear->id));
                     })
                     ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
-                    ->leftjoin('user_file', function($join) use ($userYear) {
+                    ->leftjoin('user_file', function ($join) use ($userYear) {
                         $join->on('question.id', '=', 'user_file.question_id');
                         $join->on('user_file.user_year_id', "=", DB::raw($userYear->id));
                     })
@@ -108,7 +105,6 @@ class QuestionController extends Controller
         return new Response(array(
             "categories" => $questionaire
         ));
-
     }
 
     function getChildren($question, $userYear, $userYearEmpty, $plusChild)
@@ -243,7 +239,6 @@ class QuestionController extends Controller
             }
 
             $question['children'] = $children;
-
         } else {
             unset($question['answer_option']);
             unset($question['parent']);
@@ -255,5 +250,3 @@ class QuestionController extends Controller
         }
     }
 }
-
-?>
