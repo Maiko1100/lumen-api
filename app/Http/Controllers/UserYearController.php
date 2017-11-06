@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\UserFile;
 use App\UserYear;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Intervention\Image\Facades\Image as Image;
+use Illuminate\Support\Facades\Storage;
+
 
 class UserYearController extends Controller
 {
@@ -68,60 +72,29 @@ class UserYearController extends Controller
       return new Response(var_export($userYear->save()));
   }
 
-  /**
-   * Store a newly created resource in storage.
-   *
-   * @return Response
-   */
-  public function store()
-  {
-    
-  }
+    public function reportAgreed(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $year = $request->input('year');
+        $userYear = UserYear::where('person_id', '=',$user->person_id)->where('year_id', '=',$year)->first();
+        $userYear->status= 1;
+        $userYear->save();
 
-  /**
-   * Display the specified resource.
-   *
-   * @param  int  $id
-   * @return Response
-   */
-  public function show($id)
-  {
-    
-  }
+        $fullpath = "app/userDocuments/{$user->person_id}/signature".'_'.$user->person_id.'_'.$year.".png";
+        Image::make(file_get_contents($request->input('signature')))->save(storage_path($fullpath));
 
-  /**
-   * Show the form for editing the specified resource.
-   *
-   * @param  int  $id
-   * @return Response
-   */
-  public function edit($id)
-  {
-    
-  }
+        $userFile = new UserFile();
+        $userFile->name = "signature".'_'.$user->person_id.'_'.$year.".png";
+        $userFile->type = 8;
+        $userFile->person_id = $user->person_id;
+        $userFile->user_year_id = $userYear->id;
+        $userFile->save();
+        
+        return 'gelukt';
 
-  /**
-   * Update the specified resource in storage.
-   *
-   * @param  int  $id
-   * @return Response
-   */
-  public function update($id)
-  {
-    
-  }
 
-  /**
-   * Remove the specified resource from storage.
-   *
-   * @param  int  $id
-   * @return Response
-   */
-  public function destroy($id)
-  {
-    
-  }
-  
+    }
+
 }
 
 ?>

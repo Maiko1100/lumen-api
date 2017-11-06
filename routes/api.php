@@ -72,6 +72,10 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserFileController@saveFile',
             'as' => 'api.file.save'
         ]);
+        $api->get('/report/get', [
+            'uses' => 'App\Http\Controllers\UserFileController@getReport',
+            'as' => 'api.file.get'
+        ]);
 
 //        $api->delete('/auth/invalidate', [
 //            'uses' => 'App\Http\Controllers\Auth\AuthController@deleteInvalidate',
@@ -92,6 +96,10 @@ $api->version('v1', function ($api) {
         ]);
         $api->post('/userYear/create', [
             'uses' => 'App\Http\Controllers\UserYearController@create',
+            'as' => 'api.useryear.create'
+        ]);
+        $api->post('/useryear/report/agree', [
+            'uses' => 'App\Http\Controllers\UserYearController@reportAgreed',
             'as' => 'api.useryear.create'
         ]);
     });
