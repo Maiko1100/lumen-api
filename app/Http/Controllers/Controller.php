@@ -5,15 +5,31 @@ namespace App\Http\Controllers;
 use App\Partner;
 use App\Question;
 use Laravel\Lumen\Routing\Controller as BaseController;
-
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\JsonResponse;
 
 class Controller extends BaseController
 {
     public function test() {
 
-        $question =  Question::get();
+//        $data = [
+//            'hendrik' => 'henk',
+//            'email' => 'maiko@kcps.nl'
+//
+//        ];
+//
+//        Mail::send('mails.testmail', $data, function ($message) use ($data) {
+//            $message->to($data['email'], '')->subject('Do-not-reply:Afspraak');
+//            $message->from('maiko@kcps.nl', 'Maiko');
+//        });
+//        return 'send';
 
-        return new JsonResponse(['partner' => $question]);
+        $question = Question::find(1);
+
+        $questionable = $question->questionable;
+
+
+
+        return $question->questionable->year_id;
     }
 }

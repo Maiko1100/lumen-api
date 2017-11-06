@@ -1,84 +1,48 @@
-<?php 
+<?php
 
 namespace App\Http\Controllers;
 
-class PartnerController extends Controller 
+use App\Partner;
+use Illuminate\Http\Response;
+use App\Partner as Partner;
+use App\Person as Person;
+use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
+class PartnerController extends Controller
 {
 
-  /**
-   * Display a listing of the resource.
-   *
-   * @return Response
-   */
-  public function index()
-  {
-    
-  }
+    public function savePartner(Request $request)
+    {
 
-  /**
-   * Show the form for creating a new resource.
-   *
-   * @return Response
-   */
-  public function create()
-  {
-    
-  }
+        $user = JWTAuth::parseToken()->authenticate();
+        $field = $request->input('field');
+        $answer = $request->input('answer');
+        $id = $request->input('personId');
 
-  /**
-   * Store a newly created resource in storage.
-   *
-   * @return Response
-   */
-  public function store()
-  {
-    
-  }
+        if (empty($id)) {
+            $person = new Person();
+            $person->$field = $answer;
+            $person->save();
 
-  /**
-   * Display the specified resource.
-   *
-   * @param  int  $id
-   * @return Response
-   */
-  public function show($id)
-  {
-    
-  }
+            $partner = new Partner();
+            $partner->person_id = $person->id;
+            $partner->user_id = $user->person_id;
+            $partner->save();
 
-  /**
-   * Show the form for editing the specified resource.
-   *
-   * @param  int  $id
-   * @return Response
-   */
-  public function edit($id)
-  {
-    
-  }
+            return response($partner->person_id);
+        } else {
+            Person::where("id", "=", $id)
+                ->update(
+                    [
+                        $field => $answer
+                    ]
+                );
+            return response($id);
+        }
+    }
 
-  /**
-   * Update the specified resource in storage.
-   *
-   * @param  int  $id
-   * @return Response
-   */
-  public function update($id)
-  {
-    
-  }
 
-  /**
-   * Remove the specified resource from storage.
-   *
-   * @param  int  $id
-   * @return Response
-   */
-  public function destroy($id)
-  {
-    
-  }
-  
 }
 
 ?>

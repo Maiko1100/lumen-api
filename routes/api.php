@@ -28,7 +28,10 @@ $api->version('v1', function ($api) {
         'as' => 'api.user.create',
         'uses' => 'App\Http\Controllers\UserController@addUser',
     ]);
-
+    $api->post('/test', [
+        'as' => 'api.controller.test',
+        'uses' => 'App\Http\Controllers\Controller@test',
+    ]);
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {
@@ -113,13 +116,43 @@ $api->version('v1', function ($api) {
         ]);
 
         $api->post('/question/save', [
-            'uses' => 'App\Http\Controllers\QuestionController@saveQuestion',
-            'as' => 'api.questioncontroller'
+            'uses' => 'App\Http\Controllers\UserQuestionController@save',
+            'as' => 'api.userquestion.save'
         ]);
 
-        $api->post('/question/save-file', [
-            'uses' => 'App\Http\Controllers\QuestionController@saveFileQuestion',
-            'as' => 'api.question.savefile'
+        $api->post('/question/file/save', [
+            'uses' => 'App\Http\Controllers\UserFileController@saveQuestionFile',
+            'as' => 'api.question.file.save'
+        ]);
+    });
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->post('/child/save', [
+            'uses' => 'App\Http\Controllers\ChildController@saveChild',
+            'as' => 'api.ChildController.save'
+        ]);
+    });
+
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->post('/questionplus/create', [
+            'uses' => 'App\Http\Controllers\QuestionPlusController@create',
+            'as' => 'api.QuestionPlusController.create'
+        ]);
+        $api->post('/questionplus/delete', [
+            'uses' => 'App\Http\Controllers\QuestionPlusController@delete',
+            'as' => 'api.QuestionPlusController.delete'
+        ]);
+    });
+
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->post('/partner/save', [
+            'uses' => 'App\Http\Controllers\PartnerController@savePartner',
+            'as' => 'api.PartnerController.save'
         ]);
     });
 

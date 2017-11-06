@@ -4,10 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class EmployeeFile extends Model 
+class QuestionGenre extends Model
 {
 
-    protected $table = 'employee_file';
+    protected $table = 'question_genre';
     public $timestamps = false;
-
 }
