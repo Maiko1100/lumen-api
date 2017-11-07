@@ -8,6 +8,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Response;
 use App\UserYear as UserYear;
+use App\Person;
 
 class UserFileController extends Controller
 {
@@ -198,8 +199,8 @@ class UserFileController extends Controller
         $file = $request->file('file');
         $person_id = $request->input('person_id');
         $userYear = UserYear::where('user_year.person_id', "=", $person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
-        $person = Person::where('person_id','=',$person_id)->first();
-        $fileName = 'TaxReport'.'_'.$person->first_name.'_'.$person->last_name.'_'.$request->input('year');
+        $person = Person::where('id','=',$person_id)->first();
+        $fileName = 'TaxReport'.'_'.$person->first_name.'_'.$person->last_name.'_'.$request->input('year').'.pdf';
 
         Storage::putFileAs('userDocuments/' . $person_id, $file, $fileName);
 
@@ -207,11 +208,10 @@ class UserFileController extends Controller
         $userFile->name = $fileName;
         $userFile->type = 9;
         $userFile->person_id = $person_id;
-        $userYear->status = 5;
-        $userYear->save();
-
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
+        $userYear->status = 5;
+        $userYear->save();
 
         return $userFile;
 
