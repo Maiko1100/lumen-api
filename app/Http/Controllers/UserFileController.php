@@ -57,6 +57,8 @@ class UserFileController extends Controller
             ->where("year_id", "=", $year)->first();
         $qpid = $request->input('qpid');
 
+        $newNames = [];
+
         foreach ($request->file('files') as $file){
             $pinfo = pathinfo($file->getClientOriginalName());
             $newName = $pinfo['filename'] . "_" . date("YmdHis") . "." . $pinfo['extension'];
@@ -73,9 +75,11 @@ class UserFileController extends Controller
                 $userFile->qpid = $qpid;
             }
 
+            array_push($newNames, $newName);
+
             $userFile->save();
         }
-        return $newName;
+        return new Response($newNames);
     }
 
     public function save(Request $request)
