@@ -53,11 +53,12 @@ class QuestionController extends Controller
                         $join->on('question.id', '=', 'user_question.question_id');
                         $join->on('user_question.user_year_id', "=", DB::raw($userYear->id));
                     })
+                    ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
                     ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
-                    ->leftjoin('user_file', function ($join) use ($userYear) {
-                        $join->on('question.id', '=', 'user_file.question_id');
-                        $join->on('user_file.user_year_id', "=", DB::raw($userYear->id));
-                    })
+//                    ->leftjoin('user_file', function ($join) use ($userYear) {
+//                        $join->on('question.id', '=', 'user_file.question_id');
+//                        $join->on('user_file.user_year_id', "=", DB::raw($userYear->id));
+//                    })
                     ->groupBy('question.id')
                     ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
                     ->orderBy('question.id', 'asc')
@@ -126,6 +127,7 @@ class QuestionController extends Controller
                         $join->on('question_plus.id', '=', 'user_question.question_plus_id');
                         $join->on('user_question.question_id', "=", 'questions.id');
                     })
+                    ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
                     ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
                     ->groupBy('questions.id')
                     ->select('questions.id', DB::raw("group_concat(`question_plus`.`id` SEPARATOR '|;|') as `qpids`"), DB::raw("group_concat(IFNULL(`user_question`.`question_answer`, '') SEPARATOR '|;|') as `answers`"), DB::raw("group_concat(IFNULL(`user_question`.`approved`, 0) SEPARATOR '|;|') as `approveds`"), DB::raw("group_concat(IFNULL(`feedback`.`text`, '') SEPARATOR '|;|') as `feedbacks`"), DB::raw("group_concat(IFNULL(`feedback`.`admin_note`, '') SEPARATOR '|;|') as `admin_notes`"))
@@ -136,6 +138,7 @@ class QuestionController extends Controller
                     if (strpos($userQuestion['qpids'], '|;|') !== false) {
                         $userQuestion['qpids'] = array_map('intval', explode('|;|', $userQuestion['qpids']));
                         $userQuestion['answers'] = explode('|;|', $userQuestion['answers']);
+//                        $userQuestion['answers'] = explode('|;|', $userQuestion['answers']);
                         $userQuestion['approveds'] = array_map('intval', explode('|;|', $userQuestion['approveds']));
                         $userQuestion['feedbacks'] = explode('|;|', $userQuestion['feedbacks']);
                         $userQuestion['admin_notes'] = explode('|;|', $userQuestion['admin_notes']);
@@ -205,11 +208,12 @@ class QuestionController extends Controller
                         $join->on('question.id', '=', 'user_question.question_id');
                         $join->on('user_question.user_year_id', "=", DB::raw($userYear->id));
                     })
+                    ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
                     ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
-                    ->leftjoin('user_file', function($join) use ($userYear) {
-                        $join->on('question.id', '=', 'user_file.question_id');
-                        $join->on('user_file.user_year_id', "=", DB::raw($userYear->id));
-                    })
+//                    ->leftjoin('user_file', function($join) use ($userYear) {
+//                        $join->on('question.id', '=', 'user_file.question_id');
+//                        $join->on('user_file.user_year_id', "=", DB::raw($userYear->id));
+//                    })
                     ->groupBy('question.id')
                     ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
                     ->orderBy('question.id', 'asc')

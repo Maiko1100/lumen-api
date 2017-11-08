@@ -57,23 +57,28 @@ class UserFileController extends Controller
             ->where("year_id", "=", $year)->first();
         $qpid = $request->input('qpid');
 
-        $newNames = [];
+        $userQuestioncontroller = new UserQuestionController();
 
+        $uqid = (int)$userQuestioncontroller->save($request);
+
+        $newNames = [];
         foreach ($request->file('files') as $file){
             $pinfo = pathinfo($file->getClientOriginalName());
             $newName = $pinfo['filename'] . "_" . date("YmdHis") . "." . $pinfo['extension'];
             Storage::putFileAs('userDocuments/' . $user->person_id, $file, $newName);
 
             $userFile = new UserFile();
-            $userFile->user_year_id = $userYear->id;
+
+//            $userFile->user_year_id = $userYear->id;
+            $userFile->user_question_id = $uqid;
             $userFile->person_id = $user->person_id;
-            $userFile->question_id = $questionId;
+//            $userFile->question_id = $questionId;
             $userFile->name = $newName;
             $userFile->type = 10;
 
-            if(isset($qpid)) {
-                $userFile->qpid = $qpid;
-            }
+//            if(isset($qpid)) {
+//                $userFile->qpid = $qpid;
+//            }
 
             array_push($newNames, $newName);
 
