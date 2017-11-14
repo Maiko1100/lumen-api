@@ -19,8 +19,12 @@ class OrderController extends Controller {
 
     function create(Request $request) {
         $user = JWTAuth::parseToken()->authenticate();
-        $amount = $request->input('amount');
         $service = $request->input('description');
+        
+        $amount = $this->getAmount($request->input('paymentString'));
+        // echo $request;
+        if (!isset($amount)) {            
+        }
 
         $payment = $this->mollie->payments->create(array(
             "amount"      => $amount, //10.00
@@ -41,6 +45,19 @@ class OrderController extends Controller {
         return $payment->links->paymentUrl;
     }
 
+    private function getAmount($amountString) {
+        switch($amountString) {
+            case 'appointment':
+                return 50;
+            case 'taxReturnWithAppointment':
+                return 150;
+            case 'taxReturnWithoutAppointment':
+                return 100;
+            default: 
+                return null;
+        }
+    }
+
     function webhook (Request $request) {
         $paymentId = $request->input('id');
         $payment = $this->mollie->payments->get($paymentId);
@@ -53,7 +70,6 @@ class OrderController extends Controller {
                 ]
             );
     }
-
 }
 
 ?>
