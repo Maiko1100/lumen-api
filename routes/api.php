@@ -128,6 +128,10 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserFileController@saveQuestionFile',
             'as' => 'api.question.file.save'
         ]);
+        $api->post('/question/feedback/save', [
+            'uses' => 'App\Http\Controllers\feedbackController@saveQuestionFeedBack',
+            'as' => 'api.question.file.save'
+        ]);
     });
     $api->group([
         'middleware' => 'api.auth',

@@ -1,84 +1,37 @@
-<?php 
+<?php
 
 namespace App\Http\Controllers;
 
-class FeedbackController extends Controller 
+use App\Feedback;
+use App\Question;
+use App\UserQuestion;
+use Illuminate\Http\Response;
+use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use App\UserYear;
+use Illuminate\Support\Facades\DB;
+
+class FeedbackController extends Controller
 {
 
-  /**
-   * Display a listing of the resource.
-   *
-   * @return Response
-   */
-  public function index()
-  {
-    
-  }
+    public function saveQuestionFeedBack(Request $request)
+    {
 
-  /**
-   * Show the form for creating a new resource.
-   *
-   * @return Response
-   */
-  public function create()
-  {
-    
-  }
+        $user = JWTAuth::parseToken()->authenticate();
 
-  /**
-   * Store a newly created resource in storage.
-   *
-   * @return Response
-   */
-  public function store()
-  {
-    
-  }
+        if ($user->role == 2 || $user->role == 3) {
+            $userQuestion = UserQuestion::where('user_year_id' ,'=' ,$request->input('userYear'))->where('question_id','=',$request->input('id'))->first();
 
-  /**
-   * Display the specified resource.
-   *
-   * @param  int  $id
-   * @return Response
-   */
-  public function show($id)
-  {
-    
-  }
+            $feedback = new Feedback();
 
-  /**
-   * Show the form for editing the specified resource.
-   *
-   * @param  int  $id
-   * @return Response
-   */
-  public function edit($id)
-  {
-    
-  }
+            $feedback->person_id = $user->person_id;
+            $feedback->text = $request->input('feedback');
+            $feedback->user_question_id = $userQuestion->id;
+            $feedback->save();
+        }
+        return 'succes';
+    }
 
-  /**
-   * Update the specified resource in storage.
-   *
-   * @param  int  $id
-   * @return Response
-   */
-  public function update($id)
-  {
-    
-  }
-
-  /**
-   * Remove the specified resource from storage.
-   *
-   * @param  int  $id
-   * @return Response
-   */
-  public function destroy($id)
-  {
-    
-  }
-  
 }
 
 ?>
