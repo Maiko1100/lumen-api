@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Response;
 use App\UserYear as UserYear;
 use App\Person;
+use Illuminate\Support\Facades\DB;
 
 class UserFileController extends Controller
 {
@@ -213,7 +214,11 @@ class UserFileController extends Controller
         $userYear->status = 5;
         $userYear->save();
 
-        return $userFile;
+        $cases = DB::table('user_year')
+            ->join('person', 'user_year.person_id', '=', 'person.id')
+            ->leftjoin('person as employee', 'user_year.employee_id', '=', 'employee.id')
+            ->select('employee.first_name as employee_name','user_year.year_id', 'user_year.package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name', 'person.last_name', 'person.passport', 'person.bsn', 'person.dob')->get();
+        return $cases;
 
     }
 

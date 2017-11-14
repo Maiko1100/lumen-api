@@ -75,27 +75,6 @@ class UserController extends Controller
         }
     }
 
-    public function assignEmployee(Request $request)
-    {
-        $user = JWTAuth::parseToken()->authenticate();
-        if ($user->role == 3) {
-            // assign employee to case
-            $caseIdArray = $request->input('caseIdArray');
-            $employeeId = $request->input('employeeId');
-
-            foreach ($caseIdArray as $caseId) {
-                $case = UserYear::where("id", "=", $caseId)
-                ->first();
-
-                $case->employee_id = $employeeId;
-                $case->save();
-            }
-
-            return $caseIdArray;
-        } else {
-            return "You are not authorized to do this call";
-        }
-    }
 
     public function getAllCases()
     {

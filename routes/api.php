@@ -209,7 +209,7 @@ $api->version('v1', function ($api) {
         ]);
 
         $api->post('/users/employees/assign', [
-            'uses' => 'App\Http\Controllers\UserController@assignEmployee',
+            'uses' => 'App\Http\Controllers\UserYearController@assignEmployee',
             'as' => 'api.users.users.employees.assign'
         ]);
         
