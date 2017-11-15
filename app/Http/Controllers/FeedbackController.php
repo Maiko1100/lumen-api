@@ -8,8 +8,6 @@ use App\UserQuestion;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use App\UserYear;
-use Illuminate\Support\Facades\DB;
 
 class FeedbackController extends Controller
 {
@@ -27,6 +25,7 @@ class FeedbackController extends Controller
             $feedback->person_id = $user->person_id;
             $feedback->text = $request->input('feedback');
             $feedback->user_question_id = $userQuestion->id;
+            $feedback->qpid = $request->input('qpid');
             $feedback->save();
         }
         return 'succes';
