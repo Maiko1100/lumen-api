@@ -3,18 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Feedback;
-use App\Question;
 use App\UserQuestion;
-use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
-
 class FeedbackController extends Controller
 {
-
     public function saveQuestionFeedBack(Request $request)
     {
-
         $user = JWTAuth::parseToken()->authenticate();
 
         if ($user->role == 2 || $user->role == 3) {
@@ -25,7 +20,6 @@ class FeedbackController extends Controller
             $feedback->person_id = $user->person_id;
             $feedback->text = $request->input('feedback');
             $feedback->user_question_id = $userQuestion->id;
-            $feedback->qpid = $request->input('qpid');
             $feedback->save();
         }
         return 'succes';
