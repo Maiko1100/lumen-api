@@ -34,8 +34,8 @@ class UserQuestionController extends Controller
                 ->first()
                 ->isProfile == 1;
 
+        $uq = null;
         if (isset($qpid)) {
-
             if (isset($isProfile)) {
                 $existingQuestion = $this->checkPlus($questionId, $qpid, $userYear);
             } else {
@@ -45,6 +45,8 @@ class UserQuestionController extends Controller
             if (isset($existingQuestion)) {
                 $existingQuestion->question_answer = $answer;
                 $existingQuestion->save();
+
+                $uq = $existingQuestion;
             } else {
                 $userQuestion = new UserQuestion();
                 $userQuestion->person_id = $user->person_id;
@@ -54,12 +56,16 @@ class UserQuestionController extends Controller
                 $userQuestion->question_plus_id = $qpid;
 
                 $userQuestion->save();
+
+                $uq = $userQuestion;
             }
         } else {
             $existingQuestion = $this->check($userYear, $questionId);
             if (isset($existingQuestion)) {
                 $existingQuestion->question_answer = $answer;
                 $existingQuestion->save();
+
+                $uq = $existingQuestion;
             } else {
                 $userQuestion = new UserQuestion();
                 $userQuestion->person_id = $user->person_id;
@@ -68,10 +74,12 @@ class UserQuestionController extends Controller
                 $userQuestion->question_answer = $answer;
 
                 $userQuestion->save();
+
+                $uq = $userQuestion;
             }
         }
 
-        return new Response($year);
+        return $uq->id;
 
     }
 
