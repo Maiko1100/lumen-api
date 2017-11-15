@@ -76,9 +76,9 @@ class UserFileController extends Controller
             $userFile->name = $newName;
             $userFile->type = 10;
 
-//            if(isset($qpid)) {
-//                $userFile->qpid = $qpid;
-//            }
+            if(isset($qpid)) {
+                $userFile->qpid = $qpid;
+            }
 
             array_push($newNames, $newName);
 

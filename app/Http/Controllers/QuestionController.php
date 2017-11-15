@@ -119,45 +119,68 @@ class QuestionController extends Controller
         if ($question->has_childs) {
             $children = [];
             if ($question->type === 8) {
-                $userQuestions = Question::from(DB::raw("(select * from `question`) `questions`"))
-                    ->crossjoin(DB::raw("(select @pv := " . $question->id . ") `initialisation`"))
-                    ->whereraw("find_in_set(`parent`, @pv) > 0 and @pv := concat(@pv, ',', `questions`.`id`)")
-                    ->leftjoin('question_plus', 'question_plus.question_id', DB::raw($question->id))
-                    ->leftjoin('user_question', function($join) use ($userYear) {
-                        $join->on('question_plus.id', '=', 'user_question.question_plus_id');
-                        $join->on('user_question.question_id', "=", 'questions.id');
-                    })
-                    ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
-                    ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
-                    ->groupBy('questions.id')
-                    ->select('questions.id', DB::raw("group_concat(`question_plus`.`id` SEPARATOR '|;|') as `qpids`"), DB::raw("group_concat(IFNULL(`user_question`.`question_answer`, '') SEPARATOR '|;|') as `answers`"), DB::raw("group_concat(IFNULL(`user_question`.`approved`, 0) SEPARATOR '|;|') as `approveds`"), DB::raw("group_concat(IFNULL(`feedback`.`text`, '') SEPARATOR '|;|') as `feedbacks`"), DB::raw("group_concat(IFNULL(`feedback`.`admin_note`, '') SEPARATOR '|;|') as `admin_notes`"))
-                    ->get();
+                $userQuestions = Question::from(DB::raw("(select
+                    `id`,
+                    group_concat(`d`.`qpid` SEPARATOR '|;|') as `qpids`,
+                    group_concat(`d`.`answers` SEPARATOR '|;|') as `answers`,
+                    group_concat(IFNULL(`d`.`file_names`, '') SEPARATOR '|;|') as `file_names`,
+                    group_concat(`d`.`approveds` SEPARATOR '|;|') as `approveds`,
+                    group_concat(`d`.`feedbacks` SEPARATOR '|;|') as `feedbacks`,
+                    group_concat(`d`.`admin_notes` SEPARATOR '|;|') as `admin_notes`
+                    from (
+                        select
+                        `questions`.`id`,
+                        `question_plus`.`id` as `qpid`,
+                        group_concat(IFNULL(`user_question`.`question_answer`, '') SEPARATOR '~-~') as `answers`,
+                        group_concat(`user_file`.`name` SEPARATOR '~-~') as `file_names`,
+                        group_concat(IFNULL(`user_question`.`approved`, 0) SEPARATOR '~-~') as `approveds`,
+                        group_concat(IFNULL(`feedback`.`text`, '') SEPARATOR '~-~') as `feedbacks`,
+                        group_concat(IFNULL(`feedback`.`admin_note`, '') SEPARATOR '~-~') as `admin_notes`
+                        from (select * from `question`) `questions`
+                        cross join (select @pv := " . $question->id . ") `initialisation`
+                        left join `question_plus`
+                        on `question_plus`.`question_id` = " . $question->id . "
+                        left join `user_question`
+                        on `question_plus`.`id` = `user_question`.`question_plus_id` and `user_question`.`question_id` = `questions`.`id`
+                        left join `user_file`
+                        on `user_question`.`id` = `user_file`.`user_question_id`
+                        left join `feedback` on `user_question`.`id` = `feedback`.`user_question_id`
+                        where find_in_set(`parent`, @pv) > 0 and @pv := concat(@pv, ',', `questions`.`id`)
+                        group by `questions`.`id`, `question_plus`.`id`
+                    ) `d`
+                    group by `d`.`id`) `a`"))
+                ->get();
 
                 $answers = null;
                 foreach($userQuestions as $userQuestion) {
                     if (strpos($userQuestion['qpids'], '|;|') !== false) {
                         $userQuestion['qpids'] = array_map('intval', explode('|;|', $userQuestion['qpids']));
                         $userQuestion['answers'] = explode('|;|', $userQuestion['answers']);
-//                        $userQuestion['answers'] = explode('|;|', $userQuestion['answers']);
+//                        $userQuestion['file_names'] = explode('|;|', $userQuestion['file_names']);
+                        $userQuestion['file_names'] = array_map(function($val){return $val === '' ? null : $val;}, explode('|;|', $userQuestion['file_names']));
                         $userQuestion['approveds'] = array_map('intval', explode('|;|', $userQuestion['approveds']));
                         $userQuestion['feedbacks'] = explode('|;|', $userQuestion['feedbacks']);
                         $userQuestion['admin_notes'] = explode('|;|', $userQuestion['admin_notes']);
                     } else if ($userQuestion['qpids'] === null) {
                         $userQuestion['qpids'] = [];
                         $userQuestion['answers'] = [];
+                        $userQuestion['file_names'] = [];
                         $userQuestion['approveds'] = [];
                         $userQuestion['feedbacks'] = [];
                         $userQuestion['admin_notes'] = [];
                     } else {
                         $userQuestion['qpids'] = [$userQuestion['qpids']];
                         $userQuestion['answers'] = [$userQuestion['answers']];
+                        $userQuestion['file_names'] = [$userQuestion['file_names'] === '' ? null : $userQuestion['file_names']];
                         $userQuestion['approveds'] = [(int)$userQuestion['approveds']];
                         $userQuestion['feedbacks'] = [$userQuestion['feedbacks']];
                         $userQuestion['admin_notes'] = [$userQuestion['admin_notes']];
                     }
                     for ($i = 0; $i < count($userQuestion['qpids']); $i++) {
+
                         $answers[$userQuestion['qpids'][$i]][$userQuestion['id']] = array(
                             "answer" => $userQuestion['answers'][$i],
+                            "file_names" => $userQuestion['file_names'][$i] == [] ? [] : explode('~-~', $userQuestion['file_names'][$i]),
                             "approved" => $userQuestion['approveds'][$i],
                             "feedback" => $userQuestion['feedbacks'][$i]
                         );
@@ -210,10 +233,6 @@ class QuestionController extends Controller
                     })
                     ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
                     ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
-//                    ->leftjoin('user_file', function($join) use ($userYear) {
-//                        $join->on('question.id', '=', 'user_file.question_id');
-//                        $join->on('user_file.user_year_id', "=", DB::raw($userYear->id));
-//                    })
                     ->groupBy('question.id')
                     ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
                     ->orderBy('question.id', 'asc')
@@ -221,7 +240,7 @@ class QuestionController extends Controller
 
                 forEach ($childs as $child) {
                     if (strpos($child->file_names, '|;|') !== false) {
-                        $child->file_names = explode('|;|', $question->file_names);
+                        $child->file_names = explode('|;|', $child->file_names); //het is deze
                     }
                     if ($child->file_names === null) {
                         $child->file_names = [];
@@ -230,16 +249,17 @@ class QuestionController extends Controller
                     array_push($children, $child);
                     $this->getChildren($child, $userYear, $userYearEmpty, $plusChild);
 
-                    unset($question['answer_option']);
-                    unset($question['parent']);
-                    unset($question['has_childs']);
-
                     if ($plusChild) {
-                        unset($question['answer']);
-                        unset($question['approved']);
-                        unset($question['feedback']);
+                        unset($child['answer']);
+                        unset($child['file_names']);
+                        unset($child['approved']);
+                        unset($child['feedback']);
                     }
                 }
+
+                unset($question['answer_option']);
+                unset($question['parent']);
+                unset($question['has_childs']);
             }
 
             $question['children'] = $children;
