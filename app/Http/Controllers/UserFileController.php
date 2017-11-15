@@ -24,9 +24,24 @@ class UserFileController extends Controller
     public function getFile(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
-        $personId = $user->person_id;
-        $filename = $request->input('fileName');
-        $fullpath = "app/userDocuments/{$personId}/{$filename}";
+        $userYear =$request->input('userYear');
+
+        if (isset($userYear)) {
+            if ($user->role == '2' || '3') {
+                $personId = UserYear::where('id', '=', $userYear)->first()->person_id;
+                $filename = $request->input('fileName');
+                $fullpath = "app/userDocuments/{$personId}/{$filename}";
+//                var_dump($fullpath);
+//                exit;
+                return response()->download(storage_path($fullpath), null, [], null);
+            } else {
+                return response('Unauthorized.', 401);
+            }
+        }
+            $personId = $user->person_id;
+            $filename = $request->input('fileName');
+            $fullpath = "app/userDocuments/{$personId}/{$filename}";
+
 
         return response()->download(storage_path($fullpath), null, [], null);
 

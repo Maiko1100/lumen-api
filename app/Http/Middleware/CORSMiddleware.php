@@ -30,7 +30,9 @@ class CORSMiddleware
             'image/png',
             'image/jpg',
             'image/jpeg',
-            'application/pdf'
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/msword',
         ];
 
         if(in_array($response->headers->get('content-type'), $supportedFiles)) {
