@@ -17,7 +17,7 @@ class OrderController extends Controller {
         $this->webhook = "http://test-ttmtax-api.kcps.nl/api/mollie-webhook";
     }
 
-    function create(Request $request) {
+    function createOrder(Request $request) {
         $user = JWTAuth::parseToken()->authenticate();
         $service = $request->input('description');
         
@@ -69,6 +69,15 @@ class OrderController extends Controller {
                     'accepted' => date('Y-m-d H:i:s')
                 ]
             );
+    }
+
+    public function getPayment(Request $request)
+    {
+         $id = 'tr_'.$request->input('paymentId');
+        $order = Order::where('payment_id', '=',$id)->first();
+
+
+            return $order->payment_status;
     }
 }
 

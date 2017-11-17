@@ -185,19 +185,20 @@ $api->version('v1', function ($api) {
 //        ]);
     });
 
-    $api->post('/create', [
-        'uses' => 'App\Http\Controllers\OrderController@create',
+    $api->post('/order/create', [
+        'uses' => 'App\Http\Controllers\OrderController@createOrder',
         'as' => 'api.order.create'
+    ]);
+    $api->get('/payment/get', [
+        'uses' => 'App\Http\Controllers\OrderController@getPayment',
+        'as' => 'api.payment.get'
     ]);
 
     $api->post('/mollie-webhook', [
         'uses' => 'App\Http\Controllers\OrderController@webhook',
         'as' => 'api.order.webhook'
     ]);
-    $api->get('/attachement/actions/test', [
-        'uses' => 'App\Http\Controllers\BookController@deleteBook',
-        'as' => 'attachement.actions.test'
-    ]);
+
 
     $api->group([
         'middleware' => 'api.auth',
