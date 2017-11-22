@@ -76,6 +76,13 @@ class OrderController extends Controller {
          $id = 'tr_'.$request->input('paymentId');
         $order = Order::where('payment_id', '=',$id)->first();
 
+        if($order->payment_status === 'paid'){
+            if($order->user_year_id != null){
+                $userYear = UserYear::where('id', '=',$order->user_year_id)->first();
+                $userYear->status = 3;
+                $userYear-save();
+            }
+        }
 
             return $order->payment_status;
     }

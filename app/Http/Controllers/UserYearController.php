@@ -14,6 +14,14 @@ use Illuminate\Support\Facades\DB;
 
 class UserYearController extends Controller
 {
+    public function changeUserYearStatus(Request $request){
+        $user = JWTAuth::parseToken()->authenticate();
+        $year = $request->input('year');
+        $userYear = UserYear::where('person_id', '=',$user->person_id)->where('year_id', '=',$year)->first();
+        $status = $request->input('status');
+        $userYear->status = $status;
+        $userYear->save();
+    }
 
     public function getUserYears() {
         $user = JWTAuth::parseToken()->authenticate();
