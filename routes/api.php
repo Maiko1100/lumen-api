@@ -222,5 +222,9 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserController@getAllCases',
             'as' => 'api.users.customers.cases'
         ]);
+        $api->post('/user/changePassword', [
+            'uses' => 'App\Http\Controllers\UserController@updateUserPassword',
+            'as' => 'api.user.changePassword'
+        ]);
     });
 });
