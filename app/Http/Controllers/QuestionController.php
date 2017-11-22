@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\UserYear;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class QuestionController extends Controller
 {
@@ -67,6 +68,7 @@ class QuestionController extends Controller
                 $q = array();
 
                 foreach ($questions as $question) {
+                    $question->category_id = $category->id;
                     if (strpos($question->file_names, '|;|') !== false) {
                         $question->file_names = explode('|;|', $question->file_names);
                     } else if ($question->file_names === null) {
@@ -76,7 +78,7 @@ class QuestionController extends Controller
                     }
 
                     if (empty($question->parent)) {
-                        $this->getChildren($question, $userYear, $userYearEmpty, false);
+                        $this->getChildren($question, $userYear, $userYearEmpty, false, $category->id);
 
                         if ($userYearEmpty) {
                             unset($question->admin_note);
@@ -86,7 +88,7 @@ class QuestionController extends Controller
                     }
                 }
 
-                unset($group->category_id);
+//                unset($group->category_id);
                 $group['questions'] = $q;
                 array_push($g, $group);
             }
@@ -108,7 +110,7 @@ class QuestionController extends Controller
         ));
     }
 
-    function getChildren($question, $userYear, $userYearEmpty, $plusChild)
+    function getChildren($question, $userYear, $userYearEmpty, $plusChild, $categoryId)
     {
         if ($question->answer_option == 1) {
             $question['answer_options'] = $question->getOptions()->pluck('text')->toArray();
@@ -153,10 +155,10 @@ class QuestionController extends Controller
 
                 $answers = null;
                 foreach($userQuestions as $userQuestion) {
+                    $userQuestion->category_id = $categoryId;
                     if (strpos($userQuestion['qpids'], '|;|') !== false) {
                         $userQuestion['qpids'] = array_map('intval', explode('|;|', $userQuestion['qpids']));
                         $userQuestion['answers'] = explode('|;|', $userQuestion['answers']);
-//                        $userQuestion['file_names'] = explode('|;|', $userQuestion['file_names']);
                         $userQuestion['file_names'] = array_map(function($val){return $val === '' ? null : $val;}, explode('|;|', $userQuestion['file_names']));
                         $userQuestion['approveds'] = array_map('intval', explode('|;|', $userQuestion['approveds']));
                         $userQuestion['feedbacks'] = explode('|;|', $userQuestion['feedbacks']);
@@ -177,12 +179,12 @@ class QuestionController extends Controller
                         $userQuestion['admin_notes'] = [$userQuestion['admin_notes']];
                     }
                     for ($i = 0; $i < count($userQuestion['qpids']); $i++) {
-
                         $answers[$userQuestion['qpids'][$i]][$userQuestion['id']] = array(
                             "answer" => $userQuestion['answers'][$i],
                             "file_names" => $userQuestion['file_names'][$i] == [] ? [] : explode('~-~', $userQuestion['file_names'][$i]),
                             "approved" => $userQuestion['approveds'][$i],
-                            "feedback" => $userQuestion['feedbacks'][$i]
+                            "feedback" => $userQuestion['feedbacks'][$i] === '' ? null : $userQuestion['feedbacks'][$i],
+                            "admin_note" => $userQuestion['admin_notes'][$i] === '' ? null : $userQuestion['admin_notes'][$i],
                         );
 
                         if (!$userYearEmpty) {
@@ -206,7 +208,8 @@ class QuestionController extends Controller
                     ->get();
 
                 forEach ($childs as $child) {
-                    $this->getChildren($child, $userYear, $userYearEmpty, true);
+                    $child->category_id = $categoryId;
+                    $this->getChildren($child, $userYear, $userYearEmpty, true, $categoryId);
 
                     unset($child['qpids']);
                     unset($child['answers']);
@@ -221,9 +224,11 @@ class QuestionController extends Controller
                 unset($question['feedback']);
                 unset($question['answer_option']);
                 unset($question['answer_options']);
-                unset($question['parent']);
+//                unset($question['parent']);
                 unset($question['has_childs']);
-
+                if($answers == null) {
+                    $answers = new stdClass();
+                }
                 $question['answers'] = $answers;
             } else {
                 $childs = $question->getChilds()
@@ -239,15 +244,16 @@ class QuestionController extends Controller
                     ->get();
 
                 forEach ($childs as $child) {
+                    $child->category_id = $categoryId;
                     if (strpos($child->file_names, '|;|') !== false) {
-                        $child->file_names = explode('|;|', $child->file_names); //het is deze
+                        $child->file_names = explode('|;|', $child->file_names);
                     }
                     if ($child->file_names === null) {
                         $child->file_names = [];
                     }
 
                     array_push($children, $child);
-                    $this->getChildren($child, $userYear, $userYearEmpty, $plusChild);
+                    $this->getChildren($child, $userYear, $userYearEmpty, $plusChild, $categoryId);
 
                     if ($plusChild) {
                         unset($child['answer']);
@@ -258,14 +264,14 @@ class QuestionController extends Controller
                 }
 
                 unset($question['answer_option']);
-                unset($question['parent']);
+//                unset($question['parent']);
                 unset($question['has_childs']);
             }
 
             $question['children'] = $children;
         } else {
             unset($question['answer_option']);
-            unset($question['parent']);
+//            unset($question['parent']);
             unset($question['has_childs']);
 
             $question['children'] = null;
