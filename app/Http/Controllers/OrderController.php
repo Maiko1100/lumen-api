@@ -130,19 +130,15 @@ class OrderController extends Controller {
                 $userYear->status = 1;
                 $userYear->save();
 
-                $response = [
-                    'status' => 1,
-                    'service' => $service
-                ];
-                return $response;
+//                $response = [
+//                    'status' => 1,
+//                    'service' => $service
+//                ];
+                return $service;
             case 'Tax Return':
                 $userYear->status = 3;
                 $userYear->save();
-                $response = [
-                    'status' => 3,
-                    'service' => $service
-                ];
-                return $response;
+                return $service;
             case 'Tax Advice':
                 $appointment = new Appointment();
                 $appointment->startDate = $request->input('startDate');

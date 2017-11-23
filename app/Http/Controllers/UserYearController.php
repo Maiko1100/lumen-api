@@ -34,7 +34,15 @@ class UserYearController extends Controller
         $userYear->status = $status;
         $userYear->save();
 
-        return new JsonResponse($userYear);
+        $userYears = UserYear::where("person_id", "=", $user->person_id)->get();
+
+        $userYearsArray = [];
+
+        foreach ($userYears as $userYear) {
+            $userYearsArray[$userYear->year_id] = $userYear->status;
+        }
+
+        return new JsonResponse($userYearsArray);
     }
 
     public function getUserYears() {
