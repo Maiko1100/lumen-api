@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Appointment;
 use App\Order as Order;
+use Dingo\Api\Http\Response;
 use Mollie_API_Client;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\UserYear as UserYear;
+use Log;
+use Illuminate\Http\JsonResponse;
 
 class OrderController extends Controller {
     private $mollie;
@@ -19,9 +23,31 @@ class OrderController extends Controller {
     }
 
     function createOrder(Request $request) {
-        $user = JWTAuth::parseToken()->authenticate();
+        $order = new Order();
+
+        if($request->header('Authorization')!= "Bearer null") {
+
+            $user = JWTAuth::parseToken()->authenticate();
+
+            if($request->input('year') != null){
+                $userYear = UserYear::where('person_id', '=', $user->person_id)->where('year_id','=',$request->input('year'))->first();
+                if($userYear==null){
+                    $userYear = new UserYear();
+                    $userYear->person_id = $user->person_id;
+                    $userYear->year_id = $request->input('year');
+                    $userYear->status = 0;
+                    $userYear->save();
+                }
+                $order->user_id = $user->person_id;
+                $order->user_year_id = $userYear->id;
+            }else{
+                $userYear = null;
+            }
+
+
+
+        }
         $service = $request->input('description');
-        
         $amount = $this->getAmount($request->input('paymentString'));
         // echo $request;
         if (!isset($amount)) {            
@@ -34,8 +60,7 @@ class OrderController extends Controller {
             "webhookUrl"  => $this->webhook
         ));
 
-        $order = new Order();
-        $order->user_id = $user->person_id;
+
         $order->service_name = $service;
         $order->price = $amount;
         $order->payment_id = $payment->id;
@@ -81,42 +106,52 @@ class OrderController extends Controller {
         $id = 'tr_'.$request->input('paymentId');
         $order = Order::where('payment_id', '=',$id)->first();
 
-        if($order->status == 'paid') {
+        if($request->header('Authorization')!= "") {
+            $user = JWTAuth::parseToken()->authenticate();
+        }else{
+            $user = null;
+        }
+
+        if($order->payment_status == 'paid') {
             if ($order->user_year_id != null) {
                 $userYear = UserYear::where('id', '=', $order->user_year_id)->first();
-                $this->handlePayment($order->service_name,$userYear);
+                return $this->handlePayment($order->service_name,$userYear,$request,$user);
             }else{
-                $this->handlePayment($order->service_name,null);
+                return $this->handlePayment($order->service_name,null,$request,$user);
             }
         }else{
-            return $order->status;
+            return $order->payment_status;
         }
     }
 
-    public function handlePayment($service,$userYear){
+    public function handlePayment($service,$userYear,$request,$user){
         switch($service) {
-            case 'taxReturnWithAppointment':
-                $userYear->update(
-                    [
-                        'status' => 1
-                    ]);
+            case 'Tax Return with appointment':
+                $userYear->status = 1;
+                $userYear->save();
+
                 $response = [
                     'status' => 1,
                     'service' => $service
                 ];
                 return $response;
-            case 'taxReturnWithoutAppointment':
-                $userYear->update(
-                    [
-                        'status' => 3
-                    ]);
+            case 'Tax Return':
+                $userYear->status = 3;
+                $userYear->save();
                 $response = [
                     'status' => 3,
                     'service' => $service
                 ];
                 return $response;
-            case 'taxAdvice':
-                return $service;
+            case 'Tax Advice':
+                $appointment = new Appointment();
+                $appointment->startDate = $request->input('startDate');
+                $appointment->endDate = $request->input('endDate');
+                if($user!=null) {
+                    $appointment->person_id =$user->person_id;
+                }
+                $appointment->save();
+                return new JsonResponse($service);
             default:
                 return false;
         }

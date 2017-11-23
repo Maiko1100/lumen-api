@@ -109,6 +109,10 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserYearController@reportAgreed',
             'as' => 'api.useryear.create'
         ]);
+        $api->post('/useryear/status/change', [
+            'uses' => 'App\Http\Controllers\UserYearController@changeStatus',
+            'as' => 'api.useryear.status.change'
+        ]);
     });
 
     $api->group([

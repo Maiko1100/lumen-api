@@ -14,13 +14,27 @@ use Illuminate\Support\Facades\DB;
 
 class UserYearController extends Controller
 {
-    public function changeUserYearStatus(Request $request){
+    public function changeStatus(Request $request){
+        $userYearId = $request->input('userYear');
+
+        if(isset($userYearId)){
+            $userYear = UserYear::where('id', '=',$userYearId)->first();
+            $userYear->status = $request->input('status');
+            $userYear->save();
+            $cases = DB::table('user_year')
+                ->join('person', 'user_year.person_id', '=', 'person.id')
+                ->leftjoin('person as employee', 'user_year.employee_id', '=', 'employee.id')
+                ->select('employee.first_name as employee_name','user_year.year_id', 'user_year.package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name', 'person.last_name', 'person.passport', 'person.bsn', 'person.dob')->get();
+            return $cases;
+        }
         $user = JWTAuth::parseToken()->authenticate();
         $year = $request->input('year');
         $userYear = UserYear::where('person_id', '=',$user->person_id)->where('year_id', '=',$year)->first();
         $status = $request->input('status');
         $userYear->status = $status;
         $userYear->save();
+
+        return new JsonResponse($userYear);
     }
 
     public function getUserYears() {
@@ -53,16 +67,6 @@ class UserYearController extends Controller
     }
 
   /**
-   * Display a listing of the resource.
-   *
-   * @return Response
-   */
-  public function index()
-  {
-    
-  }
-
-  /**
    * Show the form for creating a new resource.
    *
    * @return Response
@@ -76,8 +80,8 @@ class UserYearController extends Controller
       $userYear->year_id = $request->input('year');
       $userYear->package = $request->input('package');
       $userYear->status = 0;
-
-      return new Response(var_export($userYear->save()));
+      $userYear->save();
+      return $userYear->id;
   }
 
     public function reportAgreed(Request $request)
@@ -85,7 +89,7 @@ class UserYearController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $year = $request->input('year');
         $userYear = UserYear::where('person_id', '=',$user->person_id)->where('year_id', '=',$year)->first();
-        $userYear->status= 1;
+        $userYear->status= 8;
         $userYear->save();
 
         $fullpath = "app/userDocuments/{$user->person_id}/signature".'_'.$user->person_id.'_'.$year.".png";
@@ -97,7 +101,7 @@ class UserYearController extends Controller
         $userFile->person_id = $user->person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
-        
+
         return 'gelukt';
 
 
