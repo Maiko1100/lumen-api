@@ -207,17 +207,14 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserController@getAllCustomers',
             'as' => 'api.users.customers'
         ]);
-
         $api->get('/users/employees', [
             'uses' => 'App\Http\Controllers\UserController@getAllEmployees',
             'as' => 'api.users.users.employees'
         ]);
-
         $api->post('/users/employees/assign', [
             'uses' => 'App\Http\Controllers\UserYearController@assignEmployee',
             'as' => 'api.users.users.employees.assign'
         ]);
-        
         $api->get('/customers/cases', [
             'uses' => 'App\Http\Controllers\UserController@getAllCases',
             'as' => 'api.users.customers.cases'

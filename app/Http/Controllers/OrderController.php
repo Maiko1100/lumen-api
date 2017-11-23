@@ -47,12 +47,16 @@ class OrderController extends Controller {
 
     private function getAmount($amountString) {
         switch($amountString) {
-            case 'appointment':
+            case 'taxAdvice':
                 return 50;
             case 'taxReturnWithAppointment':
                 return 150;
             case 'taxReturnWithoutAppointment':
                 return 100;
+            case 'taxReturnPlusFiscal':
+                return 325;
+            case 'taxReturn':
+                return 249;
             default: 
                 return null;
         }
