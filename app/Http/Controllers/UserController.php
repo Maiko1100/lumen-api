@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\UserYear as UserYear;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -32,8 +33,21 @@ class UserController extends Controller
 
         $loggedInUser = $auth->postLogin($request);
 
-
         return $loggedInUser;
+    }
+
+    public function updateUserPassword(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $oldPassword = $request->input('oldPassword');
+
+        if(Hash::check($oldPassword, $user->password)){
+            $user->password = app('hash')->make($request->input('newPassword'));
+            $user->save();
+            return $user;
+        }else{
+            return "error - password didn't match";
+        }
     }
 
     protected function getCredentials(Request $request)
@@ -83,7 +97,7 @@ class UserController extends Controller
             $cases = DB::table('user_year')
                 ->join('person', 'user_year.person_id', '=', 'person.id')
                 ->leftjoin('person as employee', 'user_year.employee_id', '=', 'employee.id')
-                ->select('employee.first_name as employee_name','user_year.year_id', 'user_year.package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name', 'person.last_name', 'person.passport', 'person.bsn', 'person.dob')->get();
+                ->select('employee.first_name as employee_name', 'user_year.year_id', 'user_year.package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name', 'person.last_name', 'person.passport', 'person.bsn', 'person.dob')->get();
             return $cases;
         } elseif ($user->role == 2) {
             $cases = DB::table('user_year')
