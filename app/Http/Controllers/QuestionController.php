@@ -123,6 +123,7 @@ class QuestionController extends Controller
             if ($question->type === 8) {
                 $userQuestions = Question::from(DB::raw("(select
                     `id`,
+                    `type`,
                     group_concat(`d`.`qpid` SEPARATOR '|;|') as `qpids`,
                     group_concat(`d`.`answers` SEPARATOR '|;|') as `answers`,
                     group_concat(IFNULL(`d`.`file_names`, '') SEPARATOR '|;|') as `file_names`,
@@ -132,6 +133,7 @@ class QuestionController extends Controller
                     from (
                         select
                         `questions`.`id`,
+                        `questions`.`type`,
                         `question_plus`.`id` as `qpid`,
                         group_concat(IFNULL(`user_question`.`question_answer`, '') SEPARATOR '~-~') as `answers`,
                         group_concat(`user_file`.`name` SEPARATOR '~-~') as `file_names`,
@@ -181,6 +183,7 @@ class QuestionController extends Controller
                     for ($i = 0; $i < count($userQuestion['qpids']); $i++) {
                         $answers[$userQuestion['qpids'][$i]][$userQuestion['id']] = array(
                             "answer" => $userQuestion['answers'][$i],
+                            "type" => $userQuestion['type'],
                             "file_names" => $userQuestion['file_names'][$i] == [] ? [] : explode('~-~', $userQuestion['file_names'][$i]),
                             "approved" => $userQuestion['approveds'][$i],
                             "feedback" => $userQuestion['feedbacks'][$i] === '' ? null : $userQuestion['feedbacks'][$i],

@@ -45,7 +45,7 @@ class QuestionPlusController extends Controller
                 $questionPlus->id => null
             )
         );
-        foreach($answers as $answer) {
+        foreach ($answers as $answer) {
             $output['newQuestionPlusId'][$questionPlus->id][$answer->id] = array(
                 'answer' => '',
                 'file_names' => [],
@@ -58,7 +58,7 @@ class QuestionPlusController extends Controller
         return Response($output);
     }
 
-    public function delete(Request $request)
+    public function delete(Request $request)    
     {
         $questionPlus = QuestionPlus::find($request->input('id'));
         $questionPlus->delete();
