@@ -6,6 +6,7 @@ use App\Order as Order;
 use Mollie_API_Client;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\UserYear as UserYear;
 
 class OrderController extends Controller {
     private $mollie;
@@ -73,18 +74,49 @@ class OrderController extends Controller {
 
     public function getPayment(Request $request)
     {
-         $id = 'tr_'.$request->input('paymentId');
+        $id = 'tr_'.$request->input('paymentId');
         $order = Order::where('payment_id', '=',$id)->first();
 
-        if($order->payment_status === 'paid'){
-            if($order->user_year_id != null){
-                $userYear = UserYear::where('id', '=',$order->user_year_id)->first();
-                $userYear->status = 3;
-                $userYear-save();
+        if($order->status == 'paid') {
+            if ($order->user_year_id != null) {
+                $userYear = UserYear::where('id', '=', $order->user_year_id)->first();
+                $this->handlePayment($order->service_name,$userYear);
+            }else{
+                $this->handlePayment($order->service_name,null);
             }
+        }else{
+            return $order->status;
+        }
+    }
+
+    public function handlePayment($service,$userYear){
+        switch($service) {
+            case 'taxReturnWithAppointment':
+                $userYear->update(
+                    [
+                        'status' => 1
+                    ]);
+                $response = [
+                    'status' => 1,
+                    'service' => $service
+                ];
+                return $response;
+            case 'taxReturnWithoutAppointment':
+                $userYear->update(
+                    [
+                        'status' => 3
+                    ]);
+                $response = [
+                    'status' => 3,
+                    'service' => $service
+                ];
+                return $response;
+            case 'taxAdvice':
+                return $service;
+            default:
+                return false;
         }
 
-            return $order->payment_status;
     }
 }
 
