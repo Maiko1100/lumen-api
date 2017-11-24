@@ -231,8 +231,8 @@ class UserFileController extends Controller
         $userFile->person_id = $person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
-        $userYear->status = 5;
-        $userYear->save();
+//        $userYear->status = 5;
+//        $userYear->save();
 
         $cases = DB::table('user_year')
             ->join('person', 'user_year.person_id', '=', 'person.id')
