@@ -241,6 +241,44 @@ class UserFileController extends Controller
         return $cases;
 
     }
+    public function saveSubmission(Request $request)
+    {
+        $file = $request->file('file');
+        $person_id = $request->input('person_id');
+        $userYear = UserYear::where('user_year.person_id', "=", $person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
+        $person = Person::where('id','=',$person_id)->first();
+        $fileName = 'TaxReportSubmission'.'_'.$person->first_name.'_'.$person->last_name.'_'.$request->input('year').'.pdf';
+
+        Storage::putFileAs('userDocuments/' . $person_id, $file, $fileName);
+
+        $userFile = new UserFile();
+        $userFile->name = $fileName;
+        $userFile->type = 8;
+        $userFile->person_id = $person_id;
+        $userFile->user_year_id = $userYear->id;
+        $userFile->save();
+        $userYear->status = 5;
+        $userYear->save();
+
+        $cases = DB::table('user_year')
+            ->join('person', 'user_year.person_id', '=', 'person.id')
+            ->leftjoin('person as employee', 'user_year.employee_id', '=', 'employee.id')
+            ->select('employee.first_name as employee_name','user_year.year_id', 'user_year.package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name', 'person.last_name', 'person.passport', 'person.bsn', 'person.dob')->get();
+        return $cases;
+
+    }
+    public function getSubmission(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
+        $personId = $user->person_id;
+        $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', 8)->first();
+        $filename = $userFile->name;
+        $fullpath = "app/userDocuments/{$personId}/{$filename}";
+
+        return response()->download(storage_path($fullpath), null, [], null);
+    }
+
 
 
 }
