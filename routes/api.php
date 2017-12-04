@@ -131,9 +131,6 @@ $api->version('v1', function ($api) {
         ]);
     });
 
-
-
-
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {
@@ -143,6 +140,14 @@ $api->version('v1', function ($api) {
         ]);
     });
 
+    $api->get('/group/questions', [
+        'uses' => 'App\Http\Controllers\QuestionController@getQuestionsByGroup',
+        'as' => 'api.questioncontroller'
+    ]);
+    $api->post('/group/questions/sort', [
+        'uses' => 'App\Http\Controllers\QuestionController@setQuestionsGroupSort',
+        'as' => 'api.group.questions.sort'
+    ]);
 
     $api->group([
         'middleware' => 'api.auth',
