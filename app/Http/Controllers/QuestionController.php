@@ -3,16 +3,41 @@
 namespace App\Http\Controllers;
 
 use App\Question;
-use App\UserQuestion;
+use App\Group;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\UserYear;
 use Illuminate\Support\Facades\DB;
 use stdClass;
+use Illuminate\Http\JsonResponse;
 
 class QuestionController extends Controller
 {
+    public function getQuestionsByGroup (Request $request) {
+        $out = array();
+
+        $groups = Group::join('category', 'group.category_id', 'category.id')
+            ->where('category.year_id', '=', $request->input('year'))->get();
+
+        foreach ($groups as $group) {
+            $questions = $group->getQuestions()->get();
+            foreach ($questions as $question) {
+                unset($question->answer_option);
+                unset($question->parent);
+                unset($question->group_id);
+                unset($question->condition);
+                unset($question->type);
+                unset($question->validation_type);
+                unset($question->has_childs);
+                unset($question->question_genre_id);
+            }
+
+            array_push($out, $questions);
+        }
+
+        return new JsonResponse($out);
+    }
 
     public function getQuestions(Request $request)
     {
@@ -62,7 +87,7 @@ class QuestionController extends Controller
 //                    })
                     ->groupBy('question.id')
                     ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
-                    ->orderBy('question.id', 'asc')
+                    ->orderBy('question.sort', 'asc')
                     ->get();
 
                 $q = array();

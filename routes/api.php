@@ -111,6 +111,11 @@ $api->version('v1', function ($api) {
         ]);
     });
 
+    $api->get('/group/questions', [
+        'uses' => 'App\Http\Controllers\QuestionController@getQuestionsByGroup',
+        'as' => 'api.questioncontroller'
+    ]);
+
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {

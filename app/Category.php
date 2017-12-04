@@ -12,7 +12,7 @@ class Category extends Model
 
     public function getGroups()
     {
-        return $this->hasmany('App\Group', 'category_id', 'id');
+        return $this->hasmany('App\Group', 'category_id', 'id')->orderBy("sort", "asc");
     }
 
 }

@@ -21,7 +21,7 @@ class CategoryController extends Controller
   }
 
   public function getCategoriesByYear($year) {
-      $categories = Category::where("year_id", "=", $year)->get();
+      $categories = Category::where("year_id", "=", $year)->orderBy("sort", "asc")->get();
 
       return $categories;
   }
