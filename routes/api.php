@@ -121,7 +121,28 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserYearController@changeStatus',
             'as' => 'api.useryear.status.change'
         ]);
+        $api->get('/calendar/meeting/get', [
+            'uses' => 'App\Http\Controllers\gCalendarController@getMeetings',
+            'as' => 'api.oath'
+        ]);
+        $api->post('/calendar/meeting/update', [
+            'uses' => 'App\Http\Controllers\gCalendarController@updateMeeting',
+            'as' => 'api.oath'
+        ]);
     });
+
+
+
+
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->get('/calendar/getEvents', [
+            'uses' => 'App\Http\Controllers\gCalendarController@index',
+            'as' => 'api.calendar.events'
+        ]);
+    });
+
 
     $api->group([
         'middleware' => 'api.auth',
