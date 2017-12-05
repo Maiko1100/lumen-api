@@ -28,6 +28,7 @@ class UserController extends Controller
         $user = new User();
         $user->person_id = $person->id;
         $user->email = $credentials['email'];
+        $user->role=1;
         $user->password = app('hash')->make($credentials['password']);
         $user->save();
 

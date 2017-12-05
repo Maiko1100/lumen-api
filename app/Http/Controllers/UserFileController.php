@@ -10,6 +10,7 @@ use Illuminate\Http\Response;
 use App\UserYear as UserYear;
 use App\Person;
 use Illuminate\Support\Facades\DB;
+use App\Utils\Enums\ProgressTimeline;
 
 class UserFileController extends Controller
 {
@@ -91,7 +92,7 @@ class UserFileController extends Controller
             $userFile->person_id = $user->person_id;
 //            $userFile->question_id = $questionId;
             $userFile->name = $newName;
-            $userFile->type = 10;
+            $userFile->type = ProgressTimeline::taxReturnUploaded;
 
             if(isset($qpid)) {
                 $userFile->qpid = $qpid;
@@ -231,7 +232,7 @@ class UserFileController extends Controller
         $userFile->person_id = $person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
-        $userYear->status = 7;
+        $userYear->status = ProgressTimeline::reportUploaded;
         $userYear->save();
         
         $cases = DB::table('user_year')
@@ -257,7 +258,7 @@ class UserFileController extends Controller
         $userFile->person_id = $person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
-        $userYear->status = 10;
+        $userYear->status = ProgressTimeline::taxReturnUploaded;
         $userYear->save();
 
         $cases = DB::table('user_year')
