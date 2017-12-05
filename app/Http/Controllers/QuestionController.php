@@ -18,9 +18,12 @@ class QuestionController extends Controller
         $out = array();
 
         $groups = Group::join('category', 'group.category_id', 'category.id')
-            ->where('category.year_id', '=', $request->input('year'))->get();
+            ->where('category.year_id', '=', $request->input('year'))
+            ->select('group.*')
+            ->get();
 
         foreach ($groups as $group) {
+            $q = array();
             $questions = $group->getQuestions()->get();
             foreach ($questions as $question) {
                 unset($question->answer_option);
@@ -30,7 +33,9 @@ class QuestionController extends Controller
                 unset($question->type);
                 unset($question->validation_type);
                 unset($question->has_childs);
-                unset($question->question_genre_id);
+                unset($question->has_childs);
+
+                array_push($q, $question);
             }
 
             array_push($out, $questions);
@@ -179,6 +184,9 @@ class QuestionController extends Controller
                     ) `d`
                     group by `d`.`id`) `a`"))
                 ->get();
+
+//                echo $userQuestions;
+//                exit;
 
                 $answers = null;
                 foreach($userQuestions as $userQuestion) {

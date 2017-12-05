@@ -36,7 +36,7 @@ class QuestionPlusController extends Controller
         $answers = questionPlus::from(DB::raw("(select * from `question`) `questions`"))
             ->crossjoin(DB::raw("(select @pv := " . $questionPlus->question_id . ") `initialisation`"))
             ->whereraw("find_in_set(`parent`, @pv) > 0 and @pv := concat(@pv, ',', `questions`.`id`)")
-            ->select("questions.id")
+            ->select("questions.id", "questions.type")
             ->get();
 
         $output = array(
@@ -51,7 +51,8 @@ class QuestionPlusController extends Controller
                 'file_names' => [],
                 'approved' => 0,
                 'feedback' => null,
-                'admin_note' => ''
+                'admin_note' => '',
+                'type' => $answer->type
             );
         }
 
