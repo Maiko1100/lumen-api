@@ -167,7 +167,7 @@ $api->version('v1', function ($api) {
             'as' => 'api.question.file.save'
         ]);
         $api->post('/question/feedback/save', [
-            'uses' => 'App\Http\Controllers\feedbackController@saveQuestionFeedBack',
+            'uses' => 'App\Http\Controllers\FeedbackController@saveQuestionFeedBack',
             'as' => 'api.question.file.save'
         ]);
     });

@@ -233,7 +233,7 @@ class UserFileController extends Controller
         $userFile->save();
         $userYear->status = 6;
         $userYear->save();
-
+        
         $cases = DB::table('user_year')
             ->join('person', 'user_year.person_id', '=', 'person.id')
             ->leftjoin('person as employee', 'user_year.employee_id', '=', 'employee.id')
