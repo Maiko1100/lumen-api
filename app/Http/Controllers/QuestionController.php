@@ -66,7 +66,7 @@ class QuestionController extends Controller
         }
         return self::getQuestionsByGroup(null,2017);
     }
-    
+
     public function getQuestions(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();

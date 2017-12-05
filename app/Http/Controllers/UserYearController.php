@@ -97,7 +97,7 @@ class UserYearController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $year = $request->input('year');
         $userYear = UserYear::where('person_id', '=',$user->person_id)->where('year_id', '=',$year)->first();
-        $userYear->status= 8;
+        $userYear->status= 9;
         $userYear->save();
 
         $fullpath = "app/userDocuments/{$user->person_id}/signature".'_'.$user->person_id.'_'.$year.".png";
