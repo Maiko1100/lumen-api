@@ -11,6 +11,7 @@ use App\UserYear as UserYear;
 use App\Person;
 use Illuminate\Support\Facades\DB;
 use App\Utils\Enums\ProgressState;
+
 use App\Utils\Enums\UserRole;
 
 class UserFileController extends Controller
@@ -93,7 +94,7 @@ class UserFileController extends Controller
             $userFile->person_id = $user->person_id;
 //            $userFile->question_id = $questionId;
             $userFile->name = $newName;
-            $userFile->type = ProgressTimeline::taxReturnUploaded;
+            $userFile->type = ProgressState::taxReturnUploaded;
 
             if(isset($qpid)) {
                 $userFile->qpid = $qpid;
@@ -233,7 +234,7 @@ class UserFileController extends Controller
         $userFile->person_id = $person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
-        $userYear->status = ProgressTimeline::reportUploaded;
+        $userYear->status = ProgressState::reportUploaded;
         $userYear->save();
         
         $cases = DB::table('user_year')
@@ -259,7 +260,7 @@ class UserFileController extends Controller
         $userFile->person_id = $person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
-        $userYear->status = ProgressTimeline::taxReturnUploaded;
+        $userYear->status = ProgressState::taxReturnUploaded;
         $userYear->save();
 
         $cases = DB::table('user_year')
