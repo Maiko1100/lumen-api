@@ -231,7 +231,7 @@ class UserFileController extends Controller
         $userFile->person_id = $person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
-        $userYear->status = 6;
+        $userYear->status = 7;
         $userYear->save();
         
         $cases = DB::table('user_year')
@@ -257,7 +257,7 @@ class UserFileController extends Controller
         $userFile->person_id = $person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
-        $userYear->status = 10;
+        $userYear->status = 11;
         $userYear->save();
 
         $cases = DB::table('user_year')
