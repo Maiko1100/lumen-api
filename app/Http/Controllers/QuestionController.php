@@ -13,17 +13,23 @@ use Illuminate\Http\JsonResponse;
 
 class QuestionController extends Controller
 {
-    public function getQuestionsByGroup (Request $request) {
+    public function getQuestionsByGroup (Request $request = null, $year = null) {
         $out = array();
+        if($year != null){
+
+        }else{
+            $year = $request->input('year');
+        }
+
 
         $groups = Group::join('category', 'group.category_id', 'category.id')
-            ->where('category.year_id', '=', $request->input('year'))
+            ->where('category.year_id', '=', $year)
             ->select('group.*')
             ->get();
 
         foreach ($groups as $group) {
             $q = array();
-            $questions = $group->getQuestions()->get();
+            $questions = $group->getQuestions()->orderBy('sort','asc')->get();
             foreach ($questions as $question) {
                 unset($question->answer_option);
                 unset($question->parent);
@@ -32,11 +38,10 @@ class QuestionController extends Controller
                 unset($question->type);
                 unset($question->validation_type);
                 unset($question->has_childs);
-                unset($question->has_childs);
+                unset($question->tip_text);
 
                 array_push($q, $question);
             }
-
             array_push($out, $questions);
         }
 
@@ -54,12 +59,10 @@ class QuestionController extends Controller
                     [
                         'sort' => $index
                     ]);
-//                $question->sort = $index;
-//                $question->save();
             }
         }
 
-        return "success";
+        return self::getQuestionsByGroup(null,2017);
     }
 
     public function getQuestions(Request $request)
