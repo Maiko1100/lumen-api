@@ -1,6 +1,6 @@
 <?php
 namespace App\utils\enums;
-abstract class ProgressTimeline {
+abstract class ProgressState {
     const questionnaireStartedNotPaid = 0;
     const questionnaireSubmittedNotPaid = 1;
     const questionnaireStartedPaid = 2;

@@ -10,7 +10,8 @@ use Illuminate\Http\Response;
 use App\UserYear as UserYear;
 use App\Person;
 use Illuminate\Support\Facades\DB;
-use App\Utils\Enums\ProgressTimeline;
+use App\Utils\Enums\ProgressState;
+use App\Utils\Enums\UserRole;
 
 class UserFileController extends Controller
 {
