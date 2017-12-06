@@ -12,15 +12,20 @@ use App\Person;
 use Illuminate\Support\Facades\DB;
 use App\Utils\Enums\ProgressState;
 
-use App\Utils\Enums\UserRole;
+use App\Utils\Enums\userRole;
+use App\Utils\Enums\documentType;
 
 class UserFileController extends Controller
 {
-    public function getFiles()
+    public function getFiles(Request $request)
     {
+        $documentType = $request->get('documentType');
         $user = JWTAuth::parseToken()->authenticate();
-        $files = $user->getUserFiles();
-
+        if ($documentType == documentType::all_documents){
+            $files = $user->getUserFiles();
+    }else{
+            $files = UserFile::where('person_id', '=', $user->person_id)->where('type','=',$documentType)->get();
+        }
         return $files;
     }
 
