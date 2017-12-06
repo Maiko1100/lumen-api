@@ -263,7 +263,7 @@ class QuestionController extends Controller
                     ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
                     ->groupBy('question.id')
                     ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', DB::raw("group_concat(`question_plus`.`id` SEPARATOR '|;|') as `qpids`"), DB::raw("group_concat(IFNULL(`user_question`.`question_answer`, '') SEPARATOR '|;|') as `answers`"), DB::raw("group_concat(IFNULL(`user_question`.`approved`, 0) SEPARATOR '|;|') as `approveds`"), DB::raw("group_concat(IFNULL(`feedback`.`text`, '') SEPARATOR '|;|') as `feedbacks`"), DB::raw("group_concat(IFNULL(`feedback`.`admin_note`, '') SEPARATOR '|;|') as `admin_notes`"))
-                    ->orderBy('question.id', 'asc')
+                    ->orderBy('question.sort', 'asc')
                     ->get();
 
                 forEach ($childs as $child) {
