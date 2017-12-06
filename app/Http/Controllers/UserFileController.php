@@ -93,13 +93,10 @@ class UserFileController extends Controller
             Storage::putFileAs('userDocuments/' . $user->person_id, $file, $newName);
 
             $userFile = new UserFile();
-
-//            $userFile->user_year_id = $userYear->id;
             $userFile->user_question_id = $uqid;
             $userFile->person_id = $user->person_id;
-//            $userFile->question_id = $questionId;
             $userFile->name = $newName;
-            $userFile->type = ProgressState::taxReturnUploaded;
+            $userFile->type = documentType::questionaire_documents;
 
             if(isset($qpid)) {
                 $userFile->qpid = $qpid;
@@ -202,7 +199,7 @@ class UserFileController extends Controller
 
         $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
         Storage::putFileAs('userDocuments/' . $user->person_id, $file, $fileName);
-        $userFile->type = 1;
+        $userFile->type = documentType::normal_documents;
         $userFile->person_id = $user->person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
@@ -216,7 +213,7 @@ class UserFileController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
         $personId = $user->person_id;
-        $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', 9)->first();
+        $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', documentType::report)->first();
         $filename = $userFile->name;
         $fullpath = "app/userDocuments/{$personId}/{$filename}";
 
@@ -235,7 +232,7 @@ class UserFileController extends Controller
 
         $userFile = new UserFile();
         $userFile->name = $fileName;
-        $userFile->type = 9;
+        $userFile->type = documentType::report;
         $userFile->person_id = $person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
@@ -261,7 +258,7 @@ class UserFileController extends Controller
 
         $userFile = new UserFile();
         $userFile->name = $fileName;
-        $userFile->type = 8;
+        $userFile->type = documentType::submission;
         $userFile->person_id = $person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
@@ -280,15 +277,12 @@ class UserFileController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
         $personId = $user->person_id;
-        $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', 8)->first();
+        $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', documentType::submission)->first();
         $filename = $userFile->name;
         $fullpath = "app/userDocuments/{$personId}/{$filename}";
 
         return response()->download(storage_path($fullpath), null, [], null);
     }
-
-
-
 }
 
 ?>
