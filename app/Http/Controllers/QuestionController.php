@@ -194,7 +194,9 @@ class QuestionController extends Controller
                         left join `question_plus`
                         on `question_plus`.`question_id` = " . $question->id . "
                         left join `user_question`
-                        on `question_plus`.`id` = `user_question`.`question_plus_id` and `user_question`.`question_id` = `questions`.`id`
+                        on `question_plus`.`id` = `user_question`.`question_plus_id`
+                        and `user_question`.`question_id` = `questions`.`id`
+                        and `user_question`.`user_year_id` = " . $userYear->id . "
                         left join `user_file`
                         on `user_question`.`id` = `user_file`.`user_question_id`
                         left join `feedback` on `user_question`.`id` = `feedback`.`user_question_id`
