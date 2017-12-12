@@ -7,6 +7,7 @@ use App\Event;
 use Illuminate\Http\JsonResponse;
 use App\Appointment;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Mail;
 
 class gCalendarController extends Controller
 {
@@ -27,6 +28,8 @@ class gCalendarController extends Controller
 
         $meeting = json_decode($request->input('formValues'))->formvalues;
 
+        self::sendMail($meeting);
+
         $event = Event::find($meeting->eventId);
         $event->name = 'Tax Advice meeting with ' . $meeting->firstName ." " . $meeting->lastName ;
         $event->colorId = 11;
@@ -42,6 +45,23 @@ class gCalendarController extends Controller
         $appointment->save();
 
         return self::getMeetings();
+    }
+
+    public function sendMail($meeting)
+    {
+        $emailData = [
+            'name' => $meeting->firstName ." ".$meeting->lastName,
+            'email' => $meeting->email,
+            'service' => $meeting->service,
+            'comments' => $meeting->comments,
+            'startDate' => $meeting->startDate,
+            'endDate' => $meeting->endDate,
+        ];
+
+        Mail::send('mails.appointment.appointmentMade', $emailData, function ($message) use ($emailData) {
+            $message->to($emailData['email'], '')->subject('Do-not-reply:Afspraak');
+            $message->from('info@kcps.nl', 'Info || KCPSoftware');
+        });
     }
 
 }

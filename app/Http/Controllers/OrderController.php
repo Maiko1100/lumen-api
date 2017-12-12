@@ -11,6 +11,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use App\UserYear as UserYear;
 use Log;
 use Illuminate\Http\JsonResponse;
+use App\Utils\Enums\ProgressState;
 
 class OrderController extends Controller {
     private $mollie;
@@ -35,7 +36,7 @@ class OrderController extends Controller {
                     $userYear = new UserYear();
                     $userYear->person_id = $user->person_id;
                     $userYear->year_id = $request->input('year');
-                    $userYear->status = 0;
+                    $userYear->status = ProgressState::questionnaireStartedNotPaid;
                     $userYear->save();
                 }
                 $order->user_id = $user->person_id;
@@ -127,20 +128,14 @@ class OrderController extends Controller {
     public function handlePayment($service,$userYear,$request,$user){
         switch($service) {
             case 'Tax Return with appointment':
-                $userYear->status = 1;
+                $userYear->status = ProgressState::questionnaireStartedPaid;
                 $userYear->save();
-
-//                $response = [
-//                    'status' => 1,
-//                    'service' => $service
-//                ];
                 return $service;
             case 'Tax Return':
-                $userYear->status = 3;
+                $userYear->status = ProgressState::questionnaireReadyToReview;
                 $userYear->save();
                 return $service;
             case 'Tax Advice':
-
                 return new JsonResponse($service);
             default:
                 return false;
