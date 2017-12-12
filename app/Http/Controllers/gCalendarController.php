@@ -5,6 +5,8 @@ use Carbon\Carbon;
 use Dingo\Api\Contract\Http\Request;
 use App\Event;
 use Illuminate\Http\JsonResponse;
+use App\Appointment;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class gCalendarController extends Controller
 {
@@ -17,6 +19,11 @@ class gCalendarController extends Controller
 
     public function updateMeeting(Request $request)
     {
+        if($request->header('Authorization')!= "") {
+            $user = JWTAuth::parseToken()->authenticate();
+        }else{
+            $user = null;
+        }
 
         $meeting = json_decode($request->input('formValues'))->formvalues;
 
@@ -25,6 +32,15 @@ class gCalendarController extends Controller
         $event->colorId = 11;
         $event->description = "Name: ".$meeting->firstName ." ". $meeting->lastName. " || Service: ".$meeting->service . " || Phonenumber: ". $meeting->phoneNumber." || ". "Socialname: ". $meeting->socialName." || Type " .$meeting->type." || Comments: " . $meeting->comments ;
         $event->save();
+
+        $appointment = new Appointment();
+        $appointment->startDate = $meeting->startDate;
+        $appointment->endDate = $meeting->endDate;
+        if($user!=null) {
+            $appointment->person_id =$user->person_id;
+        }
+        $appointment->save();
+
         return self::getMeetings();
     }
 

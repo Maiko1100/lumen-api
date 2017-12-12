@@ -89,7 +89,16 @@ class UserYearController extends Controller
       $userYear->package = $request->input('package');
       $userYear->status = ProgressState::questionnaireStartedNotPaid;
       $userYear->save();
-      return $userYear->id;
+
+      $userYears = UserYear::where("person_id", "=", $user->person_id)->get();
+
+      $userYearsArray = [];
+
+      foreach ($userYears as $userYear) {
+          $userYearsArray[$userYear->year_id] = $userYear->status;
+      }
+
+      return new JsonResponse($userYearsArray);
   }
 
     public function reportAgreed(Request $request)

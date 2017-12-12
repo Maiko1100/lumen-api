@@ -140,13 +140,7 @@ class OrderController extends Controller {
                 $userYear->save();
                 return $service;
             case 'Tax Advice':
-                $appointment = new Appointment();
-                $appointment->startDate = $request->input('startDate');
-                $appointment->endDate = $request->input('endDate');
-                if($user!=null) {
-                    $appointment->person_id =$user->person_id;
-                }
-                $appointment->save();
+
                 return new JsonResponse($service);
             default:
                 return false;
