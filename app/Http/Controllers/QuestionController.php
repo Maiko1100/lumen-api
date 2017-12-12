@@ -193,6 +193,7 @@ class QuestionController extends Controller
                         cross join (select @pv := " . $question->id . ") `initialisation`
                         left join `question_plus`
                         on `question_plus`.`question_id` = " . $question->id . "
+                        and `question_plus`.`person_id` = " . $userYear->person_id . "
                         left join `user_question`
                         on `question_plus`.`id` = `user_question`.`question_plus_id`
                         and `user_question`.`question_id` = `questions`.`id`
@@ -205,7 +206,7 @@ class QuestionController extends Controller
                     ) `d`
                     group by `d`.`id`) `a`"))
                 ->get();
-
+//                ->toSql();
 //                echo $userQuestions;
 //                exit;
 
