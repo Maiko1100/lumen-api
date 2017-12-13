@@ -262,4 +262,13 @@ $api->version('v1', function ($api) {
             'as' => 'api.user.changePassword'
         ]);
     });
+
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->get('/appointment', [
+            'uses' => 'App\Http\Controllers\AppointmentController@getUserAppointment',
+            'as' => 'api.users.customers'
+        ]);
+    });
 });
