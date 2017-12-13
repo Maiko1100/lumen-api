@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\UserFile;
+use App\UserQuestion;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Storage;
@@ -19,13 +20,13 @@ class UserFileController extends Controller
 {
     public function getFiles(Request $request)
     {
-        $documentType = $request->get('documentType');
         $user = JWTAuth::parseToken()->authenticate();
-        if ($documentType == documentType::all_documents){
-            $files = $user->getUserFiles();
-    }else{
-            $files = UserFile::where('person_id', '=', $user->person_id)->where('type','=',$documentType)->toSql();
-        }
+
+
+        $files = UserFile::where('user_file.person_id', '=', $user->person_id)
+            ->join('user_year', 'user_year.person_id', '=', 'user_file.person_id')
+        ->select('user_year.year_id','user_year.person_id as id','user_file.person_id','user_file.id', 'user_file.user_question_id', 'user_file.name', 'user_file.type', 'user_file.description', 'user_file.question_id', 'user_file.user_year_id', 'user_file.qpid')->get();
+
         return $files;
     }
 
@@ -62,6 +63,9 @@ class UserFileController extends Controller
         $personId = $user->person_id;
         $filename = $request->input('fileName');
         $fullpath = "userDocuments/{$personId}/{$filename}";
+
+        $file = UserFile::where('person_id','=',$personId)->where('name','=',$filename)->first();
+        $file->delete();
 
         if (Storage::delete($fullpath)) {
             $userfile = UserFile::where("user_year.person_id", "=", $user->person_id)->where('name', "=", $filename)
