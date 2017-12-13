@@ -24,7 +24,7 @@ class UserFileController extends Controller
         if ($documentType == documentType::all_documents){
             $files = $user->getUserFiles();
     }else{
-            $files = UserFile::where('person_id', '=', $user->person_id)->where('type','=',$documentType)->get();
+            $files = UserFile::where('person_id', '=', $user->person_id)->where('type','=',$documentType)->toSql();
         }
         return $files;
     }
