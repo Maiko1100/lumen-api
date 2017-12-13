@@ -77,20 +77,45 @@ class UserFileController extends Controller
         }
     }
 
+    public function deleteQuestionFile(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $personId = $user->person_id;
+        $filename = $request->input('fileName');
+        $fullpath = "userDocuments/{$personId}/{$filename}";
+
+        if (Storage::delete($fullpath)) {
+            $userfile = UserFile::where("person_id", "=", $personId)
+                ->where('name', "=", $filename)
+                ->first();
+            $uqid = $userfile->user_question_id;
+            UserFile::where("person_id", "=", $personId)
+                ->where('name', "=", $filename)
+                ->delete();
+
+            $newFiles = [];
+            $files = UserFile::where("user_question_id", "=", $uqid)
+                ->select('name')
+                ->get();
+
+            foreach ($files as $file) {
+                array_push($newFiles, $file->name);
+            }
+
+            return $newFiles;
+        } else {
+            return new Response('file does not exist');
+        }
+    }
+
     public function saveQuestionFile(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
-        $year = $request->input('year');
-        $questionId = $request->input('id');
-        $userYear = UserYear::where("person_id", "=", $user->person_id)
-            ->where("year_id", "=", $year)->first();
         $qpid = $request->input('qpid');
 
         $userQuestioncontroller = new UserQuestionController();
 
         $uqid = (int)$userQuestioncontroller->save($request);
-
-        $newNames = [];
         foreach ($request->file('files') as $file){
             $pinfo = pathinfo($file->getClientOriginalName());
             $newName = $pinfo['filename'] . "_" . date("YmdHis") . "." . $pinfo['extension'];
@@ -106,11 +131,19 @@ class UserFileController extends Controller
                 $userFile->qpid = $qpid;
             }
 
-            array_push($newNames, $newName);
-
             $userFile->save();
         }
-        return new Response($newNames);
+
+        $newFiles = [];
+        $files = UserFile::where("user_question_id", "=", $uqid)
+            ->select('name')
+            ->get();
+
+        foreach ($files as $file) {
+            array_push($newFiles, $file->name);
+        }
+
+        return new Response($newFiles);
     }
 
     public function save(Request $request)

@@ -174,21 +174,21 @@ class QuestionController extends Controller
                     `id`,
                     `type`,
                     group_concat(`d`.`qpid` SEPARATOR '|;|') as `qpids`,
-                    group_concat(`d`.`answers` SEPARATOR '|;|') as `answers`,
+                    group_concat(`d`.`answer` SEPARATOR '|;|') as `answers`,
                     group_concat(IFNULL(`d`.`file_names`, '') SEPARATOR '|;|') as `file_names`,
-                    group_concat(`d`.`approveds` SEPARATOR '|;|') as `approveds`,
-                    group_concat(`d`.`feedbacks` SEPARATOR '|;|') as `feedbacks`,
-                    group_concat(`d`.`admin_notes` SEPARATOR '|;|') as `admin_notes`
+                    group_concat(`d`.`approved` SEPARATOR '|;|') as `approveds`,
+                    group_concat(`d`.`feedback` SEPARATOR '|;|') as `feedbacks`,
+                    group_concat(`d`.`admin_note` SEPARATOR '|;|') as `admin_notes`
                     from (
                         select
                         `questions`.`id`,
                         `questions`.`type`,
                         `question_plus`.`id` as `qpid`,
-                        group_concat(IFNULL(`user_question`.`question_answer`, '') SEPARATOR '~-~') as `answers`,
+                        IFNULL(`user_question`.`question_answer`, '') as `answer`,
                         group_concat(`user_file`.`name` SEPARATOR '~-~') as `file_names`,
-                        group_concat(IFNULL(`user_question`.`approved`, 0) SEPARATOR '~-~') as `approveds`,
-                        group_concat(IFNULL(`feedback`.`text`, '') SEPARATOR '~-~') as `feedbacks`,
-                        group_concat(IFNULL(`feedback`.`admin_note`, '') SEPARATOR '~-~') as `admin_notes`
+                        IFNULL(`user_question`.`approved`, 0) as `approved`,
+                        IFNULL(`feedback`.`text`, '') as `feedback`,
+                        IFNULL(`feedback`.`admin_note`, '') as `admin_note`
                         from (select * from `question`) `questions`
                         cross join (select @pv := " . $question->id . ") `initialisation`
                         left join `question_plus`
@@ -238,7 +238,7 @@ class QuestionController extends Controller
                     for ($i = 0; $i < count($userQuestion['qpids']); $i++) {
                         $answers[$userQuestion['qpids'][$i]][$userQuestion['id']] = array(
                             "answer" => $userQuestion['answers'][$i],
-                            "type" => $userQuestion['type'][$i],
+                            "type" => $userQuestion['type'],
                             "file_names" => $userQuestion['file_names'][$i] == [] ? [] : explode('~-~', $userQuestion['file_names'][$i]),
                             "approved" => $userQuestion['approveds'][$i],
                             "feedback" => $userQuestion['feedbacks'][$i] === '' ? null : $userQuestion['feedbacks'][$i],

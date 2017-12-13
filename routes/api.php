@@ -166,6 +166,11 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserFileController@saveQuestionFile',
             'as' => 'api.question.file.save'
         ]);
+        $api->post('/question/file/delete', [
+            'uses' => 'App\Http\Controllers\UserFileController@deleteQuestionFile',
+            'as' => 'api.question.file.delete'
+        ]);
+
         $api->post('/question/feedback/save', [
             'uses' => 'App\Http\Controllers\FeedbackController@saveQuestionFeedBack',
             'as' => 'api.question.file.save'
@@ -260,6 +265,15 @@ $api->version('v1', function ($api) {
         $api->post('/user/changePassword', [
             'uses' => 'App\Http\Controllers\UserController@updateUserPassword',
             'as' => 'api.user.changePassword'
+        ]);
+    });
+
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->get('/appointment', [
+            'uses' => 'App\Http\Controllers\AppointmentController@getUserAppointment',
+            'as' => 'api.users.customers'
         ]);
     });
 });
