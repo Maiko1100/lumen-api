@@ -166,6 +166,11 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserFileController@saveQuestionFile',
             'as' => 'api.question.file.save'
         ]);
+        $api->post('/question/file/delete', [
+            'uses' => 'App\Http\Controllers\UserFileController@deleteQuestionFile',
+            'as' => 'api.question.file.delete'
+        ]);
+
         $api->post('/question/feedback/save', [
             'uses' => 'App\Http\Controllers\FeedbackController@saveQuestionFeedBack',
             'as' => 'api.question.file.save'
