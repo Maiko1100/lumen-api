@@ -62,7 +62,10 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserFileController@getFiles',
             'as' => 'api.files'
         ]);
-
+        $api->get('/files/taxreturn', [
+            'uses' => 'App\Http\Controllers\UserFileController@getTaxReturnFiles',
+            'as' => 'api.files.taxreturn'
+        ]);
         $api->post('/file/get', [
             'uses' => 'App\Http\Controllers\UserFileController@getFile',
             'as' => 'api.file.get'
