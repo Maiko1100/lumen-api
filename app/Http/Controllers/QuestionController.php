@@ -146,6 +146,7 @@ class QuestionController extends Controller
                 $questionaire, array(
                     'id' => $category->id,
                     'name' => $category->name,
+                    'icon' => $category->icon,
                     'year_id' => $category->year_id,
                     'question_id' => $category->question_id,
                     'condition' => $category->condition,
