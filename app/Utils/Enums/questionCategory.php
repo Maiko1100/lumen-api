@@ -10,4 +10,5 @@ abstract class questionCategory {
     const number = 6;
     const country = 7;
     const plus = 8;
+    const infoText = 9;
 }

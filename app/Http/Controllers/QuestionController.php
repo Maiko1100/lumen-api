@@ -38,7 +38,7 @@ class QuestionController extends Controller
                 unset($question->group_id);
                 unset($question->condition);
                 unset($question->type);
-                unset($question->validation_type);
+//                unset($question->validation_type);
                 unset($question->has_childs);
                 unset($question->tip_text);
 
@@ -110,7 +110,7 @@ class QuestionController extends Controller
                     ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
                     ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
                     ->groupBy('question.id')
-                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
+                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.validation_type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
                     ->orderBy('question.sort', 'asc')
                     ->get();
 
@@ -261,7 +261,7 @@ class QuestionController extends Controller
                     })
                     ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
                     ->groupBy('question.id')
-                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', DB::raw("group_concat(`question_plus`.`id` SEPARATOR '|;|') as `qpids`"), DB::raw("group_concat(IFNULL(`user_question`.`question_answer`, '') SEPARATOR '|;|') as `answers`"), DB::raw("group_concat(IFNULL(`user_question`.`approved`, 0) SEPARATOR '|;|') as `approveds`"), DB::raw("group_concat(IFNULL(`feedback`.`text`, '') SEPARATOR '|;|') as `feedbacks`"), DB::raw("group_concat(IFNULL(`feedback`.`admin_note`, '') SEPARATOR '|;|') as `admin_notes`"))
+                    ->select('question.id', 'question.text', 'question.validation_type', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', DB::raw("group_concat(`question_plus`.`id` SEPARATOR '|;|') as `qpids`"), DB::raw("group_concat(IFNULL(`user_question`.`question_answer`, '') SEPARATOR '|;|') as `answers`"), DB::raw("group_concat(IFNULL(`user_question`.`approved`, 0) SEPARATOR '|;|') as `approveds`"), DB::raw("group_concat(IFNULL(`feedback`.`text`, '') SEPARATOR '|;|') as `feedbacks`"), DB::raw("group_concat(IFNULL(`feedback`.`admin_note`, '') SEPARATOR '|;|') as `admin_notes`"))
                     ->orderBy('question.sort', 'asc')
                     ->get();
 
@@ -297,7 +297,7 @@ class QuestionController extends Controller
                     ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
                     ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
                     ->groupBy('question.id')
-                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
+                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.validation_type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
                     ->orderBy('question.id', 'asc')
                     ->get();
 
