@@ -11,7 +11,7 @@ class AppointmentController extends Controller
       $user = JWTAuth::parseToken()->authenticate();
       $userAppointments = Appointment::where('person_id', '=', $user->person_id)->get();
 
-      return $userAppointments;
+      return new JsonResponse($userAppointments);
   }
   
 }
