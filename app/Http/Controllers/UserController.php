@@ -18,8 +18,11 @@ class UserController extends Controller
     public function addUser(Request $request)
     {
         $auth = new AuthController();
-
         $credentials = $this->getCredentials($request);
+
+        if(User::where('email', '=', $credentials['email'])->exists()){
+            return "User with this email address already exists.";
+        }
 
         $person = new Person();
         $person->first_name = $request->input('name');
@@ -108,5 +111,17 @@ class UserController extends Controller
         } else {
             return "You are not authorized to do this call";
         }
+    }
+
+    public function getCaseAndUser(Request $request){
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $case = UserYear::where('user_year.id', '=' ,$request->input('caseId'))
+            ->leftjoin('person', 'person.id', '=', 'user_year.person_id')
+            ->leftjoin('person as employee', 'employee.id', '=', 'employee_id')
+            ->select('employee.first_name as employee_first_name', 'employee.last_name as employee_last_name', 'person.first_name', 'person.last_name', 'person.bsn', 'person.dob', 'user_year.status', 'user_year.year_id', 'user_year.package')->first();
+
+
+        return $case;
     }
 }
