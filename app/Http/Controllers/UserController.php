@@ -11,6 +11,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use App\UserYear as UserYear;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Utils\Enums\userRole;
 
 class UserController extends Controller
 {
@@ -31,6 +32,7 @@ class UserController extends Controller
         $user = new User();
         $user->person_id = $person->id;
         $user->email = $credentials['email'];
+        $user->role=userRole::regularUser;
         $user->password = app('hash')->make($credentials['password']);
         $user->save();
 

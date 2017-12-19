@@ -10,7 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Intervention\Image\Facades\Image as Image;
 use Illuminate\Support\Facades\DB;
-
+use App\Utils\Enums\ProgressState;
 
 class UserYearController extends Controller
 {
@@ -87,9 +87,18 @@ class UserYearController extends Controller
       $userYear->person_id = $user->person_id;
       $userYear->year_id = $request->input('year');
       $userYear->package = $request->input('package');
-      $userYear->status = 0;
+      $userYear->status = ProgressState::questionnaireStartedNotPaid;
       $userYear->save();
-      return $userYear->id;
+
+      $userYears = UserYear::where("person_id", "=", $user->person_id)->get();
+
+      $userYearsArray = [];
+
+      foreach ($userYears as $userYear) {
+          $userYearsArray[$userYear->year_id] = $userYear->status;
+      }
+
+      return new JsonResponse($userYearsArray);
   }
 
     public function reportAgreed(Request $request)
@@ -97,7 +106,7 @@ class UserYearController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $year = $request->input('year');
         $userYear = UserYear::where('person_id', '=',$user->person_id)->where('year_id', '=',$year)->first();
-        $userYear->status= 8;
+        $userYear->status= ProgressState::uploadTaxReturn;
         $userYear->save();
 
         $fullpath = "app/userDocuments/{$user->person_id}/signature".'_'.$user->person_id.'_'.$year.".png";

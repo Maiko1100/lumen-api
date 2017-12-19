@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\UserFile;
+use App\UserQuestion;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Storage;
@@ -10,16 +11,31 @@ use Illuminate\Http\Response;
 use App\UserYear as UserYear;
 use App\Person;
 use Illuminate\Support\Facades\DB;
+use App\Utils\Enums\ProgressState;
+
+use App\Utils\Enums\userRole;
+use App\Utils\Enums\documentType;
 
 class UserFileController extends Controller
 {
     public function getFiles()
     {
         $user = JWTAuth::parseToken()->authenticate();
-        $files = $user->getUserFiles();
 
+
+        $files = UserFile::where('user_file.person_id', '=', $user->person_id)->get();
         return $files;
     }
+    public function getTaxReturnFiles()
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $files = UserFile::where('user_file.person_id', '=', $user->person_id)
+            ->join("user_year", "user_file.user_year_id", "user_year.id")
+            ->select('user_year.year_id','user_year.person_id as id','user_file.person_id','user_file.id', 'user_file.user_question_id', 'user_file.name', 'user_file.type', 'user_file.description', 'user_file.question_id', 'user_file.user_year_id', 'user_file.qpid')->get();
+        return $files;
+    }
+
 
     public function getFile(Request $request)
     {
@@ -55,6 +71,9 @@ class UserFileController extends Controller
         $filename = $request->input('fileName');
         $fullpath = "userDocuments/{$personId}/{$filename}";
 
+        $file = UserFile::where('person_id','=',$personId)->where('name','=',$filename)->first();
+        $file->delete();
+
         if (Storage::delete($fullpath)) {
             $userfile = UserFile::where("user_year.person_id", "=", $user->person_id)->where('name', "=", $filename)
                 ->join("user_year", "user_file.user_year_id", "user_year.id");
@@ -65,43 +84,73 @@ class UserFileController extends Controller
         }
     }
 
+    public function deleteQuestionFile(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $personId = $user->person_id;
+        $filename = $request->input('fileName');
+        $fullpath = "userDocuments/{$personId}/{$filename}";
+
+        if (Storage::delete($fullpath)) {
+            $userfile = UserFile::where("person_id", "=", $personId)
+                ->where('name', "=", $filename)
+                ->first();
+            $uqid = $userfile->user_question_id;
+            UserFile::where("person_id", "=", $personId)
+                ->where('name', "=", $filename)
+                ->delete();
+
+            $newFiles = [];
+            $files = UserFile::where("user_question_id", "=", $uqid)
+                ->select('name')
+                ->get();
+
+            foreach ($files as $file) {
+                array_push($newFiles, $file->name);
+            }
+
+            return $newFiles;
+        } else {
+            return new Response('file does not exist');
+        }
+    }
+
     public function saveQuestionFile(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
-        $year = $request->input('year');
-        $questionId = $request->input('id');
-        $userYear = UserYear::where("person_id", "=", $user->person_id)
-            ->where("year_id", "=", $year)->first();
         $qpid = $request->input('qpid');
 
         $userQuestioncontroller = new UserQuestionController();
 
         $uqid = (int)$userQuestioncontroller->save($request);
-
-        $newNames = [];
         foreach ($request->file('files') as $file){
             $pinfo = pathinfo($file->getClientOriginalName());
             $newName = $pinfo['filename'] . "_" . date("YmdHis") . "." . $pinfo['extension'];
             Storage::putFileAs('userDocuments/' . $user->person_id, $file, $newName);
 
             $userFile = new UserFile();
-
-//            $userFile->user_year_id = $userYear->id;
             $userFile->user_question_id = $uqid;
             $userFile->person_id = $user->person_id;
-//            $userFile->question_id = $questionId;
             $userFile->name = $newName;
-            $userFile->type = 10;
+            $userFile->type = documentType::questionaire_documents;
 
             if(isset($qpid)) {
                 $userFile->qpid = $qpid;
             }
 
-            array_push($newNames, $newName);
-
             $userFile->save();
         }
-        return new Response($newNames);
+
+        $newFiles = [];
+        $files = UserFile::where("user_question_id", "=", $uqid)
+            ->select('name')
+            ->get();
+
+        foreach ($files as $file) {
+            array_push($newFiles, $file->name);
+        }
+
+        return new Response($newFiles);
     }
 
     public function save(Request $request)
@@ -194,7 +243,7 @@ class UserFileController extends Controller
 
         $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
         Storage::putFileAs('userDocuments/' . $user->person_id, $file, $fileName);
-        $userFile->type = 1;
+        $userFile->type = documentType::normal_documents;
         $userFile->person_id = $user->person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
@@ -208,7 +257,7 @@ class UserFileController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
         $personId = $user->person_id;
-        $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', 9)->first();
+        $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', documentType::report)->first();
         $filename = $userFile->name;
         $fullpath = "app/userDocuments/{$personId}/{$filename}";
 
@@ -227,11 +276,11 @@ class UserFileController extends Controller
 
         $userFile = new UserFile();
         $userFile->name = $fileName;
-        $userFile->type = 9;
+        $userFile->type = documentType::report;
         $userFile->person_id = $person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
-        $userYear->status = 6;
+        $userYear->status = ProgressState::reportUploaded;
         $userYear->save();
         
         $cases = DB::table('user_year')
@@ -253,11 +302,11 @@ class UserFileController extends Controller
 
         $userFile = new UserFile();
         $userFile->name = $fileName;
-        $userFile->type = 8;
+        $userFile->type = documentType::submission;
         $userFile->person_id = $person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
-        $userYear->status = 10;
+        $userYear->status = ProgressState::taxReturnUploaded;
         $userYear->save();
 
         $cases = DB::table('user_year')
@@ -272,15 +321,12 @@ class UserFileController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
         $personId = $user->person_id;
-        $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', 8)->first();
+        $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', documentType::submission)->first();
         $filename = $userFile->name;
         $fullpath = "app/userDocuments/{$personId}/{$filename}";
 
         return response()->download(storage_path($fullpath), null, [], null);
     }
-
-
-
 }
 
 ?>
