@@ -235,14 +235,15 @@ class UserFileController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $file = $request->file('file');
         $fileName = $file->getClientOriginalName();
-        $person_id = $request->input('person_id');
-
         $userFile = new UserFile();
         $userFile->name = $fileName;
+        $request->input('year');
 
 
         $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
-        Storage::putFileAs('userDocuments/' . $user->person_id, $file, $fileName);
+
+        Storage::putFileAs('test' . $user->person_id."/", $file, $fileName);
+
         $userFile->type = documentType::normal_documents;
         $userFile->person_id = $user->person_id;
         $userFile->user_year_id = $userYear->id;
@@ -272,7 +273,7 @@ class UserFileController extends Controller
         $person = Person::where('id','=',$person_id)->first();
         $fileName = 'TaxReport'.'_'.$person->first_name.'_'.$person->last_name.'_'.$request->input('year').'.pdf';
 
-        Storage::putFileAs('userDocuments/' . $person_id, $file, $fileName);
+        Storage::putFileAs('userDocuments/' . $person_id. "/", $file, $fileName);
 
         $userFile = new UserFile();
         $userFile->name = $fileName;
@@ -282,7 +283,7 @@ class UserFileController extends Controller
         $userFile->save();
         $userYear->status = ProgressState::reportUploaded;
         $userYear->save();
-        
+        MailController::sendStatusMail($userYear);
         $cases = DB::table('user_year')
             ->join('person', 'user_year.person_id', '=', 'person.id')
             ->leftjoin('person as employee', 'user_year.employee_id', '=', 'employee.id')
@@ -297,7 +298,6 @@ class UserFileController extends Controller
         $userYear = UserYear::where('user_year.person_id', "=", $person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
         $person = Person::where('id','=',$person_id)->first();
         $fileName = 'TaxReportSubmission'.'_'.$person->first_name.'_'.$person->last_name.'_'.$request->input('year').'.pdf';
-
         Storage::putFileAs('userDocuments/' . $person_id, $file, $fileName);
 
         $userFile = new UserFile();
@@ -308,6 +308,7 @@ class UserFileController extends Controller
         $userFile->save();
         $userYear->status = ProgressState::taxReturnUploaded;
         $userYear->save();
+        MailController::sendStatusMail($userYear);
 
         $cases = DB::table('user_year')
             ->join('person', 'user_year.person_id', '=', 'person.id')

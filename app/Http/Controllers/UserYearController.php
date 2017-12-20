@@ -33,6 +33,8 @@ class UserYearController extends Controller
         $status = $request->input('status');
         $userYear->status = $status;
         $userYear->save();
+        MailController::sendStatusMail($userYear);
+
 
         $userYears = UserYear::where("person_id", "=", $user->person_id)->get();
 

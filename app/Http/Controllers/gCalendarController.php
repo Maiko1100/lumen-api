@@ -27,8 +27,8 @@ class gCalendarController extends Controller
         }
 
         $meeting = json_decode($request->input('formValues'))->formvalues;
-
-        self::sendMail($meeting);
+        $meeting->template = 'mails.appointment.appointmentMade';
+        MailController::sendMail($meeting);
 
         $event = Event::find($meeting->eventId);
         $event->name = 'Tax Advice meeting with ' . $meeting->firstName ." " . $meeting->lastName ;
@@ -47,21 +47,6 @@ class gCalendarController extends Controller
         return self::getMeetings();
     }
 
-    public function sendMail($meeting)
-    {
-        $emailData = [
-            'name' => $meeting->firstName ." ".$meeting->lastName,
-            'email' => $meeting->email,
-            'service' => $meeting->service,
-            'comments' => $meeting->comments,
-            'startDate' => $meeting->startDate,
-            'endDate' => $meeting->endDate,
-        ];
 
-        Mail::send('mails.appointment.appointmentMade', $emailData, function ($message) use ($emailData) {
-            $message->to($emailData['email'], '')->subject('Do-not-reply:Afspraak');
-            $message->from('info@kcps.nl', 'Info || KCPSoftware');
-        });
-    }
 
 }

@@ -78,6 +78,10 @@ class QuestionController extends Controller
             $userYear = UserYear::where("person_id", "=", $user->person_id)
                 ->where("year_id", "=", $year)
                 ->first();
+            if(empty($userYear)){
+                return new Response([]);
+            }
+
         } else {
             if ($user->role == 2 || $user->role == 3) {
                 $userYear = UserYear::where("id", "=", $request->input('user_year'))
@@ -102,6 +106,7 @@ class QuestionController extends Controller
             $g = array();
 
             foreach ($groups as $group) {
+
                 $questions = $group->getQuestions()
                     ->leftjoin('user_question', function ($join) use ($userYear) {
                         $join->on('question.id', '=', 'user_question.question_id');
