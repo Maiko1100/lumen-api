@@ -20,7 +20,8 @@ class MailController extends Controller
             'service' => isset($meeting->service)?$meeting->service : "",
             'comments' =>  isset($meeting->comments)?$meeting->comments: "",
             'startDate' => isset($meeting->startDate)?$meeting->startDate:"",
-            'endDate' => isset($meeting->endDate)?$meeting->endDate:"",
+            'startTime' => isset($meeting->startTime)?$meeting->startTime:"",
+            'endTime' => isset($meeting->endTime)?$meeting->endTime:"",
             'template' => $meeting->template,
             'subject' => $meeting->subject,
         ];

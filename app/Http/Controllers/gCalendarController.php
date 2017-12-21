@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use App\Appointment;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Mail;
+use Log;
 
 class gCalendarController extends Controller
 {
@@ -25,9 +26,16 @@ class gCalendarController extends Controller
         }else{
             $user = null;
         }
-
         $meeting = json_decode($request->input('formValues'))->formvalues;
+        $startDate = date_format(date_create($meeting->startDate),"d F Y");
+        $startTime = date_format(date_create($meeting->startDate),"H:i");
+        $endTime = date_format(date_create($meeting->endDate),"H:i");
+
         $meeting->template = 'mails.appointment.appointmentMade';
+        $meeting->subject = 'TTMTax appointment';
+        $meeting->startDate = $startDate;
+        $meeting->startTime = $startTime;
+        $meeting->endTime = $endTime;
         MailController::sendMail($meeting);
 
         $event = Event::find($meeting->eventId);

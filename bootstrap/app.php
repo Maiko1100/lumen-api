@@ -118,11 +118,12 @@ $app->configure('mail');
 */
 
 $app->middleware([
-   App\Http\Middleware\CORSMiddleware::class
+   App\Http\Middleware\CORSMiddleware::class,
+
 ]);
 
 $app->routeMiddleware([
-    // 'auth' => App\Http\Middleware\Authenticate::class,
+     'refresh' => Tymon\JWTAuth\Middleware\RefreshToken::class,
 ]);
 
 /*
