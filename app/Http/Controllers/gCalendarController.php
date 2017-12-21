@@ -21,7 +21,8 @@ class gCalendarController extends Controller
 
     public function updateMeeting(Request $request)
     {
-        if($request->header('Authorization')!= "") {
+        if($request->header('Authorization')!= "Bearer null") {
+            Log::info("ik kom hier in maar dat moet helemaal niet" . $request->header('Authorization'));
             $user = JWTAuth::parseToken()->authenticate();
         }else{
             $user = null;
