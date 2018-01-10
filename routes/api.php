@@ -283,4 +283,12 @@ $api->version('v1', function ($api) {
             'as' => 'api.users.customers'
         ]);
     });
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->post('/discount/get', [
+            'uses' => 'App\Http\Controllers\DiscountController@getDiscount',
+            'as' => 'api.discount.get'
+        ]);
+    });
 });
