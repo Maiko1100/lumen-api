@@ -286,7 +286,7 @@ $api->version('v1', function ($api) {
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {
-        $api->post('/discount/get', [
+        $api->get('/discount/get', [
             'uses' => 'App\Http\Controllers\DiscountController@getDiscount',
             'as' => 'api.discount.get'
         ]);
