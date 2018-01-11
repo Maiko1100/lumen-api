@@ -78,7 +78,7 @@ class OrderController extends Controller {
 
                 return $request->input('redirectURL');
             }
-            $amount = $amount - ($amount * $discount->percentage);
+            $amount = $amount - ($amount / 100 * $discount->percentage);
         }
 
 
