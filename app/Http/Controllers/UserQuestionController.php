@@ -34,13 +34,26 @@ class UserQuestionController extends Controller
                 ->first()
                 ->isProfile == 1;
 
+        if ($isProfile) {
+            $existingProfileQuestion = $this->checkProfile($questionId, $qpid);
+
+            if (isset($existingProfileQuestion)) {
+                $existingProfileQuestion->question_answer = $answer;
+                $existingProfileQuestion->save();
+            } else {
+                $profileUserQuestion = new UserQuestion();
+                $profileUserQuestion->person_id = $user->person_id;
+                $profileUserQuestion->question_id = $questionId;
+                $profileUserQuestion->question_answer = $answer;
+                $profileUserQuestion->question_plus_id = $qpid;
+
+                $profileUserQuestion->save();
+            }
+        }
+
         $uq = null;
         if (isset($qpid)) {
-            if (isset($isProfile)) {
-                $existingQuestion = $this->checkPlus($questionId, $qpid, $userYear);
-            } else {
-                $existingQuestion = $this->checkPlus($questionId, $qpid);
-            }
+            $existingQuestion = $this->checkPlus($questionId, $qpid, $userYear);
 
             if (isset($existingQuestion)) {
                 $existingQuestion->question_answer = $answer;
@@ -88,17 +101,24 @@ class UserQuestionController extends Controller
         return UserQuestion::where("user_year_id", "=", $userYear->id)->where("question_id", "=", $questionId)->first();
     }
 
-    private function checkPlus($questionId, $qpid, $userYear = NULL)
+    private function checkPlus($questionId, $qpid, $userYear)
     {
-        if (isset($userYear)) {
+        return UserQuestion::where("question_id", "=", $questionId)
+            ->where("question_plus_id", "=", $qpid)
+            ->where("user_year_id", "=", $userYear->id)
+            ->first();
+    }
+
+    private function checkProfile($questionId, $qpid)
+    {
+        if(isset($qpid)) {
             return UserQuestion::where("question_id", "=", $questionId)
                 ->where("question_plus_id", "=", $qpid)
-                ->where("user_year_id", "=", $userYear->id)
+                ->whereNull("user_year_id")
                 ->first();
         } else {
             return UserQuestion::where("question_id", "=", $questionId)
-                ->where("question_plus_id", "=", $qpid)
-                ->where("user_year_id", "IS", "NULL")
+                ->whereNull("user_year_id")
                 ->first();
         }
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Question;
 use App\Group;
+use App\QuestionGenre;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -61,10 +62,71 @@ class QuestionController extends Controller
                 Question::where('id',"=",$question['id'])->update(
                     [
                         'sort' => $index
-                    ]);
+                ]);
             }
         }
         return self::getQuestionsByGroup(null,2017);
+    }
+
+    public function getProfileQuestions(Request $request) {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $questionGenres = QuestionGenre::where('isProfile', '=', 1)
+            ->select('id', 'text')
+            ->get();
+
+        foreach ($questionGenres as $questionGenre) {
+            $questions = Question::join('question_genre', 'question.question_genre_id', 'question_genre.id')
+                ->leftjoin('user_question', function ($join) use ($user) {
+                    $join->on('question.id', '=', 'user_question.question_id');
+                    $join->on('user_question.person_id', '=', DB::raw($user->person_id));
+                    $join->whereNull('user_question.user_year_id');
+                })
+                ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
+                ->groupBy('question.id')
+                ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.validation_type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved')
+                ->orderBy('question.sort', 'asc')
+                ->where('question_genre.isProfile', '=', 1)
+                ->where('question_genre.id', '=', $questionGenre->id)
+                ->get();
+
+            $q = $this->getQs($questions, null, true, null, $user);
+
+            $questionGenre->questions = $q;
+        }
+
+
+
+        return new JsonResponse($questionGenres);
+    }
+
+    private function getQs($questions, $userYear, $userYearEmpty, $categoryId = null, $user = null) {
+        $q = array();
+
+        foreach ($questions as $question) {
+            if (isset($categoryId)) {
+                $question->category_id = $categoryId;
+            }
+            if (strpos($question->file_names, '|;|') !== false) {
+                $question->file_names = explode('|;|', $question->file_names);
+            } else if ($question->file_names === null) {
+                $question->file_names = [];
+            } else {
+                $question->file_names = [$question->file_names];
+            }
+
+            if (empty($question->parent)) {
+                $this->getChildren($question, $userYear, $userYearEmpty, false, $categoryId, $user);
+
+                if ($userYearEmpty) {
+                    unset($question->admin_note);
+                }
+
+                array_push($q, $question);
+            }
+        }
+
+        return $q;
     }
 
     public function getQuestions(Request $request)
@@ -81,7 +143,6 @@ class QuestionController extends Controller
             if(empty($userYear)){
                 return new Response([]);
             }
-
         } else {
             if ($user->role == 2 || $user->role == 3) {
                 $userYear = UserYear::where("id", "=", $request->input('user_year'))
@@ -119,28 +180,7 @@ class QuestionController extends Controller
                     ->orderBy('question.sort', 'asc')
                     ->get();
 
-                $q = array();
-
-                foreach ($questions as $question) {
-                    $question->category_id = $category->id;
-                    if (strpos($question->file_names, '|;|') !== false) {
-                        $question->file_names = explode('|;|', $question->file_names);
-                    } else if ($question->file_names === null) {
-                        $question->file_names = [];
-                    } else {
-                        $question->file_names = [$question->file_names];
-                    }
-
-                    if (empty($question->parent)) {
-                        $this->getChildren($question, $userYear, $userYearEmpty, false, $category->id);
-
-                        if ($userYearEmpty) {
-                            unset($question->admin_note);
-                        }
-
-                        array_push($q, $question);
-                    }
-                }
+                $q = $this->getQs($questions, $userYear, $userYearEmpty, $category->id);
 
 //                unset($group->category_id);
                 $group['questions'] = $q;
@@ -165,7 +205,7 @@ class QuestionController extends Controller
         ));
     }
 
-    function getChildren($question, $userYear, $userYearEmpty, $plusChild, $categoryId)
+    function getChildren($question, $userYear, $userYearEmpty, $plusChild, $categoryId, $user = null)
     {
         if ($question->answer_option == 1) {
             $question['answer_options'] = $question->getOptions()->pluck('text')->toArray();
@@ -176,7 +216,45 @@ class QuestionController extends Controller
         if ($question->has_childs) {
             $children = [];
             if ($question->type === 8) {
-                $userQuestions = Question::from(DB::raw("(select
+                if (isset($user)) {
+                    $userQuestions = Question::from(DB::raw("(select
+                    `id`,
+                    `type`,
+                    group_concat(`d`.`qpid` SEPARATOR '|;|') as `qpids`,
+                    group_concat(`d`.`answer` SEPARATOR '|;|') as `answers`,
+                    group_concat(IFNULL(`d`.`file_names`, '') SEPARATOR '|;|') as `file_names`,
+                    group_concat(`d`.`approved` SEPARATOR '|;|') as `approveds`,
+                    group_concat(`d`.`feedback` SEPARATOR '|;|') as `feedbacks`,
+                    group_concat(`d`.`admin_note` SEPARATOR '|;|') as `admin_notes`
+                    from (
+                        select
+                        `questions`.`id`,
+                        `questions`.`type`,
+                        `question_plus`.`id` as `qpid`,
+                        IFNULL(`user_question`.`question_answer`, '') as `answer`,
+                        group_concat(`user_file`.`name` SEPARATOR '~-~') as `file_names`,
+                        IFNULL(`user_question`.`approved`, 0) as `approved`,
+                        IFNULL(`feedback`.`text`, '') as `feedback`,
+                        IFNULL(`feedback`.`admin_note`, '') as `admin_note`
+                        from (select * from `question`) `questions`
+                        cross join (select @pv := " . $question->id . ") `initialisation`
+                        left join `question_plus`
+                        on `question_plus`.`question_id` = " . $question->id . "
+                        and `question_plus`.`person_id` = " . $user->person_id . "
+                        left join `user_question`
+                        on `question_plus`.`id` = `user_question`.`question_plus_id`
+                        and `user_question`.`question_id` = `questions`.`id`
+                        and `user_question`.`user_year_id` IS NULL
+                        left join `user_file`
+                        on `user_question`.`id` = `user_file`.`user_question_id`
+                        left join `feedback` on `user_question`.`id` = `feedback`.`user_question_id`
+                        where find_in_set(`parent`, @pv) > 0 and @pv := concat(@pv, ',', `questions`.`id`)
+                        group by `questions`.`id`, `question_plus`.`id`
+                    ) `d`
+                    group by `d`.`id`) `a`"))
+                        ->get();
+                } else {
+                    $userQuestions = Question::from(DB::raw("(select
                     `id`,
                     `type`,
                     group_concat(`d`.`qpid` SEPARATOR '|;|') as `qpids`,
@@ -211,14 +289,17 @@ class QuestionController extends Controller
                         group by `questions`.`id`, `question_plus`.`id`
                     ) `d`
                     group by `d`.`id`) `a`"))
-                ->get();
+                        ->get();
 //                ->toSql();
 //                echo $userQuestions;
 //                exit;
+                }
 
                 $answers = null;
                 foreach($userQuestions as $userQuestion) {
-                    $userQuestion->category_id = $categoryId;
+                    if (isset($categoryId)) {
+                        $userQuestion->category_id = $categoryId;
+                    }
                     if (strpos($userQuestion['qpids'], '|;|') !== false) {
                         $userQuestion['qpids'] = array_map('intval', explode('|;|', $userQuestion['qpids']));
                         $userQuestion['answers'] = explode('|;|', $userQuestion['answers']);
@@ -273,7 +354,7 @@ class QuestionController extends Controller
 
                 forEach ($childs as $child) {
                     $child->category_id = $categoryId;
-                    $this->getChildren($child, $userYear, $userYearEmpty, true, $categoryId);
+                    $this->getChildren($child, $userYear, $userYearEmpty, true, $categoryId, isset($user) ? $user : null);
 
                     unset($child['qpids']);
                     unset($child['answers']);
@@ -295,17 +376,32 @@ class QuestionController extends Controller
                 }
                 $question['answers'] = $answers;
             } else {
-                $childs = $question->getChilds()
-                    ->leftjoin('user_question', function($join) use ($userYear) {
-                        $join->on('question.id', '=', 'user_question.question_id');
-                        $join->on('user_question.user_year_id', "=", DB::raw($userYear->id));
-                    })
-                    ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
-                    ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
-                    ->groupBy('question.id')
-                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.validation_type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
-                    ->orderBy('question.id', 'asc')
-                    ->get();
+                if (isset($user)) {
+                    $childs = $question->getChilds()
+                        ->leftjoin('user_question', function($join) use ($user) {
+                            $join->on('question.id', '=', 'user_question.question_id');
+                            $join->on('user_question.person_id', '=', DB::raw($user->person_id));
+                            $join->whereNull('user_question.user_year_id');
+                        })
+                        ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
+                        ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
+                        ->groupBy('question.id')
+                        ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.validation_type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
+                        ->orderBy('question.id', 'asc')
+                        ->get();
+                } else {
+                    $childs = $question->getChilds()
+                        ->leftjoin('user_question', function($join) use ($userYear) {
+                            $join->on('question.id', '=', 'user_question.question_id');
+                            $join->on('user_question.user_year_id', "=", DB::raw($userYear->id));
+                        })
+                        ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
+                        ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
+                        ->groupBy('question.id')
+                        ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.validation_type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
+                        ->orderBy('question.id', 'asc')
+                        ->get();
+                }
 
                 forEach ($childs as $child) {
                     $child->category_id = $categoryId;
@@ -318,7 +414,7 @@ class QuestionController extends Controller
                     }
 
                     array_push($children, $child);
-                    $this->getChildren($child, $userYear, $userYearEmpty, $plusChild, $categoryId);
+                    $this->getChildren($child, $userYear, $userYearEmpty, $plusChild, $categoryId, isset($user) ? $user : null);
 
                     if ($plusChild) {
                         unset($child['answer']);
