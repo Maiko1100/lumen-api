@@ -22,7 +22,7 @@ class UserController extends Controller
         $credentials = $this->getCredentials($request);
 
         if(User::where('email', '=', $credentials['email'])->exists()){
-            return "User with this email address already exists.";
+            abort(400, "A user with this email address already exists.");
         }
 
         $person = new Person();
@@ -39,6 +39,8 @@ class UserController extends Controller
         $loggedInUser = $auth->postLogin($request);
 
         return $loggedInUser;
+
+
     }
 
     public function updateUserPassword(Request $request)
@@ -46,12 +48,14 @@ class UserController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $oldPassword = $request->input('oldPassword');
 
+
         if(Hash::check($oldPassword, $user->password)){
             $user->password = app('hash')->make($request->input('newPassword'));
             $user->save();
             return $user;
         }else{
-            return "error - password didn't match";
+            abort (400, "Password didn't match");
+//            return "error - password didn't match";
         }
     }
 
@@ -78,7 +82,8 @@ class UserController extends Controller
 
             return $customers;
         } else {
-            return "You are not authorized to do this call";
+            abort(400, "You are not authorized to do this call");
+//            return "You are not authorized to do this call";
         }
     }
 
@@ -90,7 +95,8 @@ class UserController extends Controller
             ->join('person', 'person_id', '=', 'person.id')->get();
             return $employees;
         } else {
-            return "You are not authorized to do this call";
+            abort(400, "You are not authorized to do this call");
+//            return "You are not authorized to do this call";
         }
     }
 
@@ -111,7 +117,8 @@ class UserController extends Controller
                 ->select('user_year.year_id', 'user_year.package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name', 'person.last_name', 'person.passport', 'person.bsn', 'person.dob')->get();
             return $cases;
         } else {
-            return "You are not authorized to do this call";
+            abort(400, "You are not authorized to do this call");
+//            return "You are not authorized to do this call";
         }
     }
 
@@ -122,8 +129,6 @@ class UserController extends Controller
             ->leftjoin('person', 'person.id', '=', 'user_year.person_id')
             ->leftjoin('person as employee', 'employee.id', '=', 'employee_id')
             ->select('employee.first_name as employee_first_name', 'employee.last_name as employee_last_name', 'person.first_name', 'person.last_name', 'person.bsn', 'person.dob', 'user_year.status', 'user_year.year_id', 'user_year.package')->first();
-
-
         return $case;
     }
 }
