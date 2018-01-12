@@ -24,6 +24,7 @@ class MailController extends Controller
             'endTime' => isset($meeting->endTime)?$meeting->endTime:"",
             'template' => $meeting->template,
             'subject' => $meeting->subject,
+            'resetLink' => isset($meeting->resetLink)?$meeting->resetLink:"",
         ];
 
         Mail::send($emailData['template'], $emailData, function ($message) use ($emailData) {

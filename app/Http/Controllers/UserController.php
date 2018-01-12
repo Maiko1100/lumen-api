@@ -9,9 +9,12 @@ use App\User as User;
 use Illuminate\Http\JsonResponse;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\UserYear as UserYear;
+use stdClass;
+use App\PasswordReset as PasswordReset;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Utils\Enums\userRole;
+use Webpatser\Uuid\Uuid;
 
 class UserController extends Controller
 {
@@ -125,5 +128,27 @@ class UserController extends Controller
 
 
         return $case;
+    }
+
+    public function createResetLink(Request $request){
+        $email = $request->input('email');
+        $token = Uuid::generate();
+        $user = User::where('email','=',$email)->first();
+
+        $passwordReset = new PasswordReset();
+
+        $passwordReset->email = $email;
+        $passwordReset->token = $token;
+        $passwordReset->save();
+
+
+        $meeting = new StdClass();
+        $meeting->email = $email;
+        $meeting->name = "test";
+        $meeting->template="mails.userMails.passwordReset";
+        $meeting->subject="TTMTax Reset password";
+        $meeting->resetLink = "http://localhost:1333/user/reset/".$token;
+
+        MailController::sendMail($meeting);
     }
 }

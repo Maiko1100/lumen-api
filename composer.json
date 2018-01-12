@@ -13,7 +13,8 @@
         "mollie/mollie-api-php": "1.9.*",
         "league/flysystem": " ~1.0",
         "illuminate/mail": "~5.1",
-        "google/apiclient": "^2.0"
+        "google/apiclient": "^2.0",
+        "webpatser/laravel-uuid": "^3.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
