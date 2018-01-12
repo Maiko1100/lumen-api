@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\AuthController;
 use App\Person as Person;
@@ -11,6 +12,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use App\UserYear as UserYear;
 use stdClass;
 use App\PasswordReset as PasswordReset;
+use App\ActivateToken as ActivateToken;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Utils\Enums\userRole;
@@ -41,25 +43,45 @@ class UserController extends Controller
 
         $loggedInUser = $auth->postLogin($request);
 
+//        $activationToken = Uuid::generate();
+//        $activateToken = new ActivateToken();
+//        $activateToken->user_id = $user->person_id;
+//        $activateToken->token = $activationToken;
+//        $activateToken->save();
+//        $meeting = new StdClass();
+//        $meeting->email = $user->email;
+//        $meeting->name = "test";
+//        $meeting->template="mails.userMails.activateAccount";
+//        $meeting->subject="TTMTax activate account";
+//        $meeting->activateLink = "http://localhost:1333/user/reset/".$activationToken;
+//
+//        MailController::sendMail($meeting);
+
         return $loggedInUser;
-
-
     }
 
     public function updateUserPassword(Request $request)
     {
-        $user = JWTAuth::parseToken()->authenticate();
-        $oldPassword = $request->input('oldPassword');
+        $resetString = $request->input('resetString');
+        if(!isset($resetString)){
+            $user = JWTAuth::parseToken()->authenticate();
+            $oldPassword = $request->input('oldPassword');
 
-
-        if(Hash::check($oldPassword, $user->password)){
+            if(Hash::check($oldPassword, $user->password)){
+                $user->password = app('hash')->make($request->input('newPassword'));
+                $user->save();
+                return $user;
+            }else{
+                abort (400, "Password didn't match");
+            }
+        }else{
+            $passwordReset = PasswordReset::where('token','=', $resetString);
+            $user = User::where('email','=',$passwordReset->email)->first();
             $user->password = app('hash')->make($request->input('newPassword'));
             $user->save();
             return $user;
-        }else{
-            abort (400, "Password didn't match");
-//            return "error - password didn't match";
         }
+
     }
 
     protected function getCredentials(Request $request)
@@ -141,7 +163,6 @@ class UserController extends Controller
         $user = User::where('email','=',$email)->first();
 
         $passwordReset = new PasswordReset();
-
         $passwordReset->email = $email;
         $passwordReset->token = $token;
         $passwordReset->save();
@@ -155,5 +176,19 @@ class UserController extends Controller
         $meeting->resetLink = "http://localhost:1333/user/reset/".$token;
 
         MailController::sendMail($meeting);
+
+        return JsonResponse::create("reset email send to user");
+    }
+
+    public function activateAccount(Request $request){
+        $token = $request->input('activationToken');
+        $activateToken = ActivateToken::where('token', '=',$token);
+        $user = User::where('person_id','=',$activateToken->user_id)->first();
+        $user->is_active = 1;
+        $user->save();
+
+        $activateToken->delete();
+        return JsonResponse::create("account activated succesfully");
+
     }
 }
