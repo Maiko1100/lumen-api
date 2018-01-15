@@ -12,6 +12,8 @@ use App\UserYear as UserYear;
 use Log;
 use Illuminate\Http\JsonResponse;
 use App\Utils\Enums\ProgressState;
+use App\Discount as Discount;
+use App\UserDiscount as UserDiscount;
 
 class OrderController extends Controller {
     private $mollie;
@@ -49,8 +51,39 @@ class OrderController extends Controller {
 
         }
         $service = $request->input('description');
+
         $amount = $this->getAmount($request->input('paymentString'));
-        // echo $request;
+        $package = $request->input('paymentString');
+        $discountCode = $request->input("discountCode");
+
+
+
+        if (isset($discountCode)) {
+            $discount = Discount::where('code', '=', $discountCode)->first();
+            if(isset($discount)) {
+                UserDiscount::create(array(
+                    "user_id" => $user->person_id,
+                    "discount_id" => $discount->id,
+                ));
+            }else{
+                return "not a valid discountCode";
+            }
+
+            if($discount->percentage == 100){
+                $order->service_name = $package;
+                $order->price = $amount;
+                $order->payment_id = "null";
+                $order->payment_status = "opRek";
+                $order->created = date('Y-m-d H:i:s');
+                $order->save();
+
+                return $request->input('redirectURL');
+            }
+            $amount = $amount - ($amount / 100 * $discount->percentage);
+        }
+
+
+
         if (!isset($amount)) {            
         }
 
@@ -62,7 +95,7 @@ class OrderController extends Controller {
         ));
 
 
-        $order->service_name = $service;
+        $order->service_name = $package;
         $order->price = $amount;
         $order->payment_id = $payment->id;
         $order->payment_status = $payment->status;
@@ -127,21 +160,25 @@ class OrderController extends Controller {
 
     public function handlePayment($service,$userYear,$request,$user){
         switch($service) {
-            case 'Tax Return with appointment':
+            case 'taxReturnWithAppointment':
                 $userYear->status = ProgressState::questionnaireStartedPaid;
                 $userYear->save();
-                return $service;
-            case 'Tax Return':
+                return new JsonResponse($service);
+            case 'taxReturnWithoutAppointment':
                 $userYear->status = ProgressState::questionnaireReadyToReview;
                 $userYear->save();
-                return $service;
-            case 'Tax Advice':
+                return new JsonResponse($service);
+            case 'taxReturnPlusFiscal':
+                return new JsonResponse($service);
+            case 'taxAdvice':
                 return new JsonResponse($service);
             default:
-                return false;
+                return "package not found";
         }
 
     }
+
+
 }
 
 ?>

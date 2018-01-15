@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\AuthController;
 use App\Person as Person;
@@ -9,9 +10,13 @@ use App\User as User;
 use Illuminate\Http\JsonResponse;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\UserYear as UserYear;
+use stdClass;
+use App\PasswordReset as PasswordReset;
+use App\ActivateToken as ActivateToken;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Utils\Enums\userRole;
+use Webpatser\Uuid\Uuid;
 
 class UserController extends Controller
 {
@@ -22,7 +27,7 @@ class UserController extends Controller
         $credentials = $this->getCredentials($request);
 
         if(User::where('email', '=', $credentials['email'])->exists()){
-            return "User with this email address already exists.";
+            abort(400, "A user with this email address already exists.");
         }
 
         $person = new Person();
@@ -38,21 +43,45 @@ class UserController extends Controller
 
         $loggedInUser = $auth->postLogin($request);
 
+//        $activationToken = Uuid::generate();
+//        $activateToken = new ActivateToken();
+//        $activateToken->user_id = $user->person_id;
+//        $activateToken->token = $activationToken;
+//        $activateToken->save();
+//        $meeting = new StdClass();
+//        $meeting->email = $user->email;
+//        $meeting->name = "test";
+//        $meeting->template="mails.userMails.activateAccount";
+//        $meeting->subject="TTMTax activate account";
+//        $meeting->activateLink = "http://localhost:1333/user/reset/".$activationToken;
+//
+//        MailController::sendMail($meeting);
+
         return $loggedInUser;
     }
 
     public function updateUserPassword(Request $request)
     {
-        $user = JWTAuth::parseToken()->authenticate();
-        $oldPassword = $request->input('oldPassword');
+        $resetString = $request->input('resetString');
+        if(!isset($resetString)){
+            $user = JWTAuth::parseToken()->authenticate();
+            $oldPassword = $request->input('oldPassword');
 
-        if(Hash::check($oldPassword, $user->password)){
+            if(Hash::check($oldPassword, $user->password)){
+                $user->password = app('hash')->make($request->input('newPassword'));
+                $user->save();
+                return $user;
+            }else{
+                abort (400, "Password didn't match");
+            }
+        }else{
+            $passwordReset = PasswordReset::where('token','=', $resetString);
+            $user = User::where('email','=',$passwordReset->email)->first();
             $user->password = app('hash')->make($request->input('newPassword'));
             $user->save();
             return $user;
-        }else{
-            return "error - password didn't match";
         }
+
     }
 
     protected function getCredentials(Request $request)
@@ -78,7 +107,8 @@ class UserController extends Controller
 
             return $customers;
         } else {
-            return "You are not authorized to do this call";
+            abort(400, "You are not authorized to do this call");
+//            return "You are not authorized to do this call";
         }
     }
 
@@ -90,7 +120,8 @@ class UserController extends Controller
             ->join('person', 'person_id', '=', 'person.id')->get();
             return $employees;
         } else {
-            return "You are not authorized to do this call";
+            abort(400, "You are not authorized to do this call");
+//            return "You are not authorized to do this call";
         }
     }
 
@@ -111,7 +142,8 @@ class UserController extends Controller
                 ->select('user_year.year_id', 'user_year.package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name', 'person.last_name', 'person.passport', 'person.bsn', 'person.dob')->get();
             return $cases;
         } else {
-            return "You are not authorized to do this call";
+            abort(400, "You are not authorized to do this call");
+//            return "You are not authorized to do this call";
         }
     }
 
@@ -122,8 +154,44 @@ class UserController extends Controller
             ->leftjoin('person', 'person.id', '=', 'user_year.person_id')
             ->leftjoin('person as employee', 'employee.id', '=', 'employee_id')
             ->select('employee.first_name as employee_first_name', 'employee.last_name as employee_last_name', 'person.first_name', 'person.last_name', 'person.bsn', 'person.dob', 'user_year.status', 'user_year.year_id', 'user_year.package')->first();
-
-
         return $case;
+    }
+
+    public function createResetLink(Request $request){
+        $email = $request->input('email');
+        $token = Uuid::generate();
+        $user = User::where('email','=',$email)->first();
+        if(!isset($user)){
+            abort(400,"Email does not exist");
+        }
+
+        $passwordReset = new PasswordReset();
+        $passwordReset->email = $email;
+        $passwordReset->token = $token;
+        $passwordReset->save();
+
+
+        $meeting = new StdClass();
+        $meeting->email = $email;
+        $meeting->name = "test";
+        $meeting->template="mails.userMails.passwordReset";
+        $meeting->subject="TTMTax Reset password";
+        $meeting->resetLink = "http://localhost:1333/user/reset?reset_token=".$token;
+
+        MailController::sendMail($meeting);
+
+        return JsonResponse::create("reset email send to user");
+    }
+
+    public function activateAccount(Request $request){
+        $token = $request->input('activationToken');
+        $activateToken = ActivateToken::where('token', '=',$token);
+        $user = User::where('person_id','=',$activateToken->user_id)->first();
+        $user->is_active = 1;
+        $user->save();
+
+        $activateToken->delete();
+        return JsonResponse::create("account activated succesfully");
+
     }
 }

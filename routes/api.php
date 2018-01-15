@@ -28,9 +28,9 @@ $api->version('v1', function ($api) {
         'as' => 'api.user.create',
         'uses' => 'App\Http\Controllers\UserController@addUser',
     ]);
-    $api->post('/test', [
-        'as' => 'api.controller.test',
-        'uses' => 'App\Http\Controllers\Controller@test',
+    $api->get('/user/reset/', [
+        'as' => 'api.user.reset',
+        'uses' => 'App\Http\Controllers\UserController@createResetLink',
     ]);
     $api->group([
         'middleware' => 'api.auth',
@@ -286,6 +286,14 @@ $api->version('v1', function ($api) {
         $api->get('/appointment', [
             'uses' => 'App\Http\Controllers\AppointmentController@getUserAppointment',
             'as' => 'api.users.customers'
+        ]);
+    });
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->get('/discount/get', [
+            'uses' => 'App\Http\Controllers\DiscountController@getDiscount',
+            'as' => 'api.discount.get'
         ]);
     });
 });
