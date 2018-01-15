@@ -53,6 +53,7 @@ class OrderController extends Controller {
         $service = $request->input('description');
 
         $amount = $this->getAmount($request->input('paymentString'));
+        $package = $request->input('paymentString');
         $discountCode = $request->input("discountCode");
 
 
@@ -69,7 +70,7 @@ class OrderController extends Controller {
             }
 
             if($discount->percentage == 100){
-                $order->service_name = $service;
+                $order->service_name = $package;
                 $order->price = $amount;
                 $order->payment_id = "null";
                 $order->payment_status = "opRek";
@@ -94,7 +95,7 @@ class OrderController extends Controller {
         ));
 
 
-        $order->service_name = $service;
+        $order->service_name = $package;
         $order->price = $amount;
         $order->payment_id = $payment->id;
         $order->payment_status = $payment->status;
@@ -159,21 +160,24 @@ class OrderController extends Controller {
 
     public function handlePayment($service,$userYear,$request,$user){
         switch($service) {
-            case 'Tax Return with appointment':
+            case 'taxReturnWithAppointment':
                 $userYear->status = ProgressState::questionnaireStartedPaid;
                 $userYear->save();
-                return $service;
-            case 'Tax Return':
+                return new JsonResponse($service);
+            case 'taxReturnWithoutAppointment':
                 $userYear->status = ProgressState::questionnaireReadyToReview;
                 $userYear->save();
-                return $service;
-            case 'Tax Advice':
+                return new JsonResponse($service);
+            case 'taxReturnPlusFiscal':
+                return new JsonResponse($service);
+            case 'taxAdvice':
                 return new JsonResponse($service);
             default:
-                return false;
+                return "package not found";
         }
 
     }
+
 
 }
 
