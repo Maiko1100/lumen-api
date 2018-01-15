@@ -245,6 +245,10 @@ $api->version('v1', function ($api) {
         'as' => 'api.order.webhook'
     ]);
 
+    $api->post('/user/resetPasswordWithToken', [
+        'uses' => 'App\Http\Controllers\UserController@resetPasswordWithToken',
+        'as' => 'api.user.resetPassword'
+    ]);
 
     $api->group([
         'middleware' => 'api.auth',
@@ -274,6 +278,8 @@ $api->version('v1', function ($api) {
             'as' => 'api.user.changePassword'
         ]);
     });
+
+
 
     $api->group([
         'middleware' => 'api.auth',

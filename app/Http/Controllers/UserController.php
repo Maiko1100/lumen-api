@@ -62,8 +62,7 @@ class UserController extends Controller
 
     public function updateUserPassword(Request $request)
     {
-        $resetString = $request->input('resetString');
-        if(!isset($resetString)){
+
             $user = JWTAuth::parseToken()->authenticate();
             $oldPassword = $request->input('oldPassword');
 
@@ -74,13 +73,7 @@ class UserController extends Controller
             }else{
                 abort (400, "Password didn't match");
             }
-        }else{
-            $passwordReset = PasswordReset::where('token','=', $resetString);
-            $user = User::where('email','=',$passwordReset->email)->first();
-            $user->password = app('hash')->make($request->input('newPassword'));
-            $user->save();
-            return $user;
-        }
+
 
     }
 
@@ -167,7 +160,6 @@ class UserController extends Controller
         $passwordReset->token = $token;
         $passwordReset->save();
 
-
         $meeting = new StdClass();
         $meeting->email = $email;
         $meeting->name = "test";
@@ -189,6 +181,21 @@ class UserController extends Controller
 
         $activateToken->delete();
         return JsonResponse::create("account activated succesfully");
+    }
+
+    public function resetPasswordWithToken(Request $request){
+        $resetString = $request->input('resetString');
+        $passwordReset = PasswordReset::where('token','=', $resetString)->first();
+
+        if(isset($passwordReset)){
+            $user = User::where('email','=',$passwordReset->email)->first();
+            $user->password = app('hash')->make($request->input('newPassword'));
+            $user->save();
+            $passwordReset->delete();
+            return $user;
+        }
+
+        abort(400, "Reset token not found");
 
     }
 }
