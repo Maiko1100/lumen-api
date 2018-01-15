@@ -154,6 +154,9 @@ class UserController extends Controller
         $email = $request->input('email');
         $token = Uuid::generate();
         $user = User::where('email','=',$email)->first();
+        if(!isset($user)){
+            abort(400,"Email does not exist");
+        }
 
         $passwordReset = new PasswordReset();
         $passwordReset->email = $email;
