@@ -170,7 +170,7 @@ class UserController extends Controller
         $meeting->name = "test";
         $meeting->template="mails.userMails.passwordReset";
         $meeting->subject="TTMTax Reset password";
-        $meeting->resetLink = "http://localhost:1333/user/reset?reset_token=".$token;
+        $meeting->resetLink = "http://localhost:1333/reset?reset_token=".$token;
 
         MailController::sendMail($meeting);
 
