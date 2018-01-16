@@ -152,11 +152,13 @@ class UserController extends Controller
 
     public function createResetLink(Request $request){
         $email = $request->input('email');
-        $token = Uuid::generate();
         $user = User::where('email','=',$email)->first();
+
         if(!isset($user)){
-            abort(400,"Email does not exist");
+            abort(400,"Email does not exist". $email);
         }
+
+        $token = Uuid::generate();
 
         $passwordReset = new PasswordReset();
         $passwordReset->email = $email;

@@ -28,7 +28,7 @@ $api->version('v1', function ($api) {
         'as' => 'api.user.create',
         'uses' => 'App\Http\Controllers\UserController@addUser',
     ]);
-    $api->get('/user/reset/', [
+    $api->post('/user/reset/', [
         'as' => 'api.user.reset',
         'uses' => 'App\Http\Controllers\UserController@createResetLink',
     ]);
