@@ -160,6 +160,11 @@ $api->version('v1', function ($api) {
             'as' => 'api.questioncontroller'
         ]);
 
+        $api->post('/question/profile', [
+            'uses' => 'App\Http\Controllers\QuestionController@getProfileQuestions',
+            'as' => 'api.questioncontroller'
+        ]);
+
         $api->post('/question/save', [
             'uses' => 'App\Http\Controllers\UserQuestionController@save',
             'as' => 'api.userquestion.save'
