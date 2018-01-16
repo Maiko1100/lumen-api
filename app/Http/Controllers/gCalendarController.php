@@ -22,7 +22,6 @@ class gCalendarController extends Controller
     public function updateMeeting(Request $request)
     {
         if($request->header('Authorization')!= "Bearer null") {
-            Log::info("ik kom hier in maar dat moet helemaal niet" . $request->header('Authorization'));
             $user = JWTAuth::parseToken()->authenticate();
         }else{
             $user = null;
@@ -37,7 +36,8 @@ class gCalendarController extends Controller
         $meeting->startDate = $startDate;
         $meeting->startTime = $startTime;
         $meeting->endTime = $endTime;
-        MailController::sendMail($meeting);
+        $test = MailController::sendMail($meeting);
+        Log::info($test. " test ");
 
         $event = Event::find($meeting->eventId);
         $event->name = 'Tax Advice meeting with ' . $meeting->firstName ." " . $meeting->lastName ;
