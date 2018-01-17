@@ -21,6 +21,7 @@ class UserYearController extends Controller
             $userYear = UserYear::where('id', '=',$userYearId)->first();
             $userYear->status = $request->input('status');
             $userYear->save();
+            MailController::sendStatusMail($userYear);
             $cases = DB::table('user_year')
                 ->join('person', 'user_year.person_id', '=', 'person.id')
                 ->leftjoin('person as employee', 'user_year.employee_id', '=', 'employee.id')
