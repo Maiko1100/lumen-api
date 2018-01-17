@@ -27,6 +27,7 @@ class gCalendarController extends Controller
             $user = null;
         }
         $meeting = json_decode($request->input('formValues'))->formvalues;
+        $appointmentStartDate = $meeting->startDate;
         $startDate = date_format(date_create($meeting->startDate),"d F Y");
         $startTime = date_format(date_create($meeting->startDate),"H:i");
         $endTime = date_format(date_create($meeting->endDate),"H:i");
@@ -46,7 +47,7 @@ class gCalendarController extends Controller
         $event->save();
 
         $appointment = new Appointment();
-        $appointment->startDate = $meeting->startDate;
+        $appointment->startDate = $appointmentStartDate;
         $appointment->endDate = $meeting->endDate;
         if($user!=null) {
             $appointment->person_id =$user->person_id;

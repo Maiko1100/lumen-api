@@ -110,9 +110,9 @@ class OrderController extends Controller {
             case 'taxAdvice':
                 return 50;
             case 'taxReturnWithAppointment':
-                return 150;
+                return 249;
             case 'taxReturnWithoutAppointment':
-                return 100;
+                return 200;
             case 'taxReturnPlusFiscal':
                 return 325;
             case 'taxReturn':
