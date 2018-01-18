@@ -38,7 +38,7 @@ class UserQuestionController extends Controller
                     ->isProfile == 1;
 
             if ($isProfile) {
-                $existingProfileQuestion = $this->checkProfile($questionId, $qpid);
+                $existingProfileQuestion = $this->checkProfile($questionId, $qpid, $user);
 
                 if (isset($existingProfileQuestion)) {
                     $existingProfileQuestion->question_answer = $answer;
@@ -204,15 +204,17 @@ class UserQuestionController extends Controller
         }
     }
 
-    private function checkProfile($questionId, $qpid)
+    private function checkProfile($questionId, $qpid, $user)
     {
         if(isset($qpid)) {
             return UserQuestion::where("question_id", "=", $questionId)
                 ->where("question_plus_id", "=", $qpid)
+                ->where("person_id", "=", $user->person_id)
                 ->whereNull("user_year_id")
                 ->first();
         } else {
             return UserQuestion::where("question_id", "=", $questionId)
+                ->where("person_id", "=", $user->person_id)
                 ->whereNull("user_year_id")
                 ->first();
         }
