@@ -61,10 +61,10 @@ class OrderController extends Controller {
         if (isset($discountCode)) {
             $discount = Discount::where('code', '=', $discountCode)->first();
             if(isset($discount)) {
-                UserDiscount::create(array(
-                    "user_id" => $user->person_id,
-                    "discount_id" => $discount->id,
-                ));
+                $userDiscount = new UserDiscount();
+                $userDiscount->user_id = $user->person_id;
+                $userDiscount->discount_id = $discount->id;
+                $userDiscount->save();
             }else{
                 return "not a valid discountCode";
             }
