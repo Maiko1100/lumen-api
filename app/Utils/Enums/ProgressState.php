@@ -5,7 +5,7 @@ abstract class ProgressState {
     const questionnaireSubmittedNotPaid = 1;
     const questionnaireStartedPaid = 2;
     const questionnaireReadyToReview = 3;
-    const questionnaireNotApproved = 3;
+    const questionnaireNotApproved = 4;
     const questionnaireModified = 5;
     const questionnaireApproved = 6;
     const reportUploaded = 7;
