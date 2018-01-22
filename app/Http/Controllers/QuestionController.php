@@ -169,14 +169,19 @@ class QuestionController extends Controller
             foreach ($groups as $group) {
 
                 $questions = $group->getQuestions()
-                    ->leftjoin('user_question', function ($join) use ($userYear) {
-                        $join->on('question.id', '=', 'user_question.question_id');
-                        $join->on('user_question.user_year_id', "=", DB::raw($userYear->id));
+                    ->leftjoin('user_question as user_year_answer', function ($join) use ($userYear) {
+                        $join->on('question.id', '=', 'user_year_answer.question_id');
+                        $join->on('user_year_answer.user_year_id', "=", DB::raw($userYear->id));
                     })
-                    ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
-                    ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
+                    ->leftjoin('user_question as profile_answer', function ($join) use ($userYear) {
+                        $join->on('question.id', '=', 'profile_answer.question_id');
+                        $join->whereNull('profile_answer.user_year_id');
+                        $join->on('profile_answer.person_id', "=", DB::raw($userYear->person_id));
+                    })
+                    ->leftjoin('user_file', 'user_year_answer.id', 'user_file.user_question_id')
+                    ->leftjoin('feedback', 'user_year_answer.id', 'feedback.user_question_id')
                     ->groupBy('question.id')
-                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.validation_type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
+                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.validation_type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', DB::raw("ifnull(`user_year_answer`.`question_answer`, `profile_answer`.`question_answer`) as `answer`"), DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_year_answer.approved', 'feedback.text as feedback', 'feedback.admin_note')
                     ->orderBy('question.sort', 'asc')
                     ->get();
 
