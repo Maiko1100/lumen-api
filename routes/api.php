@@ -302,4 +302,9 @@ $api->version('v1', function ($api) {
             'as' => 'api.discount.get'
         ]);
     });
+
+    $api->post('/question/clone', [
+        'uses' => 'App\Http\Controllers\QuestionGeneratorController@cloneYearQuestions',
+        'as' => 'api.questiongenerator.clone'
+    ]);
 });
