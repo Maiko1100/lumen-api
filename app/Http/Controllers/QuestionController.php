@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Question;
 use App\Group;
 use App\QuestionGenre;
+use App\User;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -69,7 +70,12 @@ class QuestionController extends Controller
     }
 
     public function getProfileQuestions(Request $request) {
+
         $user = JWTAuth::parseToken()->authenticate();
+
+        if($user->role >1 ) {
+            $user = User::where('person_id','=',$request->input('userId'))->get();
+        }
 
         $questionGenres = QuestionGenre::where('isProfile', '=', 1)
             ->select('id', 'text')
