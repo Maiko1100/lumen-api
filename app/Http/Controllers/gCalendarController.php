@@ -27,6 +27,7 @@ class gCalendarController extends Controller
             $user = null;
         }
         $meeting = json_decode($request->input('formValues'))->formvalues;
+        $meeting2 = json_decode($request->input('formValues'))->formvalues;
         $appointmentStartDate = $meeting->startDate;
         $startDate = date_format(date_create($meeting->startDate),"d F Y");
         $startTime = date_format(date_create($meeting->startDate),"H:i");
@@ -39,10 +40,9 @@ class gCalendarController extends Controller
         $meeting->endTime = $endTime;
         MailController::sendMail($meeting);
 
-        $meeting2 = new \stdClass();
         $meeting2->template = 'mails.appointment.appointmentThijs';
         $meeting2->subject = 'Appointment made';
-        $meeting2->email = 'info@ttmtax.nl';
+        $meeting2->email = 'maiko1100@gmail.com';
         $meeting2->startDate = $startDate;
         $meeting2->startTime = $startTime;
         $meeting2->endTime = $endTime;
