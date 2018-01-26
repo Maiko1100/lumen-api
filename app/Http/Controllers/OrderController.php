@@ -113,6 +113,10 @@ class OrderController extends Controller {
                 return 249;
             case 'taxReturnWithoutAppointment':
                 return 200;
+            case 'taxReturnProvisionalWithAppointment':
+                return 175;
+            case 'taxReturnProvisionalWithoutAppointment':
+                return 125;
             case 'taxReturnPlusFiscal':
                 return 324;
             case 'taxReturn':
@@ -165,6 +169,14 @@ class OrderController extends Controller {
                 $userYear->save();
                 return new JsonResponse($service);
             case 'taxReturnWithoutAppointment':
+                $userYear->status = ProgressState::questionnaireReadyToReview;
+                $userYear->save();
+                return new JsonResponse($service);
+            case 'taxReturnProvisionalWithAppointment':
+                $userYear->status = ProgressState::questionnaireStartedPaid;
+                $userYear->save();
+                return new JsonResponse($service);
+            case 'taxReturnProvisionalWithoutAppointment':
                 $userYear->status = ProgressState::questionnaireReadyToReview;
                 $userYear->save();
                 return new JsonResponse($service);
