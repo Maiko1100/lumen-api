@@ -73,7 +73,7 @@ class QuestionController extends Controller
 
         $user = JWTAuth::parseToken()->authenticate();
 
-        if($user->role >1 ) {
+        if($user->role > 1) {
             $user = User::where('person_id','=',$request->input('userId'))->get();
         }
 
@@ -82,7 +82,9 @@ class QuestionController extends Controller
             ->get();
 
         foreach ($questionGenres as $questionGenre) {
-            $questions = Question::join('question_genre', 'question.question_genre_id', 'question_genre.id')
+            $questions = Question::join('group', 'question.group_id', 'group.id')
+                ->join('category', 'group.category_id', 'category.id')
+                ->join('question_genre', 'question.question_genre_id', 'question_genre.id')
                 ->leftjoin('user_question', function ($join) use ($user) {
                     $join->on('question.id', '=', 'user_question.question_id');
                     $join->on('user_question.person_id', '=', DB::raw($user->person_id));
@@ -94,14 +96,13 @@ class QuestionController extends Controller
                 ->orderBy('question.sort', 'asc')
                 ->where('question_genre.isProfile', '=', 1)
                 ->where('question_genre.id', '=', $questionGenre->id)
+                ->whereRaw('`category`.`year_id` = (select max(`year_id`) from `user_year` where `person_id` = ' . $user->person_id . ')')
                 ->get();
 
             $q = $this->getQs($questions, null, true, null, $user);
 
             $questionGenre->questions = $q;
         }
-
-
 
         return new JsonResponse($questionGenres);
     }
