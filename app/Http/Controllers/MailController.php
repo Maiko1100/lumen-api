@@ -22,9 +22,12 @@ class MailController extends Controller
             'startDate' => isset($meeting->startDate)?$meeting->startDate:"",
             'startTime' => isset($meeting->startTime)?$meeting->startTime:"",
             'endTime' => isset($meeting->endTime)?$meeting->endTime:"",
+            'type' => isset($meeting->type)?$meeting->type:"",
+            'socialName' => isset($meeting->socialName)?$meeting->socialName:"",
             'template' => $meeting->template,
             'subject' => $meeting->subject,
             'resetLink' => isset($meeting->resetLink)?$meeting->resetLink:"",
+            'year' => isset($meeting->year)?$meeting->year:"",
             'activateLink' => isset($meeting->activateLink)?$meeting->activateLink:"",
         ];
 
@@ -41,6 +44,7 @@ class MailController extends Controller
         $meeting = new StdClass();
         $meeting->email = $user->email;
         $meeting->firstName = $user->email;
+        $meeting->year = $userYear->year_id;
 
         switch ($userYear->status) {
             case ProgressState::questionnaireStartedPaid:
@@ -48,22 +52,24 @@ class MailController extends Controller
                 break;
             case ProgressState::questionnaireNotApproved:
                 $meeting->template="mails.statusMails.questionaireEditingRequired";
-                $meeting->subject="TTMTax Questionaire";
+                $meeting->subject="Missing information questionnaire ". $userYear->year_id;
                 self::sendMail($meeting);
                 return 'mail send';
                 break;
             case ProgressState::questionnaireSubmittedNotPaid:
-                return 'geen mail';
+                $meeting->template="mails.statusMails.questionnaireSubmittedNotPaid";
+                $meeting->subject="next step -payment";
+                return 'mail send';
                 break;
             case ProgressState::questionnaireApproved:
                 $meeting->template="mails.statusMails.questionaireReviewed";
-                $meeting->subject="TTMTax Questionaire";
+                $meeting->subject="Questionnaire approved - no action required";
                 self::sendMail($meeting);
                 return 'mail send';
                 break;
             case ProgressState::reportUploaded:
                 $meeting->template="mails.statusMails.questionaireReportReady";
-                $meeting->subject="TTMTax Questionaire";
+                $meeting->subject="Tax return ready for review - Dutch income tax return ". $userYear->year_id. "prepared, please review";
                 self::sendMail($meeting);
                 return 'mail send';
                 break;

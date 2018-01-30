@@ -14,7 +14,7 @@ class gCalendarController extends Controller
 {
     public function getMeetings()
     {
-        $optParams = ['q' => 'Meeting'];
+        $optParams = ['q' => 'Meeting' , 'maxResults' => '2500'];
         $events = Event::get(Carbon::now(), Carbon::now()->addMonth(3), $optParams);
         return JsonResponse::create($events);
     }
