@@ -93,11 +93,25 @@ class QuestionController extends Controller
                 ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
                 ->groupBy('question.id')
                 ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.validation_type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved')
-                ->orderBy('question.sort', 'asc')
+                ->orderBy('question.profile_question_id', 'asc')
                 ->where('question_genre.isProfile', '=', 1)
                 ->where('question_genre.id', '=', $questionGenre->id)
                 ->whereRaw('`category`.`year_id` = (select max(`year_id`) from `user_year` where `person_id` = ' . $user->person_id . ')')
                 ->get();
+
+            if ($questions->isEmpty()) {
+                $questions = Question::whereNotNull('question.profile_question_id')
+                    ->leftjoin('user_question', function ($join) use ($user) {
+                        $join->on('question.id', '=', 'user_question.question_id');
+                        $join->on('user_question.person_id', '=', DB::raw($user->person_id));
+                        $join->whereNull('user_question.user_year_id');
+                    })
+                    ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
+                    ->groupBy('question.profile_question_id')
+                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.validation_type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved')
+                    ->orderBy('question.profile_question_id', 'asc')
+                    ->get();
+            }
 
             $q = $this->getQs($questions, null, true, null, $user);
 
@@ -181,7 +195,7 @@ class QuestionController extends Controller
                         $join->on('user_year_answer.user_year_id', "=", DB::raw($userYear->id));
                     })
                     ->leftjoin('user_question as profile_answer', function ($join) use ($userYear) {
-                        $join->on('question.id', '=', 'profile_answer.question_id');
+                        $join->on('question.profile_question_id', '=', 'profile_answer.profile_question_id');
                         $join->whereNull('profile_answer.user_year_id');
                         $join->on('profile_answer.person_id', "=", DB::raw($userYear->person_id));
                     })

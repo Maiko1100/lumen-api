@@ -70,7 +70,7 @@ class QuestionGeneratorController extends Controller
                         ->whereNull('parent')
                         ->get();
 
-                    $this->getQuestions($questions, $newGroup, $fromYear, null);
+                    $this->getQuestions($questions, $newGroup, $fromYear, $toYear, null);
                 }
             }
 
@@ -88,12 +88,27 @@ class QuestionGeneratorController extends Controller
         }
     }
 
-    private function getQuestions($questions, $group, $fromYear, $parentQuestion)
+    private function getQuestions($questions, $group, $fromYear, $toYear, $parentQuestion)
     {
         foreach ($questions as $question) {
+            $questionText = $question->text;
+            if (strpos($question->text, (string)$fromYear) !== false) {
+                $questionText = str_replace((string)$fromYear, (string)$toYear, $question->text);
+            }
+
+            $questionTipText = $question->tip_text;
+            if (strpos($question->tip_text, (string)$fromYear) !== false) {
+                $questionTipText = str_replace((string)$fromYear, (string)$toYear, $question->tip_text);
+            }
+
+            $questionPlaceholder = $question->placeholder_text;
+            if (strpos($question->placeholder_text, (string)$fromYear) !== false) {
+                $questionPlaceholder = str_replace((string)$fromYear, (string)$toYear, $question->placeholder_text);
+            }
+
             $newQuestion = new Question();
 
-            $newQuestion->text = $question->text;
+            $newQuestion->text = $questionText;
             $newQuestion->answer_option = $question->answer_option;
             $newQuestion->parent = $parentQuestion ? $parentQuestion->id : null;
             $newQuestion->group_id = $group->id;
@@ -103,8 +118,9 @@ class QuestionGeneratorController extends Controller
             $newQuestion->has_childs = $question->has_childs;
             $newQuestion->question_genre_id = $question->question_genre_id;
             $newQuestion->sort = $question->sort;
-            $newQuestion->tip_text = $question->tip_text;
-            $newQuestion->placeholder_text = $question->placeholder_text;
+            $newQuestion->tip_text = $questionTipText;
+            $newQuestion->placeholder_text = $questionPlaceholder;
+            $newQuestion->profile_question_id = $question->profile_question_id;
 
             $newQuestion->save();
 
@@ -135,7 +151,7 @@ class QuestionGeneratorController extends Controller
                     ->select('question.*')
                     ->get();
 
-                $this->getQuestions($childQuestions, $group, $fromYear, $newQuestion);
+                $this->getQuestions($childQuestions, $group, $fromYear, $toYear, $newQuestion);
             }
         }
     }
