@@ -33,6 +33,7 @@ class CORSMiddleware
             'application/pdf',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'application/msword',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         ];
 
         if(in_array($response->headers->get('content-type'), $supportedFiles)) {
