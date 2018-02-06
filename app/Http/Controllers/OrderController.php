@@ -112,7 +112,7 @@ class OrderController extends Controller {
             case 'taxReturnWithAppointment':
                 return 249;
             case 'taxReturnWithoutAppointment':
-                return 200;
+                return 199;
             case 'taxReturnProvisionalWithAppointment':
                 return 175;
             case 'taxReturnProvisionalWithoutAppointment':
