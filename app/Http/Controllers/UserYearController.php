@@ -117,7 +117,7 @@ class UserYearController extends Controller
 
         $userFile = new UserFile();
         $userFile->name = "signature".'_'.$user->person_id.'_'.$year.".png";
-        $userFile->type = 8;
+        $userFile->type = 6;
         $userFile->person_id = $user->person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
