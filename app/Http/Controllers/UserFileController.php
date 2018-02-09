@@ -12,7 +12,6 @@ use App\UserYear as UserYear;
 use App\Person;
 use Illuminate\Support\Facades\DB;
 use App\Utils\Enums\ProgressState;
-
 use App\Utils\Enums\userRole;
 use App\Utils\Enums\documentType;
 
@@ -291,22 +290,22 @@ class UserFileController extends Controller
         return $cases;
 
     }
-    public function saveSubmission(Request $request)
+    public function saveFinalTaxAssessment(Request $request)
     {
         $file = $request->file('file');
         $person_id = $request->input('person_id');
         $userYear = UserYear::where('user_year.person_id', "=", $person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
         $person = Person::where('id','=',$person_id)->first();
-        $fileName = 'TaxReportSubmission'.'_'.$person->first_name.'_'.$person->last_name.'_'.$request->input('year').'.pdf';
+        $fileName = 'FinalTaxAssessment'.'_'.$person->first_name.'_'.$person->last_name.'_'.$request->input('year').'.pdf';
         Storage::putFileAs('userDocuments/' . $person_id, $file, $fileName);
 
         $userFile = new UserFile();
         $userFile->name = $fileName;
-        $userFile->type = documentType::submission;
+        $userFile->type = documentType::final_tax_assesment;
         $userFile->person_id = $person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();
-        $userYear->status = ProgressState::taxReturnUploaded;
+        $userYear->status = ProgressState::finalTaxAssessmentUploaded;
         $userYear->save();
         MailController::sendStatusMail($userYear);
 
@@ -317,12 +316,49 @@ class UserFileController extends Controller
         return $cases;
 
     }
-    public function getSubmission(Request $request)
+    public function getFinalTaxAssessment(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
         $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
         $personId = $user->person_id;
-        $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', documentType::submission)->first();
+        $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', documentType::final_tax_assesment)->first();
+        $filename = $userFile->name;
+        $fullpath = "app/userDocuments/{$personId}/{$filename}";
+
+        return response()->download(storage_path($fullpath), null, [], null);
+    }
+    public function savePreliminaryTax(Request $request)
+    {
+        $file = $request->file('file');
+        $person_id = $request->input('person_id');
+        $userYear = UserYear::where('user_year.person_id', "=", $person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
+        $person = Person::where('id','=',$person_id)->first();
+        $fileName = 'PreliminaryTax'.'_'.$person->first_name.'_'.$person->last_name.'_'.$request->input('year').'.pdf';
+        Storage::putFileAs('userDocuments/' . $person_id, $file, $fileName);
+
+        $userFile = new UserFile();
+        $userFile->name = $fileName;
+        $userFile->type = documentType::preliminaryTax;
+        $userFile->person_id = $person_id;
+        $userFile->user_year_id = $userYear->id;
+        $userFile->save();
+        $userYear->status = ProgressState::preliminaryTaxUploaded;
+        $userYear->save();
+        MailController::sendStatusMail($userYear);
+
+        $cases = DB::table('user_year')
+            ->join('person', 'user_year.person_id', '=', 'person.id')
+            ->leftjoin('person as employee', 'user_year.employee_id', '=', 'employee.id')
+            ->select('employee.first_name as employee_name','user_year.year_id', 'user_year.package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name', 'person.last_name', 'person.passport', 'person.bsn', 'person.dob')->get();
+        return $cases;
+
+    }
+    public function getPrilimentaryTax(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
+        $personId = $user->person_id;
+        $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', documentType::preliminaryTax)->first();
         $filename = $userFile->name;
         $fullpath = "app/userDocuments/{$personId}/{$filename}";
 

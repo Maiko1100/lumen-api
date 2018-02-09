@@ -10,8 +10,9 @@ abstract class ProgressState {
     const questionnaireApproved = 6;
     const reportUploaded = 7;
     const reportNotApproved = 8;
-    const uploadTaxReturn = 9;
-    const taxReturnUploaded = 10;
-    const taxReturnFiled = 11;
-    const finalTaxAssesmentUploaded =12;
+    const fileTaxReturn = 9;
+    const taxReturnFiled = 10;
+    const preliminaryTaxUploaded = 11;
+    const finalTaxAssessmentUploaded =12;
 }
+
