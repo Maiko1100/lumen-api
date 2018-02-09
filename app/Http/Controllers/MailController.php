@@ -47,6 +47,7 @@ class MailController extends Controller
         $meeting->email = $user->email;
         $meeting->firstName = $user->email;
         $meeting->year = $userYear->year_id;
+        $meeting->name = $user->first_name;
 
         switch ($userYear->status) {
             case ProgressState::questionnaireStartedPaid:
