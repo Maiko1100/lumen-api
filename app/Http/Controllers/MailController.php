@@ -75,7 +75,7 @@ class MailController extends Controller
                 self::sendMail($meeting);
                 return 'mail send';
                 break;
-            case ProgressState::taxReturnUploaded:
+            case ProgressState::preliminaryTaxUploaded:
                 $meeting->template="mails.statusMails.taxReturnUploaded";
                 $meeting->subject="TTMTax Questionaire";
                 self::sendMail($meeting);
@@ -87,7 +87,7 @@ class MailController extends Controller
                 self::sendMail($meeting);
                 return 'mail send';
                 break;
-            case ProgressState::finalTaxAssesmentUploaded:
+            case ProgressState::finalTaxAssessmentUploaded:
                 $meeting->template="mails.statusMails.finalTaxAssesmentUploaded";
                 $meeting->subject="TTMTax Questionaire";
                 self::sendMail($meeting);

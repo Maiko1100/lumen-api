@@ -90,12 +90,20 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserFileController@saveReport',
             'as' => 'api.file.save'
         ]);
-        $api->get('/submission/get', [
-            'uses' => 'App\Http\Controllers\UserFileController@getSubmission',
+        $api->get('/finalTaxAssessment/get', [
+            'uses' => 'App\Http\Controllers\UserFileController@getFinalTaxAssessment',
             'as' => 'api.file.get'
         ]);
-        $api->post('/submission/save', [
-            'uses' => 'App\Http\Controllers\UserFileController@saveSubmission',
+        $api->post('/finalTaxAssessment/save', [
+            'uses' => 'App\Http\Controllers\UserFileController@saveFinalTaxAssessment',
+            'as' => 'api.file.save'
+        ]);
+        $api->get('/preliminary/get', [
+            'uses' => 'App\Http\Controllers\UserFileController@getPreliminaryTax',
+            'as' => 'api.file.get'
+        ]);
+        $api->post('/preliminary/save', [
+            'uses' => 'App\Http\Controllers\UserFileController@savePreliminaryTax',
             'as' => 'api.file.save'
         ]);
 
