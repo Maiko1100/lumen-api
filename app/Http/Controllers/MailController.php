@@ -39,7 +39,9 @@ class MailController extends Controller
 
     public static function sendStatusMail($userYear)
     {
-        $user = User::where('person_id','=',$userYear->person_id)->first();
+        $user = User::where('person_id','=',$userYear->person_id)
+            ->join('person', 'user.person_id', 'person.id')
+            ->first();
 
         $meeting = new StdClass();
         $meeting->email = $user->email;

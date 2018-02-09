@@ -276,6 +276,7 @@ class QuestionController extends Controller
                         left join `feedback` on `user_question`.`id` = `feedback`.`user_question_id`
                         where find_in_set(`parent`, @pv) > 0 and @pv := concat(@pv, ',', `questions`.`id`)
                         group by `questions`.`id`, `question_plus`.`id`
+                        
                     ) `d`
                     group by `d`.`id`) `a`"))
                         ->get();
@@ -413,7 +414,7 @@ class QuestionController extends Controller
                         ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
                         ->groupBy('question.id')
                         ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.validation_type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
-                        ->orderBy('question.id', 'asc')
+                        ->orderBy('question.sort', 'asc')
                         ->get();
                 } else {
                     $childs = $question->getChilds()
@@ -425,7 +426,7 @@ class QuestionController extends Controller
                         ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
                         ->groupBy('question.id')
                         ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.validation_type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', 'user_question.question_answer as answer', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
-                        ->orderBy('question.id', 'asc')
+                        ->orderBy('question.sort', 'asc')
                         ->get();
                 }
 
