@@ -62,7 +62,7 @@ class MailController extends Controller
                 return 'mail send';
                 break;
             case ProgressState::questionnaireApproved:
-                $meeting->template="mails.statusMails.questionaireReviewed";
+                $meeting->template="mails.statusMails.questionaireApproved";
                 $meeting->subject="Questionnaire approved - no action required";
                 self::sendMail($meeting);
                 return 'mail send';
@@ -80,14 +80,14 @@ class MailController extends Controller
                 return 'mail send';
                 break;
             case ProgressState::taxReturnFiled:
-                $meeting->template="mails.statusMails.finalTaxAssesmentUploaded";
-                $meeting->subject="TTMTax Questionaire";
+                $meeting->template="mails.statusMails.taxReturnFiled";
+                $meeting->subject="Tax return filed - your Dutch income tax return filed with the Dutch tax authorities";
                 self::sendMail($meeting);
                 return 'mail send';
                 break;
             case ProgressState::finalTaxAssessmentUploaded:
                 $meeting->template="mails.statusMails.finalTaxAssesmentUploaded";
-                $meeting->subject="TTMTax Questionaire";
+                $meeting->subject="Tax assessment " . $userYear->year_id;
                 self::sendMail($meeting);
                 return 'mail send';
                 break;
