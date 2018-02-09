@@ -145,8 +145,8 @@ class UserController extends Controller
 
         $case = UserYear::where('user_year.id', '=' ,$request->input('caseId'))
             ->leftjoin('person', 'person.id', '=', 'user_year.person_id')
-            ->leftjoin('person as employee', 'employee.id', '=', 'employee_id')
-            ->select('employee.first_name as employee_first_name', 'employee.last_name as employee_last_name', 'person.first_name', 'person.last_name', 'person.bsn', 'person.dob', 'user_year.status', 'user_year.year_id', 'user_year.package')->first();
+            ->leftjoin('person as assignee', 'assignee.id', '=', 'employee_id')
+            ->select('assignee.first_name as assignee_first_name', 'assignee.last_name as assignee_last_name', 'person.first_name', 'user_year.status', 'user_year.year_id', 'user_year.package')->first();
         return $case;
     }
 

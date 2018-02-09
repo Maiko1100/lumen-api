@@ -21,7 +21,6 @@ class UserFileController extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
 
-
         $files = UserFile::where('user_file.person_id', '=', $user->person_id)->get();
         return $files;
     }
@@ -35,6 +34,17 @@ class UserFileController extends Controller
         return $files;
     }
 
+    public function getCaseFiles(Request $request) {
+        if ($request->has('userYear')) {
+            return UserFile::where('user_file.user_year_id', '=', $request->input('userYear'))
+                ->join("user_year", "user_file.user_year_id", "user_year.id")
+                ->select('user_year.year_id','user_year.person_id as id','user_file.person_id','user_file.id', 'user_file.user_question_id', 'user_file.name', 'user_file.type', 'user_file.description', 'user_file.question_id', 'user_file.user_year_id', 'user_file.qpid')
+                ->get();
+        } else {
+            return 'Bad parameters';
+        }
+
+    }
 
     public function getFile(Request $request)
     {

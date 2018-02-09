@@ -66,6 +66,10 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserFileController@getTaxReturnFiles',
             'as' => 'api.files.taxreturn'
         ]);
+        $api->get('/files/case', [
+            'uses' => 'App\Http\Controllers\UserFileController@getCaseFiles',
+            'as' => 'api.files.case'
+        ]);
         $api->post('/file/get', [
             'uses' => 'App\Http\Controllers\UserFileController@getFile',
             'as' => 'api.file.get'
@@ -289,6 +293,10 @@ $api->version('v1', function ($api) {
         $api->post('/user/changePassword', [
             'uses' => 'App\Http\Controllers\UserController@updateUserPassword',
             'as' => 'api.user.changePassword'
+        ]);
+        $api->get('/customers/profileData', [
+            'uses' => 'App\Http\Controllers\UserQuestionController@getProfileData',
+            'as' => 'api.userquestion.profiledata'
         ]);
     });
 
