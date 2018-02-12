@@ -15,7 +15,7 @@ class MailController extends Controller
     public static function sendMail($meeting)
     {
         $emailData = [
-            'name' => isset($meeting->firstName ,$meeting->lastName)? $meeting->firstName  . " " . $meeting->lastName : "",
+            'name' => isset($meeting->firstName)? $meeting->firstName : "",
             'email' => $meeting->email,
             'service' => isset($meeting->service)?$meeting->service : "",
             'comments' =>  isset($meeting->comments)?$meeting->comments: "",
@@ -47,7 +47,7 @@ class MailController extends Controller
         $meeting->email = $user->email;
         $meeting->firstName = $user->email;
         $meeting->year = $userYear->year_id;
-        $meeting->first_name = $user->first_name;
+        $meeting->firstName = $user->first_name;
 
         switch ($userYear->status) {
             case ProgressState::questionnaireStartedPaid:
