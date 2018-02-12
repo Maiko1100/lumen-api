@@ -24,6 +24,7 @@ class UserFileController extends Controller
         $files = UserFile::where('user_file.person_id', '=', $user->person_id)->get();
         return $files;
     }
+
     public function getTaxReturnFiles()
     {
         $user = JWTAuth::parseToken()->authenticate();
@@ -32,6 +33,21 @@ class UserFileController extends Controller
             ->join("user_year", "user_file.user_year_id", "user_year.id")
             ->select('user_year.year_id','user_year.person_id as id','user_file.person_id','user_file.id', 'user_file.user_question_id', 'user_file.name', 'user_file.type', 'user_file.description', 'user_file.question_id', 'user_file.user_year_id', 'user_file.qpid')->get();
         return $files;
+    }
+
+    public function getUserYearTaxReturnFiles(Request $request)
+    {
+        if ($request->has('year')) {
+            $user = JWTAuth::parseToken()->authenticate();
+
+            $files = UserFile::where('user_file.person_id', '=', $user->person_id)
+                ->join("user_year", "user_file.user_year_id", "user_year.id")
+                ->where('user_year.year_id', '=', $request->input('year'))
+                ->select('user_year.year_id','user_year.person_id as id','user_file.person_id','user_file.id', 'user_file.user_question_id', 'user_file.name', 'user_file.type', 'user_file.description', 'user_file.question_id', 'user_file.user_year_id', 'user_file.qpid')->get();
+            return $files;
+        } else {
+            return 'Bad parameters';
+        }
     }
 
     public function getCaseFiles(Request $request) {
