@@ -264,10 +264,9 @@ class UserFileController extends Controller
         $userFile->name = $fileName;
         $request->input('year');
 
-
         $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
 
-        Storage::putFileAs('test' . $user->person_id."/", $file, $fileName);
+        Storage::putFileAs('userDocuments/' . $user->person_id."/", $file, $fileName);
 
         $userFile->type = documentType::normal_documents;
         $userFile->person_id = $user->person_id;
