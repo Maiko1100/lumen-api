@@ -350,6 +350,8 @@ class UserFileController extends Controller
         $filename = $userFile->name;
         $fullpath = "app/userDocuments/{$personId}/{$filename}";
 
+        return $fullpath;
+
         return response()->download(storage_path($fullpath), null, [], null);
     }
     public function savePreliminaryTax(Request $request)
