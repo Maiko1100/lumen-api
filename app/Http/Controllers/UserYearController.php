@@ -109,7 +109,7 @@ class UserYearController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $year = $request->input('year');
         $userYear = UserYear::where('person_id', '=',$user->person_id)->where('year_id', '=',$year)->first();
-        $userYear->status= ProgressState::uploadTaxReturn;
+        $userYear->status= ProgressState::fileTaxReturn;
         $userYear->save();
 
         $fullpath = "app/userDocuments/{$user->person_id}/signature".'_'.$user->person_id.'_'.$year.".png";
