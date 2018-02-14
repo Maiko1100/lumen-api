@@ -62,7 +62,6 @@ class UserController extends Controller
 
     public function updateUserPassword(Request $request)
     {
-
             $user = JWTAuth::parseToken()->authenticate();
             $oldPassword = $request->input('oldPassword');
 
@@ -73,8 +72,6 @@ class UserController extends Controller
             }else{
                 abort (400, "Password didn't match");
             }
-
-
     }
 
     protected function getCredentials(Request $request)
