@@ -11,7 +11,7 @@ During the meeting we will discuss your situation, inform you about the Dutch ta
 Overview details<br>
 <br>
 {{$service}}<br>
-Extra comments {{$comment}}<br>
+Extra comments {{$comments}}<br>
 <br>
 If you have any questions, please contact us via e-mail (info@ttmtax.nl) or call us via +31 (0)20 51 10 09.<br>
 <br>

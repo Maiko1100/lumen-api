@@ -363,7 +363,7 @@ class UserFileController extends Controller
         return $cases;
 
     }
-    public function getPrilimentaryTax(Request $request)
+    public function getPreliminaryTax(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
         $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
