@@ -350,7 +350,18 @@ class UserFileController extends Controller
         $filename = $userFile->name;
         $fullpath = "app/userDocuments/{$personId}/{$filename}";
 
-        return $fullpath;
+
+        return response()->download(storage_path($fullpath), null, [], null);
+    }
+
+    public function getPreliminaryTax(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
+        $personId = $user->person_id;
+        $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', documentType::preliminaryTax)->first();
+        $filename = $userFile->name;
+        $fullpath = "app/userDocuments/{$personId}/{$filename}";
 
         return response()->download(storage_path($fullpath), null, [], null);
     }
@@ -380,17 +391,7 @@ class UserFileController extends Controller
         return $cases;
 
     }
-    public function getPreliminaryTax(Request $request)
-    {
-        $user = JWTAuth::parseToken()->authenticate();
-        $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
-        $personId = $user->person_id;
-        $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', documentType::preliminaryTax)->first();
-        $filename = $userFile->name;
-        $fullpath = "app/userDocuments/{$personId}/{$filename}";
 
-        return response()->download(storage_path($fullpath), null, [], null);
-    }
 }
 
 ?>
