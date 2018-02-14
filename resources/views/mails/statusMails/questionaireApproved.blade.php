@@ -6,8 +6,8 @@ We will now start with the preparation of your tax return and inform you via e-m
 <br>
 We strive to prepare your tax return within 3 weeks after this e-mail.<br>
 <br>
-You can also follow the tax filing procedure via the "progress bar" in the client portal.<br>
+You can also follow the tax filing procedure via the "action bar" in the client portal.<br>
 <br>
 Kind Regards,<br>
 <br>
-TTMTax
+Team TTMTAX

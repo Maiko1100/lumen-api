@@ -24,6 +24,7 @@ class UserFileController extends Controller
         $files = UserFile::where('user_file.person_id', '=', $user->person_id)->get();
         return $files;
     }
+
     public function getTaxReturnFiles()
     {
         $user = JWTAuth::parseToken()->authenticate();
@@ -32,6 +33,21 @@ class UserFileController extends Controller
             ->join("user_year", "user_file.user_year_id", "user_year.id")
             ->select('user_year.year_id','user_year.person_id as id','user_file.person_id','user_file.id', 'user_file.user_question_id', 'user_file.name', 'user_file.type', 'user_file.description', 'user_file.question_id', 'user_file.user_year_id', 'user_file.qpid')->get();
         return $files;
+    }
+
+    public function getUserYearTaxReturnFiles(Request $request)
+    {
+        if ($request->has('year')) {
+            $user = JWTAuth::parseToken()->authenticate();
+
+            $files = UserFile::where('user_file.person_id', '=', $user->person_id)
+                ->join("user_year", "user_file.user_year_id", "user_year.id")
+                ->where('user_year.year_id', '=', $request->input('year'))
+                ->select('user_year.year_id','user_year.person_id as id','user_file.person_id','user_file.id', 'user_file.user_question_id', 'user_file.name', 'user_file.type', 'user_file.description', 'user_file.question_id', 'user_file.user_year_id', 'user_file.qpid')->get();
+            return $files;
+        } else {
+            return 'Bad parameters';
+        }
     }
 
     public function getCaseFiles(Request $request) {
@@ -248,10 +264,9 @@ class UserFileController extends Controller
         $userFile->name = $fileName;
         $request->input('year');
 
-
         $userYear = UserYear::where('user_year.person_id', "=", $user->person_id)->where("user_year.year_id", "=", $request->input('year'))->first();
 
-        Storage::putFileAs('test' . $user->person_id."/", $file, $fileName);
+        Storage::putFileAs('userDocuments/' . $user->person_id."/", $file, $fileName);
 
         $userFile->type = documentType::normal_documents;
         $userFile->person_id = $user->person_id;
@@ -334,6 +349,8 @@ class UserFileController extends Controller
         $userFile = UserFile::where('user_year_id', '=', $userYear->id)->where('type', '=', documentType::final_tax_assesment)->first();
         $filename = $userFile->name;
         $fullpath = "app/userDocuments/{$personId}/{$filename}";
+
+        return $fullpath;
 
         return response()->download(storage_path($fullpath), null, [], null);
     }

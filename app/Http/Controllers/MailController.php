@@ -72,12 +72,12 @@ class MailController extends Controller
                 break;
             case ProgressState::reportUploaded:
                 $meeting->template="mails.statusMails.questionaireReportReady";
-                $meeting->subject="Tax return ready for review - Dutch income tax return ". $userYear->year_id. "prepared, please review";
+                $meeting->subject="Tax return ready for review - Dutch income tax return ". $userYear->year_id. " prepared, please review";
                 self::sendMail($meeting);
                 return 'mail send';
                 break;
             case ProgressState::preliminaryTaxUploaded:
-                $meeting->template="mails.statusMails.taxReturnUploaded";
+                $meeting->template="mails.statusMails.taxReturnFiled";
                 $meeting->subject="TTMTax Questionaire";
                 self::sendMail($meeting);
                 return 'mail send';

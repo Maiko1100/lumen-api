@@ -11,6 +11,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Intervention\Image\Facades\Image as Image;
 use Illuminate\Support\Facades\DB;
 use App\Utils\Enums\ProgressState;
+use App\Utils\Enums\DocumentType;
 
 class UserYearController extends Controller
 {
@@ -117,7 +118,7 @@ class UserYearController extends Controller
 
         $userFile = new UserFile();
         $userFile->name = "signature".'_'.$user->person_id.'_'.$year.".png";
-        $userFile->type = ProgressState::fileTaxReturn;
+        $userFile->type = DocumentType::signature;
         $userFile->person_id = $user->person_id;
         $userFile->user_year_id = $userYear->id;
         $userFile->save();

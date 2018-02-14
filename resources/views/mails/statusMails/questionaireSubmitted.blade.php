@@ -1,7 +1,7 @@
 Dear {{$name}},<br>
 <br>
-Thankyou for submitting your questionaire we will start reviewing your questions when we receive your payment.
+Thank you for submitting your questionnaire. We will start with the review of your questionnaire after receiving your payment.
 <br>
 Kind Regards,<br>
 <br>
-TTMTax
+Team TTMTAX

@@ -66,6 +66,10 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserFileController@getTaxReturnFiles',
             'as' => 'api.files.taxreturn'
         ]);
+        $api->get('/files/taxreturn/useryear', [
+            'uses' => 'App\Http\Controllers\UserFileController@getUserYearTaxReturnFiles',
+            'as' => 'api.files.taxreturn'
+        ]);
         $api->get('/files/case', [
             'uses' => 'App\Http\Controllers\UserFileController@getCaseFiles',
             'as' => 'api.files.case'
