@@ -7,7 +7,6 @@ use stdClass;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Mail;
 use App\Utils\Enums\ProgressState;
-use Log;
 
 class MailController extends Controller
 {
@@ -62,6 +61,7 @@ class MailController extends Controller
             case ProgressState::questionnaireSubmittedNotPaid:
                 $meeting->template="mails.statusMails.questionnaireSubmittedNotPaid";
                 $meeting->subject="next step -payment";
+                self::sendMail($meeting);
                 return 'mail send';
                 break;
             case ProgressState::questionnaireApproved:
@@ -77,7 +77,7 @@ class MailController extends Controller
                 return 'mail send';
                 break;
             case ProgressState::preliminaryTaxUploaded:
-                $meeting->template="mails.statusMails.taxReturnFiled";
+                $meeting->template="mails.statusMails.preliminaryTaxUploaded";
                 $meeting->subject="TTMTax Questionaire";
                 self::sendMail($meeting);
                 return 'mail send';

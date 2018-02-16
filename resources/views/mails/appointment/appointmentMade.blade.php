@@ -18,5 +18,4 @@ If you have any questions, please contact us via e-mail (info@ttmtax.nl) or call
 Enjoy the day!<br>
 Best regards,<br>
 <br>
-Team TTMTAX<br>
-Kind Regards,<br>
+Team TTMTAX

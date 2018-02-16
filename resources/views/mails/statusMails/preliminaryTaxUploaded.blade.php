@@ -1,6 +1,6 @@
 Dear {{$name}},<br>
 <br>
-The Dutch tax authorities have imposed a final tax assessment. <br>
+The Dutch tax authorities have imposed a preliminary tax assessment. <br>
 Please find the report of the tax assessment in the "tax return" section in your client portal. Go to the {{$year}} and under submission you will find the (preliminary) tax assessment<br>
     imposed. The tax assessment is in line with the Dutch tax return filed on your behalf and no further action is required.<br>
 <br>
