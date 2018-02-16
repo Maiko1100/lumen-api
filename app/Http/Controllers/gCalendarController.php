@@ -42,7 +42,7 @@ class gCalendarController extends Controller
 
         $meeting2->template = 'mails.appointment.appointmentThijs';
         $meeting2->subject = 'Appointment made';
-        $meeting2->email = 'maiko1100@gmail.com';
+        $meeting2->email = 'info@ttmtax.nl';
         $meeting2->startDate = $startDate;
         $meeting2->startTime = $startTime;
         $meeting2->endTime = $endTime;
