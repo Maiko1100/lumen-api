@@ -327,4 +327,9 @@ $api->version('v1', function ($api) {
         'uses' => 'App\Http\Controllers\QuestionGeneratorController@cloneYearQuestions',
         'as' => 'api.questiongenerator.clone'
     ]);
+
+    $api->post('/testmail', [
+        'uses' => 'App\Http\Controllers\MailController@testMail',
+        'as' => 'api.mail.test'
+    ]);
 });

@@ -6,6 +6,7 @@ use App\User;
 use stdClass;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Mail;
+use Dingo\Api\Contract\Http\Request;
 use App\Utils\Enums\ProgressState;
 
 class MailController extends Controller
@@ -32,7 +33,14 @@ class MailController extends Controller
 
         Mail::send($emailData['template'], $emailData, function ($message) use ($emailData) {
             $message->to($emailData['email'], '')->subject($emailData['subject']);
-            $message->from('info@kcps.nl', 'Info || TTMTax');
+            $message->from('info@ttmtax.nl', 'Info || TTMTAX');
+        });
+    }
+
+    public function testMail(Request $request) {
+        Mail::send('mails.testmail', ['hendrik' => 'jan'], function ($message) use ($request) {
+            $message->to($request->input('mail'), '')->subject('testmail');
+            $message->from('info@ttmtax.nl', 'Info || TTMTAX');
         });
     }
 
