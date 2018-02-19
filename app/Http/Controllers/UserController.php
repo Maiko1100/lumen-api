@@ -167,7 +167,7 @@ class UserController extends Controller
         $meeting->name = "test";
         $meeting->template="mails.userMails.passwordReset";
         $meeting->subject="Reset password";
-        $meeting->resetLink = env("BASE_URL_FRONT_END","http://test-ttmtax.kcps.nl/")."/reset?reset_token=".$token;
+        $meeting->resetLink = env("BASE_URL_FRONT_END","https://portal.ttmtax.nl/")."/reset?reset_token=".$token;
 
         MailController::sendMail($meeting);
 
