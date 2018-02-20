@@ -304,8 +304,6 @@ $api->version('v1', function ($api) {
         ]);
     });
 
-
-
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {
@@ -320,6 +318,23 @@ $api->version('v1', function ($api) {
         $api->get('/discount/get', [
             'uses' => 'App\Http\Controllers\DiscountController@getDiscount',
             'as' => 'api.discount.get'
+        ]);
+    });
+
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->get('/discount/all', [
+            'uses' => 'App\Http\Controllers\DiscountController@getDiscounts',
+            'as' => 'api.discount.all'
+        ]);
+        $api->post('/discount/add', [
+            'uses' => 'App\Http\Controllers\DiscountController@addDiscount',
+            'as' => 'api.discount.add'
+        ]);
+        $api->post('/discount/delete', [
+            'uses' => 'App\Http\Controllers\DiscountController@deleteDiscount',
+            'as' => 'api.discount.delete'
         ]);
     });
 
