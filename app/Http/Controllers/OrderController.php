@@ -135,7 +135,6 @@ class OrderController extends Controller {
 
         $order = Order::where("payment_id", "=", $paymentId);
         $order->payment_status = $payment->status;
-        Log($payment->status);
         if ($payment->status == "paid") {
             $order->accepted = date('Y-m-d H:i:s');
         } else {
