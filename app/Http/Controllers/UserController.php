@@ -21,6 +21,29 @@ use Webpatser\Uuid\Uuid;
 class UserController extends Controller
 {
 
+    public function addEmployee(Request $request){
+        $auth = new AuthController();
+        $credentials = $this->getCredentials($request);
+
+        if(User::where('email', '=', $credentials['email'])->exists()){
+            abort(400, "A user with this email address already exists.");
+        }
+
+        $person = new Person();
+        $person->first_name = $request->input('fname');
+        $person->last_name = $request->input('lname');
+        $person->save();
+
+        $user = new User();
+        $user->person_id = $person->id;
+        $user->email = $credentials['email'];
+        $user->role=userRole::employee;
+        $user->password = app('hash')->make($credentials['password']);
+        $user->save();
+
+        return $user;
+    }
+
     public function addUser(Request $request)
     {
         $auth = new AuthController();
@@ -196,8 +219,6 @@ class UserController extends Controller
             $passwordReset->delete();
             return $user;
         }
-
         abort(400, "Reset token not found");
-
     }
 }

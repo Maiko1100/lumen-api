@@ -343,6 +343,11 @@ $api->version('v1', function ($api) {
         'as' => 'api.questiongenerator.clone'
     ]);
 
+    $api->post('/users/employees/add', [
+        'uses' => 'App\Http\Controllers\UserController@addEmployee',
+        'as' => 'api.users.users.employees.add'
+    ]);
+
     $api->post('/testmail', [
         'uses' => 'App\Http\Controllers\MailController@testMail',
         'as' => 'api.mail.test'
