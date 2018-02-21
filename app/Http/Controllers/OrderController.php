@@ -22,7 +22,7 @@ class OrderController extends Controller {
     function __construct () {
         $this->mollie = $mollie = new Mollie_API_Client();
         $this->mollie->setApiKey("live_vXW7SjfAvjKn4Rj4A4jQXEhE3C3KeN");
-        $this->webhook = "https://portal.ttmtax.nl/api/mollie-webhook";
+        $this->webhook = "https://api.ttmtax.nl/api/mollie-webhook";
     }
 
     function createOrder(Request $request) {
