@@ -100,7 +100,7 @@ class UserYearController extends Controller
       $userYearsArray = [];
 
       foreach ($userYears as $userYear) {
-          $userYearsArray[$userYear->year_id] = $userYear->status;
+          $userYearsArray[$userYear->year_id] = [$userYear->status, $userYear->withPartner];
       }
 
       return new JsonResponse($userYearsArray);
