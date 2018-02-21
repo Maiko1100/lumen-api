@@ -133,7 +133,8 @@ class OrderController extends Controller {
         $paymentId = $request->input('id');
         $payment = $this->mollie->payments->get($paymentId);
 
-        $order = Order::where("payment_id", "=", $paymentId);
+        $order = Order::where("payment_id", "=", $paymentId)
+            ->first();
         $order->payment_status = $payment->status;
         if ($payment->status == "paid") {
             $order->accepted = date('Y-m-d H:i:s');
