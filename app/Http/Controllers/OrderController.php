@@ -39,6 +39,7 @@ class OrderController extends Controller {
                     $userYear->person_id = $user->person_id;
                     $userYear->year_id = $request->input('year');
                     $userYear->status = ProgressState::questionnaireStartedNotPaid;
+                    $userYear->withPartner = $request->input('paymentString') == 'taxReturnPlusPartnerWithAppointment' ? 1 : 0;
                     $userYear->save();
                 }
                 $order->user_id = $user->person_id;
@@ -113,12 +114,14 @@ class OrderController extends Controller {
                 return 249;
             case 'taxReturnWithoutAppointment':
                 return 199;
+            case 'taxReturnPlusPartnerWithAppointment':
+                return 324;
+            case 'taxReturnPlusPartnerWithoutAppointment':
+                return 274;
             case 'taxReturnProvisionalWithAppointment':
                 return 171;
             case 'taxReturnProvisionalWithoutAppointment':
                 return 121;
-            case 'taxReturnPlusFiscal':
-                return 324;
             case 'taxReturn':
                 return 249;
             default: 
@@ -130,13 +133,17 @@ class OrderController extends Controller {
         $paymentId = $request->input('id');
         $payment = $this->mollie->payments->get($paymentId);
 
-        Order::where("payment_id", "=", $paymentId)
-            ->update(
-                [
-                    'payment_status' => $payment->status,
-                    'accepted' => date('Y-m-d H:i:s')
-                ]
-            );
+        $order = Order::where("payment_id", "=", $paymentId)
+            ->first();
+        $order->payment_status = $payment->status;
+        if ($payment->status == "paid") {
+            $order->accepted = date('Y-m-d H:i:s');
+        } else {
+            UserYear::find($order->user_year_id)
+                ->delete();
+        }
+
+        $order->save();
     }
 
     public function getPayment(Request $request)
@@ -172,6 +179,14 @@ class OrderController extends Controller {
                 $userYear->status = ProgressState::questionnaireReadyToReview;
                 $userYear->save();
                 return new JsonResponse($service);
+            case 'taxReturnPlusPartnerWithAppointment':
+                $userYear->status = ProgressState::questionnaireStartedPaid;
+                $userYear->save();
+                return new JsonResponse($service);
+            case 'taxReturnPlusPartnerWithoutAppointment':
+                $userYear->status = ProgressState::questionnaireReadyToReview;
+                $userYear->save();
+                return new JsonResponse($service);
             case 'taxReturnProvisionalWithAppointment':
                 $userYear->status = ProgressState::questionnaireStartedPaid;
                 $userYear->save();
@@ -179,8 +194,6 @@ class OrderController extends Controller {
             case 'taxReturnProvisionalWithoutAppointment':
                 $userYear->status = ProgressState::questionnaireReadyToReview;
                 $userYear->save();
-                return new JsonResponse($service);
-            case 'taxReturnPlusFiscal':
                 return new JsonResponse($service);
             case 'taxAdvice':
                 return new JsonResponse($service);

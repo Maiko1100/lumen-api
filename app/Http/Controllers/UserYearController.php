@@ -56,7 +56,7 @@ class UserYearController extends Controller
         $userYearsArray = [];
 
         foreach ($userYears as $userYear) {
-            $userYearsArray[$userYear->year_id] = $userYear->status;
+            $userYearsArray[$userYear->year_id] = [$userYear->status, $userYear->withPartner];
         }
 
         return new JsonResponse($userYearsArray);
@@ -91,6 +91,7 @@ class UserYearController extends Controller
       $userYear->person_id = $user->person_id;
       $userYear->year_id = $request->input('year');
       $userYear->package = $request->input('package');
+      $userYear->withPartner = $request->input('partner');
       $userYear->status = ProgressState::questionnaireStartedNotPaid;
       $userYear->save();
 
@@ -99,7 +100,7 @@ class UserYearController extends Controller
       $userYearsArray = [];
 
       foreach ($userYears as $userYear) {
-          $userYearsArray[$userYear->year_id] = $userYear->status;
+          $userYearsArray[$userYear->year_id] = [$userYear->status, $userYear->withPartner];
       }
 
       return new JsonResponse($userYearsArray);

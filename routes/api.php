@@ -304,8 +304,6 @@ $api->version('v1', function ($api) {
         ]);
     });
 
-
-
     $api->group([
         'middleware' => 'api.auth',
     ], function ($api) {
@@ -323,9 +321,31 @@ $api->version('v1', function ($api) {
         ]);
     });
 
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->get('/discount/all', [
+            'uses' => 'App\Http\Controllers\DiscountController@getDiscounts',
+            'as' => 'api.discount.all'
+        ]);
+        $api->post('/discount/add', [
+            'uses' => 'App\Http\Controllers\DiscountController@addDiscount',
+            'as' => 'api.discount.add'
+        ]);
+        $api->post('/discount/delete', [
+            'uses' => 'App\Http\Controllers\DiscountController@deleteDiscount',
+            'as' => 'api.discount.delete'
+        ]);
+    });
+
     $api->post('/question/clone', [
         'uses' => 'App\Http\Controllers\QuestionGeneratorController@cloneYearQuestions',
         'as' => 'api.questiongenerator.clone'
+    ]);
+
+    $api->post('/users/employees/add', [
+        'uses' => 'App\Http\Controllers\UserController@addEmployee',
+        'as' => 'api.users.users.employees.add'
     ]);
 
     $api->post('/testmail', [

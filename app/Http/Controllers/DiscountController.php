@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use App\Discount as Discount;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class DiscountController extends Controller
 {
@@ -22,5 +23,48 @@ class DiscountController extends Controller
         }
         return JsonResponse::create($discount);
 
+    }
+
+    public function getDiscounts()
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($user->role == 3) {
+            return new Response(Discount::all());
+        } else {
+            return new Response("unauthorized");
+        }
+    }
+
+    public function addDiscount(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($user->role == 3) {
+            $discount = new Discount();
+            $discount->code = $request->input("code");
+            $discount->percentage = $request->input("percentage");
+            $discount->company = $request->has("company") ? $request->input("company") : null;
+
+            $discount->save();
+
+            return new Response($discount);
+        } else {
+            return new Response("unauthorized");
+        }
+    }
+
+    public function deleteDiscount(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($user->role == 3) {
+            Discount::find($request->input("id"))
+                ->delete();
+
+            return new Response("true");
+        } else {
+            return new Response("unauthorized");
+        }
     }
 }
