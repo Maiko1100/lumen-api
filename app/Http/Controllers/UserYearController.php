@@ -43,7 +43,8 @@ class UserYearController extends Controller
         $userYearsArray = [];
 
         foreach ($userYears as $userYear) {
-            $userYearsArray[$userYear->year_id] = $userYear->status;
+            $userYearsArray['status'][$userYear->year_id] = $userYear->status;
+            $userYearsArray['partner'][$userYear->year_id] = $userYear->withPartner;
         }
 
         return new JsonResponse($userYearsArray);
@@ -56,7 +57,8 @@ class UserYearController extends Controller
         $userYearsArray = [];
 
         foreach ($userYears as $userYear) {
-            $userYearsArray[$userYear->year_id] = [$userYear->status, $userYear->withPartner];
+            $userYearsArray['status'][$userYear->year_id] = $userYear->status;
+            $userYearsArray['partner'][$userYear->year_id] = $userYear->withPartner;
         }
 
         return new JsonResponse($userYearsArray);
@@ -100,7 +102,8 @@ class UserYearController extends Controller
       $userYearsArray = [];
 
       foreach ($userYears as $userYear) {
-          $userYearsArray[$userYear->year_id] = [$userYear->status, $userYear->withPartner];
+          $userYearsArray['status'][$userYear->year_id] = $userYear->status;
+          $userYearsArray['partner'][$userYear->year_id] = $userYear->withPartner;
       }
 
       return new JsonResponse($userYearsArray);
