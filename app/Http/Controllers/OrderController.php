@@ -58,7 +58,6 @@ class OrderController extends Controller {
         $discountCode = $request->input("discountCode");
 
 
-
         if (isset($discountCode)) {
             $discount = Discount::where('code', '=', $discountCode)->first();
             if(isset($discount)) {
@@ -77,8 +76,10 @@ class OrderController extends Controller {
                 $order->payment_status = "opRek";
                 $order->created = date('Y-m-d H:i:s');
                 $order->save();
-
-                return $request->input('redirectURL');
+                $userYear = UserYear::where('id', '=', $order->user_year_id)->first();
+                $this->handlePayment($order->service_name,$userYear,$request,$user);
+                $redirectUrl = $request->input('redirectURL') . '?package=' . $package;
+                return $redirectUrl;
             }
             $amount = $amount - ($amount / 100 * $discount->percentage);
         }
