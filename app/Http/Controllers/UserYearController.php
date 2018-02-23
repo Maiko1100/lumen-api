@@ -43,7 +43,7 @@ class UserYearController extends Controller
         $userYearsArray = [];
 
         foreach ($userYears as $userYear) {
-            $userYearsArray[$userYear->year_id] = $userYear->status;
+            $userYearsArray['status'][$userYear->year_id] = $userYear->status;
             $userYearsArray['partner'][$userYear->year_id] = $userYear->withPartner;
         }
 
@@ -57,7 +57,7 @@ class UserYearController extends Controller
         $userYearsArray = [];
 
         foreach ($userYears as $userYear) {
-            $userYearsArray[$userYear->year_id] = $userYear->status;
+            $userYearsArray['status'][$userYear->year_id] = $userYear->status;
             $userYearsArray['partner'][$userYear->year_id] = $userYear->withPartner;
         }
 
@@ -102,7 +102,7 @@ class UserYearController extends Controller
       $userYearsArray = [];
 
       foreach ($userYears as $userYear) {
-          $userYearsArray[$userYear->year_id] = $userYear->status;
+          $userYearsArray['status'][$userYear->year_id] = $userYear->status;
           $userYearsArray['partner'][$userYear->year_id] = $userYear->withPartner;
       }
 
