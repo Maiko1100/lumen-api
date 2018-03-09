@@ -146,13 +146,15 @@ class UserController extends Controller
             $cases = DB::table('user_year')
                 ->join('person', 'user_year.person_id', '=', 'person.id')
                 ->leftjoin('person as employee', 'user_year.employee_id', '=', 'employee.id')
-                ->select('employee.first_name as employee_name', 'user_year.year_id', 'user_year.package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name', 'person.last_name', 'person.passport', 'person.bsn', 'person.dob')->get();
+                ->leftjoin('order', 'user_year.id', 'order.user_year_id')
+                ->select('employee.first_name as employee_name', 'user_year.year_id', 'order.service_name as package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name')->get();
             return $cases;
         } elseif ($user->role == 2) {
             $cases = DB::table('user_year')
                 ->join('person', 'user_year.person_id', '=', 'person.id')
+                ->leftjoin('order', 'user_year.id', 'order.user_year_id')
                 ->where('user_year.employee_id', '=', $user->person_id)
-                ->select('user_year.year_id', 'user_year.package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name', 'person.last_name', 'person.passport', 'person.bsn', 'person.dob')->get();
+                ->select('user_year.year_id', 'order.service_name as package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name')->get();
             return $cases;
         } else {
             abort(400, "You are not authorized to do this call");
@@ -166,7 +168,8 @@ class UserController extends Controller
         $case = UserYear::where('user_year.id', '=' ,$request->input('caseId'))
             ->leftjoin('person', 'person.id', '=', 'user_year.person_id')
             ->leftjoin('person as assignee', 'assignee.id', '=', 'employee_id')
-            ->select('assignee.first_name as assignee_first_name', 'assignee.last_name as assignee_last_name', 'person.first_name', 'user_year.status', 'user_year.year_id', 'user_year.package')->first();
+            ->leftjoin('order', 'user_year.id', 'order.user_year_id')
+            ->select('assignee.first_name as assignee_first_name', 'person.first_name', 'user_year.status', 'user_year.year_id', 'order.service_name as package', 'order.price')->first();
         return $case;
     }
 
