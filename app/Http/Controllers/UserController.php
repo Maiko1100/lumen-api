@@ -169,7 +169,7 @@ class UserController extends Controller
             ->leftjoin('person', 'person.id', '=', 'user_year.person_id')
             ->leftjoin('person as assignee', 'assignee.id', '=', 'employee_id')
             ->leftjoin('order', 'user_year.id', 'order.user_year_id')
-            ->select('assignee.first_name as assignee_first_name', 'person.first_name', 'user_year.status', 'user_year.year_id', 'order.service_name as package', 'order.price')->first();
+            ->select('assignee.first_name as assignee_first_name', 'person.first_name', 'user_year.status', 'user_year.year_id', 'user_year.updated_at', 'order.service_name as package', 'order.price')->first();
         return $case;
     }
 
