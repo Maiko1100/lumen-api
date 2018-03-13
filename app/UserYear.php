@@ -8,7 +8,6 @@ class UserYear extends Model
 {
 
     protected $table = 'user_year';
-    public $timestamps = false;
 
     public function getUserFiles()
     {
