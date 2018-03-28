@@ -140,6 +140,10 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserYearController@changeStatus',
             'as' => 'api.useryear.status.change'
         ]);
+        $api->get('/useryear/change/partner', [
+            'uses' => 'App\Http\Controllers\UserYearController@changePartner',
+            'as' => 'api.useryear.status.change'
+        ]);
     });
     $api->get('/calendar/meeting/get', [
         'uses' => 'App\Http\Controllers\gCalendarController@getMeetings',
@@ -277,6 +281,10 @@ $api->version('v1', function ($api) {
         $api->get('/customers', [
             'uses' => 'App\Http\Controllers\UserController@getAllCustomers',
             'as' => 'api.users.customers'
+        ]);
+        $api->post('/customers/delete', [
+            'uses' => 'App\Http\Controllers\UserController@deleteUser',
+            'as' => 'api.users.customers.delete'
         ]);
         $api->get('/users/employees', [
             'uses' => 'App\Http\Controllers\UserController@getAllEmployees',
