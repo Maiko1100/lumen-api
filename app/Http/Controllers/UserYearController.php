@@ -64,6 +64,14 @@ class UserYearController extends Controller
         return new JsonResponse($userYearsArray);
     }
 
+//    public function getUserYearsFromCustomer(Request $request){
+//        $user = JWTAuth::parseToken()->authenticate();
+//        $userToDelete = $request->input('customerId');
+//
+//        $userYears = UserYear::where('person_id', '=', $userToDelete)-get();
+//
+//    }
+
     public function getUserYear(Request $request) {
         $user = JWTAuth::parseToken()->authenticate();
         $userYear = UserYear::where("person_id", "=", $user->person_id)
@@ -200,7 +208,6 @@ class UserYearController extends Controller
             return "You are not authorized to do this call";
         }
     }
-
 }
 
 ?>

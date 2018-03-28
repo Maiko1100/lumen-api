@@ -282,6 +282,10 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserController@getAllCustomers',
             'as' => 'api.users.customers'
         ]);
+        $api->post('/customers/delete', [
+            'uses' => 'App\Http\Controllers\UserController@deleteUser',
+            'as' => 'api.users.customers.delete'
+        ]);
         $api->get('/users/employees', [
             'uses' => 'App\Http\Controllers\UserController@getAllEmployees',
             'as' => 'api.users.users.employees'

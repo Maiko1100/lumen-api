@@ -224,4 +224,30 @@ class UserController extends Controller
         }
         abort(400, "Reset token not found");
     }
+
+    public function deleteUser(Request $request) {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if($user->role >= 3){
+            $userToDelete = $request->input('customerId');
+
+
+            $userYears = UserYear::where('person_id','=',$userToDelete)->get();
+            $user = User::where('person_id', '=', $userToDelete)->first();
+            $person = Person::where('id', '=', $userToDelete)->first();
+
+
+            foreach($userYears as $userYear){
+                $userYear->delete();
+            }
+
+            $user->delete();
+            $person->delete();
+
+            return "User and cases has been deleted.";
+
+        }else{
+            abort(400, "You're not authorized to make this call");
+        }
+    }
 }
