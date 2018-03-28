@@ -140,6 +140,10 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserYearController@changeStatus',
             'as' => 'api.useryear.status.change'
         ]);
+        $api->get('/useryear/change/partner', [
+            'uses' => 'App\Http\Controllers\UserYearController@changePartner',
+            'as' => 'api.useryear.status.change'
+        ]);
     });
     $api->get('/calendar/meeting/get', [
         'uses' => 'App\Http\Controllers\gCalendarController@getMeetings',

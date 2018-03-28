@@ -79,6 +79,23 @@ class UserYearController extends Controller
 
         return new JsonResponse($output);
     }
+    public function changePartner(Request $request) {
+
+        $userYearId = $request->input('caseId');
+        $userYear = UserYear::where('id', '=',$userYearId)->first();
+
+        $userYear->withPartner = !$userYear->withPartner;
+
+        $userYear->save();
+
+        $case = UserYear::where('user_year.id', '=' ,$request->input('caseId'))
+            ->leftjoin('person', 'person.id', '=', 'user_year.person_id')
+            ->leftjoin('person as assignee', 'assignee.id', '=', 'employee_id')
+            ->leftjoin('order', 'user_year.id', 'order.user_year_id')
+            ->select('assignee.first_name as assignee_first_name', 'user_year.withPartner','person.first_name', 'user_year.status', 'user_year.year_id', 'user_year.updated_at', 'order.service_name as package', 'order.price')->first();
+        return $case;
+
+    }
 
   /**
    * Show the form for creating a new resource.
