@@ -299,7 +299,11 @@ class UserFileController extends Controller
 
         Storage::putFileAs('userDocuments/' . $person_id. "/", $file, $fileName);
 
-        $userFile = new UserFile();
+        $userFile = UserFile:: where("person_id","=",$person_id)->where("user_year_id", "=", $userYear->id)->where("type","=",documentType::report)->first();
+        if(!isset($userFile)) {
+            $userFile = new UserFile();
+        }
+
         $userFile->name = $fileName;
         $userFile->type = documentType::report;
         $userFile->person_id = $person_id;
