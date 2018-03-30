@@ -26,7 +26,8 @@ class UserYearController extends Controller
             $cases = DB::table('user_year')
                 ->join('person', 'user_year.person_id', '=', 'person.id')
                 ->leftjoin('person as employee', 'user_year.employee_id', '=', 'employee.id')
-                ->select('employee.first_name as employee_name','user_year.year_id', 'user_year.package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name', 'person.last_name', 'person.passport', 'person.bsn', 'person.dob')->get();
+                ->leftjoin('order', 'user_year.id', 'order.user_year_id')
+                ->select('employee.first_name as employee_name','user_year.year_id', 'order.service_name as package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name', 'person.last_name', 'person.passport', 'person.bsn', 'person.dob')->get();
             return $cases;
         }
         $user = JWTAuth::parseToken()->authenticate();
@@ -64,6 +65,14 @@ class UserYearController extends Controller
         return new JsonResponse($userYearsArray);
     }
 
+//    public function getUserYearsFromCustomer(Request $request){
+//        $user = JWTAuth::parseToken()->authenticate();
+//        $userToDelete = $request->input('customerId');
+//
+//        $userYears = UserYear::where('person_id', '=', $userToDelete)-get();
+//
+//    }
+
     public function getUserYear(Request $request) {
         $user = JWTAuth::parseToken()->authenticate();
         $userYear = UserYear::where("person_id", "=", $user->person_id)
@@ -78,6 +87,23 @@ class UserYearController extends Controller
         }
 
         return new JsonResponse($output);
+    }
+    public function changePartner(Request $request) {
+
+        $userYearId = $request->input('caseId');
+        $userYear = UserYear::where('id', '=',$userYearId)->first();
+
+        $userYear->withPartner = !$userYear->withPartner;
+
+        $userYear->save();
+
+        $case = UserYear::where('user_year.id', '=' ,$request->input('caseId'))
+            ->leftjoin('person', 'person.id', '=', 'user_year.person_id')
+            ->leftjoin('person as assignee', 'assignee.id', '=', 'employee_id')
+            ->leftjoin('order', 'user_year.id', 'order.user_year_id')
+            ->select('assignee.first_name as assignee_first_name', 'user_year.withPartner','person.first_name', 'user_year.status', 'user_year.year_id', 'user_year.updated_at', 'order.service_name as package', 'order.price')->first();
+        return $case;
+
     }
 
   /**
@@ -183,7 +209,6 @@ class UserYearController extends Controller
             return "You are not authorized to do this call";
         }
     }
-
 }
 
 ?>

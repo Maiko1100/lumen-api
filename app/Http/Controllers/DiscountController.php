@@ -15,7 +15,7 @@ class DiscountController extends Controller
     {
         $discountCode = $request->input("discountCode");
 
-        $discount = Discount::where('code', '=', $discountCode)->first();
+        $discount = Discount::where('code', '=', $discountCode)->where('active','=',true)->first();
         if(!isset($discount)){
             return new JsonResponse([
                 'message' => 'invalid discount code'
@@ -30,7 +30,7 @@ class DiscountController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
 
         if ($user->role == 3) {
-            return new Response(Discount::all());
+            return new Response(Discount::where('active','=',true)->get());
         } else {
             return new Response("unauthorized");
         }
@@ -43,6 +43,7 @@ class DiscountController extends Controller
         if ($user->role == 3) {
             $discount = new Discount();
             $discount->code = $request->input("code");
+            $discount->active = true;
             $discount->percentage = $request->input("percentage");
             $discount->company = $request->has("company") ? $request->input("company") : null;
 
@@ -59,8 +60,9 @@ class DiscountController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
 
         if ($user->role == 3) {
-            Discount::find($request->input("id"))
-                ->delete();
+            $discount = Discount::where('id','=',$request->input("id"))->first();
+            $discount->active = false;
+            $discount->save();
 
             return new Response("true");
         } else {
