@@ -176,6 +176,11 @@ $api->version('v1', function ($api) {
             'as' => 'api.questioncontroller'
         ]);
 
+        $api->get('/question/30', [
+            'uses' => 'App\Http\Controllers\QuestionController@get30',
+            'as' => 'api.question.30'
+        ]);
+
         $api->post('/question/profile', [
             'uses' => 'App\Http\Controllers\QuestionController@getProfileQuestions',
             'as' => 'api.questioncontroller'
