@@ -125,6 +125,8 @@ class OrderController extends Controller {
                 return 121;
             case 'taxReturn':
                 return 249;
+            case 'taxRuling':
+                return 450;
             default: 
                 return null;
         }

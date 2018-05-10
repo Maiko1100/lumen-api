@@ -138,7 +138,6 @@ class UserController extends Controller
         }
     }
 
-
     public function getAllCases()
     {
         $user = JWTAuth::parseToken()->authenticate();
@@ -159,6 +158,21 @@ class UserController extends Controller
         } else {
             abort(400, "You are not authorized to do this call");
 //            return "You are not authorized to do this call";
+        }
+    }
+
+    public function changeTaxRulingState(Request $request) {
+        if ($request->has('state')) {
+            $user = JWTAuth::parseToken()->authenticate();
+
+            User::where('person_id', "=", $user->person_id)->update(
+                [
+                    'tax_ruling_state' => $request->input('state')
+                ]);
+
+            return $request->input('state');
+        } else {
+            return 'Bad parameters';
         }
     }
 

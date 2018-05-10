@@ -180,7 +180,7 @@ $api->version('v1', function ($api) {
             'as' => 'api.questioncontroller'
         ]);
 
-        $api->get('/question/30', [
+        $api->post('/question/30', [
             'uses' => 'App\Http\Controllers\QuestionController@get30',
             'as' => 'api.question.30'
         ]);
@@ -228,6 +228,15 @@ $api->version('v1', function ($api) {
         $api->post('/questionplus/delete', [
             'uses' => 'App\Http\Controllers\QuestionPlusController@delete',
             'as' => 'api.QuestionPlusController.delete'
+        ]);
+    });
+
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->post('/taxrulingstate/change', [
+            'uses' => 'App\Http\Controllers\UserController@changeTaxRulingState',
+            'as' => 'api.UserController.changeTaxRulingState'
         ]);
     });
 
