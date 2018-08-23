@@ -146,7 +146,9 @@ class UserController extends Controller
                 ->join('person', 'user_year.person_id', '=', 'person.id')
                 ->leftjoin('person as employee', 'user_year.employee_id', '=', 'employee.id')
                 ->leftjoin('order', 'user_year.id', 'order.user_year_id')
-                ->select('employee.first_name as employee_name', 'user_year.year_id', 'order.service_name as package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name')->get();
+                ->select('employee.first_name as employee_name', 'user_year.year_id', 'order.service_name as package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name')
+                ->get();
+
             return $cases;
         } elseif ($user->role == 2) {
             $cases = DB::table('user_year')
