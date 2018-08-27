@@ -208,6 +208,11 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\FeedbackController@saveQuestionFeedBack',
             'as' => 'api.question.file.save'
         ]);
+
+        $api->post('/question/30/feedback/save', [
+            'uses' => 'App\Http\Controllers\FeedbackController@saveTaxRulingQuestionFeedBack',
+            'as' => 'api.question.file.save'
+        ]);
     });
     $api->group([
         'middleware' => 'api.auth',
@@ -308,9 +313,17 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserYearController@assignEmployee',
             'as' => 'api.users.users.employees.assign'
         ]);
+        $api->post('/users/employees/assign/tax', [
+            'uses' => 'App\Http\Controllers\UserController@assignTaxEmployee',
+            'as' => 'api.users.users.employees.assigntax'
+        ]);
         $api->get('/customers/cases', [
             'uses' => 'App\Http\Controllers\UserController@getAllCases',
             'as' => 'api.users.customers.cases'
+        ]);
+        $api->get('/customers/taxcases', [
+            'uses' => 'App\Http\Controllers\UserController@getAllTaxCases',
+            'as' => 'api.users.customers.taxcases'
         ]);
         $api->get('/customers/case', [
             'uses' => 'App\Http\Controllers\UserController@getCaseAndUser',

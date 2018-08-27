@@ -13,6 +13,5 @@ abstract class ProgressState {
     const fileTaxReturn = 9;
     const taxReturnFiled = 10;
     const preliminaryTaxUploaded = 11;
-    const finalTaxAssessmentUploaded =12;
+    const finalTaxAssessmentUploaded = 12;
 }
-

@@ -237,7 +237,7 @@ class QuestionController extends Controller
     function get30(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
-        $isReview = $request->has('isReview');
+        $isReview = $request->has('person_id');
 
         $categoryController = new CategoryController();
         $category = $categoryController->getCategoryBy30();
@@ -251,18 +251,33 @@ class QuestionController extends Controller
         $g = array();
 
         foreach ($groups as $group) {
+            if ($isReview) {
+                $person_id = $request->input('person_id');
 
-            $questions = $group->getQuestions()
-                ->leftjoin('user_question', function ($join) use ($user) {
-                    $join->on('question.id', '=', 'user_question.question_id');
-                    $join->on('user_question.person_id', "=", DB::raw($user->person_id));
-                })
-                ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
-                ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
-                ->groupBy('question.id')
-                ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.validation_type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.question_answer as answer', 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
-                ->orderBy('question.sort', 'asc')
-                ->get();
+                $questions = $group->getQuestions()
+                    ->leftjoin('user_question', function ($join) use ($person_id) {
+                        $join->on('question.id', '=', 'user_question.question_id');
+                        $join->on('user_question.person_id', "=", DB::raw($person_id));
+                    })
+                    ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
+                    ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
+                    ->groupBy('question.id')
+                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.validation_type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.question_answer as answer', 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
+                    ->orderBy('question.sort', 'asc')
+                    ->get();
+            } else {
+                $questions = $group->getQuestions()
+                    ->leftjoin('user_question', function ($join) use ($user) {
+                        $join->on('question.id', '=', 'user_question.question_id');
+                        $join->on('user_question.person_id', "=", DB::raw($user->person_id));
+                    })
+                    ->leftjoin('user_file', 'user_question.id', 'user_file.user_question_id')
+                    ->leftjoin('feedback', 'user_question.id', 'feedback.user_question_id')
+                    ->groupBy('question.id')
+                    ->select('question.id', 'question.text', 'question.group_id', 'question.condition', 'question.type', 'question.validation_type', 'question.answer_option', 'question.parent', 'question.has_childs', 'question.question_genre_id', 'question.tip_text', DB::raw("group_concat(`user_file`.`name` SEPARATOR '|;|') as `file_names`"), 'user_question.question_answer as answer', 'user_question.approved', 'feedback.text as feedback', 'feedback.admin_note')
+                    ->orderBy('question.sort', 'asc')
+                    ->get();
+            }
 
             $q = array();
 
@@ -279,10 +294,6 @@ class QuestionController extends Controller
                 }
 
                 if (empty($question->parent)) {
-
-                    if ($isReview) {
-                        unset($question->admin_note);
-                    }
 
                     array_push($q, $question);
                 }
