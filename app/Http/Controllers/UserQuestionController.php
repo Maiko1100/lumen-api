@@ -264,6 +264,7 @@ class UserQuestionController extends Controller
         return UserQuestion::join('question', 'user_question.question_id', 'question.id')
             ->where('user_question.person_id', '=', $userId)
             ->whereNull('user_question.user_year_id')
+            ->whereNotNull('user_question.profile_question_id')
             ->orderBy('user_question.profile_question_id')
             ->select('question.text', 'user_question.question_answer')
             ->get();

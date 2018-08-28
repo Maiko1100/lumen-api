@@ -238,11 +238,30 @@ class UserController extends Controller
     public function getCaseAndUser(Request $request){
         $user = JWTAuth::parseToken()->authenticate();
 
-        $case = UserYear::where('user_year.id', '=' ,$request->input('caseId'))
+        $case = UserYear::where('user_year.id', '=', $request->input('caseId'))
             ->leftjoin('person', 'person.id', '=', 'user_year.person_id')
             ->leftjoin('person as assignee', 'assignee.id', '=', 'employee_id')
             ->leftjoin('order', 'user_year.id', 'order.user_year_id')
-            ->select('assignee.first_name as assignee_first_name', 'person.first_name', 'user_year.status', 'user_year.year_id', 'user_year.updated_at', 'order.service_name as package', 'order.price')->first();
+            ->select('assignee.first_name as assignee_first_name', 'assignee.last_name as assignee_last_name', 'person.first_name', 'user_year.status', 'user_year.year_id', 'user_year.updated_at', 'order.service_name as package', 'order.price')
+            ->first();
+
+        return $case;
+    }
+
+    public function getTaxRulingCaseAndUser(Request $request){
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $case = User::join('person', 'person.id', '=', 'user.person_id')
+            ->leftjoin('person as assignee', 'assignee.id', '=', 'user.employee_id')
+            ->leftjoin('order', function ($join) {
+                $join->on('person.id', '=', 'order.user_id');
+                $join->on('order.service_name', '=', DB::raw("'taxRuling'"));
+                $join->on('order.payment_status', '=', DB::raw("'paid'"));
+            })
+            ->where('person.id', '=', $request->input('person_id'))
+            ->select('assignee.first_name as assignee_first_name', 'assignee.last_name as assignee_last_name', 'person.first_name', 'user.tax_ruling_state as status', 'order.price')
+            ->first();
+            
         return $case;
     }
 

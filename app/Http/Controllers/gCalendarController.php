@@ -27,6 +27,10 @@ class gCalendarController extends Controller
             $user = null;
         }
         $meeting = json_decode($request->input('formValues'))->formvalues;
+        if ($meeting->email == null || $meeting->phoneNumber == null) {
+            return 'unauthorized';
+        }
+
         $meeting2 = json_decode($request->input('formValues'))->formvalues;
         $appointmentStartDate = $meeting->startDate;
         $startDate = date_format(date_create($meeting->startDate),"d F Y");

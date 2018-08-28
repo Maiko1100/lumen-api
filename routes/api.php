@@ -74,6 +74,10 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserFileController@getCaseFiles',
             'as' => 'api.files.case'
         ]);
+        $api->get('/files/case/taxruling', [
+            'uses' => 'App\Http\Controllers\UserFileController@getTaxRulingCaseFiles',
+            'as' => 'api.files.casetaxruling'
+        ]);
         $api->post('/file/get', [
             'uses' => 'App\Http\Controllers\UserFileController@getFile',
             'as' => 'api.file.get'
@@ -328,6 +332,10 @@ $api->version('v1', function ($api) {
         $api->get('/customers/case', [
             'uses' => 'App\Http\Controllers\UserController@getCaseAndUser',
             'as' => 'api.users.customers.case'
+        ]);
+        $api->get('/customers/case/taxruling', [
+            'uses' => 'App\Http\Controllers\UserController@getTaxRulingCaseAndUser',
+            'as' => 'api.users.customers.casetaxruling'
         ]);
         $api->post('/user/changePassword', [
             'uses' => 'App\Http\Controllers\UserController@updateUserPassword',
