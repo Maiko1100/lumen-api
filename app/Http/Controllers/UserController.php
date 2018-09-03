@@ -215,7 +215,8 @@ class UserController extends Controller
         }
     }
 
-    public function changeTaxRulingState(Request $request) {
+    public function changeTaxRulingState(Request $request)
+    {
         if ($request->has('state')) {
             $user = JWTAuth::parseToken()->authenticate();
 
@@ -229,9 +230,26 @@ class UserController extends Controller
                     'tax_ruling_state' => $request->input('state')
                 ]);
 
-            return $request->input('state');
-        } else {
-            return 'Bad parameters';
+            if ($user->role == 3) {
+                $cases = DB::table('user')
+                    ->join('person', 'user.person_id', '=', 'person.id')
+                    ->leftjoin('person as employee', 'user.employee_id', '=', 'employee.id')
+                    ->select('employee.first_name as employee_name', 'user.tax_ruling_state as status', 'user.employee_id', 'person.id as person_id', 'person.first_name')
+                    ->where('user.tax_ruling_state', '>', 0)
+                    ->get();
+                return $cases;
+            } elseif ($user->role == 2) {
+                $cases = DB::table('user')
+                    ->join('person', 'user.person_id', '=', 'person.id')
+                    ->leftjoin('person as employee', 'user.employee_id', '=', 'employee.id')
+                    ->select('employee.first_name as employee_name', 'user.tax_ruling_state as status', 'user.employee_id', 'person.id as person_id', 'person.first_name')
+                    ->where('user.tax_ruling_state ', '>', 0)
+                    ->where('user.employee_id', '=', $user->person_id)
+                    ->get();
+                return $cases;
+            } else {
+                return 'Bad parameters';
+            }
         }
     }
 
