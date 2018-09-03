@@ -26,6 +26,7 @@ class MailController extends Controller
             'socialName' => isset($meeting->socialName)?$meeting->socialName:"",
             'template' => $meeting->template,
             'subject' => $meeting->subject,
+            'phoneNumber' => $meeting->phoneNumber,
             'resetLink' => isset($meeting->resetLink)?$meeting->resetLink:"",
             'year' => isset($meeting->year)?$meeting->year:"",
             'activateLink' => isset($meeting->activateLink)?$meeting->activateLink:"",
