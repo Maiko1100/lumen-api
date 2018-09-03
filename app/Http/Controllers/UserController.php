@@ -138,7 +138,6 @@ class UserController extends Controller
         }
     }
 
-
     public function getAllCases()
     {
         $user = JWTAuth::parseToken()->authenticate();
@@ -147,14 +146,16 @@ class UserController extends Controller
                 ->join('person', 'user_year.person_id', '=', 'person.id')
                 ->leftjoin('person as employee', 'user_year.employee_id', '=', 'employee.id')
                 ->leftjoin('order', 'user_year.id', 'order.user_year_id')
-                ->select('employee.first_name as employee_name', 'user_year.year_id', 'order.service_name as package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name')->get();
+                ->select('employee.first_name as employee_name', 'user_year.year_id', 'order.service_name as package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name')
+                ->get();
             return $cases;
         } elseif ($user->role == 2) {
             $cases = DB::table('user_year')
                 ->join('person', 'user_year.person_id', '=', 'person.id')
                 ->leftjoin('order', 'user_year.id', 'order.user_year_id')
                 ->where('user_year.employee_id', '=', $user->person_id)
-                ->select('user_year.year_id', 'order.service_name as package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name')->get();
+                ->select('user_year.year_id', 'order.service_name as package', 'user_year.status', 'user_year.id', 'user_year.employee_id', 'person.id as person_id', 'person.first_name')
+                ->get();
             return $cases;
         } else {
             abort(400, "You are not authorized to do this call");
@@ -162,14 +163,105 @@ class UserController extends Controller
         }
     }
 
+    public function getAllTaxCases()
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        if ($user->role == 3) {
+            $cases = DB::table('user')
+                ->join('person', 'user.person_id', '=', 'person.id')
+                ->leftjoin('person as employee', 'user.employee_id', '=', 'employee.id')
+                ->select('employee.first_name as employee_name', 'user.tax_ruling_state as status', 'user.employee_id', 'person.id as person_id', 'person.first_name')
+                ->where('user.tax_ruling_state', '>', 0)
+                ->get();
+            return $cases;
+        } elseif ($user->role == 2) {
+            $cases = DB::table('user')
+                ->join('person', 'user.person_id', '=', 'person.id')
+                ->leftjoin('person as employee', 'user.employee_id', '=', 'employee.id')
+                ->select('employee.first_name as employee_name', 'user.tax_ruling_state as status', 'user.employee_id', 'person.id as person_id', 'person.first_name')
+                ->where('user.tax_ruling_state ', '>', 0)
+                ->where('user.employee_id', '=', $user->person_id)
+                ->get();
+            return $cases;
+        } else {
+            abort(400, "You are not authorized to do this call");
+//            return "You are not authorized to do this call";
+        }
+    }
+
+    public function assignTaxEmployee(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        if ($user->role == 3) {
+            // assign employee to case
+            $caseIdArray = $request->input('caseIdArray');
+            $employeeId = $request->input('employeeId');
+
+            foreach ($caseIdArray as $caseId) {
+                $user = User::where("person_id", "=", $caseId)
+                    ->first();
+                $user->employee_id = $employeeId;
+                $user->save();
+            }
+            $cases = DB::table('user')
+                ->join('person', 'user.person_id', '=', 'person.id')
+                ->leftjoin('person as employee', 'user.employee_id', '=', 'employee.id')
+                ->select('employee.first_name as employee_name', 'user.tax_ruling_state as status', 'user.employee_id', 'person.id as person_id', 'person.first_name')
+                ->where('user.tax_ruling_state', '>', 0)
+                ->get();
+            return $cases;
+        } else {
+            return "You are not authorized to do this call";
+        }
+    }
+
+    public function changeTaxRulingState(Request $request) {
+        if ($request->has('state')) {
+            $user = JWTAuth::parseToken()->authenticate();
+
+            $userId = $user->person_id;
+            if ($user->role == 2 || $user->role == 3) {
+                $userId = $request->input('person_id');
+            }
+
+            User::where('person_id', "=", $userId)->update(
+                [
+                    'tax_ruling_state' => $request->input('state')
+                ]);
+
+            return $request->input('state');
+        } else {
+            return 'Bad parameters';
+        }
+    }
+
     public function getCaseAndUser(Request $request){
         $user = JWTAuth::parseToken()->authenticate();
 
-        $case = UserYear::where('user_year.id', '=' ,$request->input('caseId'))
+        $case = UserYear::where('user_year.id', '=', $request->input('caseId'))
             ->leftjoin('person', 'person.id', '=', 'user_year.person_id')
             ->leftjoin('person as assignee', 'assignee.id', '=', 'employee_id')
             ->leftjoin('order', 'user_year.id', 'order.user_year_id')
-            ->select('assignee.first_name as assignee_first_name', 'person.first_name', 'user_year.status', 'user_year.year_id', 'user_year.updated_at', 'order.service_name as package', 'order.price')->first();
+            ->select('assignee.first_name as assignee_first_name', 'assignee.last_name as assignee_last_name', 'person.first_name', 'user_year.status', 'user_year.year_id', 'user_year.updated_at', 'order.service_name as package', 'order.price')
+            ->first();
+
+        return $case;
+    }
+
+    public function getTaxRulingCaseAndUser(Request $request){
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $case = User::join('person', 'person.id', '=', 'user.person_id')
+            ->leftjoin('person as assignee', 'assignee.id', '=', 'user.employee_id')
+            ->leftjoin('order', function ($join) {
+                $join->on('person.id', '=', 'order.user_id');
+                $join->on('order.service_name', '=', DB::raw("'taxRuling'"));
+                $join->on('order.payment_status', '=', DB::raw("'paid'"));
+            })
+            ->where('person.id', '=', $request->input('person_id'))
+            ->select('assignee.first_name as assignee_first_name', 'assignee.last_name as assignee_last_name', 'person.first_name', 'user.tax_ruling_state as status', 'order.price')
+            ->first();
+            
         return $case;
     }
 

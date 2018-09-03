@@ -54,12 +54,23 @@ class UserFileController extends Controller
         if ($request->has('userYear')) {
             return UserFile::where('user_file.user_year_id', '=', $request->input('userYear'))
                 ->join("user_year", "user_file.user_year_id", "user_year.id")
-                ->select('user_year.year_id','user_year.person_id as id','user_file.person_id','user_file.id', 'user_file.user_question_id', 'user_file.name', 'user_file.type', 'user_file.description', 'user_file.question_id', 'user_file.user_year_id', 'user_file.qpid')
+                ->select('user_year.year_id', 'user_year.person_id as id','user_file.person_id','user_file.id', 'user_file.user_question_id', 'user_file.name', 'user_file.type', 'user_file.description', 'user_file.question_id', 'user_file.user_year_id', 'user_file.qpid')
                 ->get();
         } else {
             return 'Bad parameters';
         }
+    }
 
+    public function getTaxRulingCaseFiles(Request $request) {
+        if ($request->has('person_id')) {
+            return UserFile::join('user_question', 'user_file.user_question_id', 'user_question.id')
+                ->whereNull('user_question.user_year_id')
+                ->where('user_question.person_id', '=', $request->input('person_id'))
+                ->select('user_file.person_id', 'user_file.id', 'user_file.user_question_id', 'user_file.name', 'user_file.type', 'user_file.description', 'user_file.question_id')
+                ->get();
+        } else {
+            return 'Bad parameters';
+        }
     }
 
     public function getFile(Request $request)

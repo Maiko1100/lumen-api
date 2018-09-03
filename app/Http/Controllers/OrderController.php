@@ -96,6 +96,9 @@ class OrderController extends Controller {
             "webhookUrl"  => $this->webhook
         ));
 
+        if ($request->input('paymentString') == 'taxRuling') {
+            $order->user_id = JWTAuth::parseToken()->authenticate()->person_id;
+        }
 
         $order->service_name = $package;
         $order->price = $amount;
@@ -125,6 +128,8 @@ class OrderController extends Controller {
                 return 121;
             case 'taxReturn':
                 return 249;
+            case 'taxRuling':
+                return 450;
             default: 
                 return null;
         }
@@ -208,6 +213,8 @@ class OrderController extends Controller {
                 $userYear->save();
                 return new JsonResponse($service);
             case 'taxAdvice':
+                return new JsonResponse($service);
+            case 'taxRuling':
                 return new JsonResponse($service);
             default:
                 return "package not found";
