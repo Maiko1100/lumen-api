@@ -53,6 +53,7 @@ class UserQuestionController extends Controller
                     $existingProfileQuestion->question_answer = $answer;
                     $existingProfileQuestion->save();
                 } else {
+                    
                     $profileUserQuestion = new UserQuestion();
                     $profileUserQuestion->person_id = $user->person_id;
                     $profileUserQuestion->question_id = $questionId;
@@ -65,6 +66,7 @@ class UserQuestionController extends Controller
             }
 
             if (isset($qpid)) {
+
                 $existingQuestion = $this->checkPlus($questionId, $qpid, $userYear, $profileQuestionId);
 
                 if (isset($existingQuestion)) {
@@ -87,17 +89,26 @@ class UserQuestionController extends Controller
                 }
             } else {
                 $existingQuestion = $this->check($userYear, $questionId, !$profileQuestionId && !$userYear ? $personId : $profileQuestionId);
+
+
                 if (isset($existingQuestion)) {
                     $existingQuestion->question_answer = $answer;
                     $existingQuestion->save();
 
                     $uq = $existingQuestion;
                 } else {
+                    $q = Question::join('group', 'question.group_id', 'group.id')
+                        ->join('category', 'group.category_id', 'category.id')
+                        ->where('question.id', '=', $questionId)
+                        ->select('category.is30')
+                        ->first();
+
                     $userQuestion = new UserQuestion();
                     $userQuestion->person_id = $user->person_id;
-                        if (property_exists($userQuestion, 'user_year_id')) {
-                            $userQuestion->user_year_id;
-                        }
+                    
+                    if($q->is30 !== 1){
+                        $userQuestion->user_year_id = $userYear->id;
+                    }
                     $userQuestion->question_id = $questionId;
                     $userQuestion->question_answer = $answer;
                     $userQuestion->profile_question_id = $profileQuestionId;
@@ -201,6 +212,7 @@ class UserQuestionController extends Controller
     private function check($userYear, $questionId, $personId = null)
     {
         if (isset($userYear)) {
+
             return UserQuestion::where("question_id", "=", $questionId)
                 ->where("user_year_id", "=", $userYear->id)
                 ->first();
