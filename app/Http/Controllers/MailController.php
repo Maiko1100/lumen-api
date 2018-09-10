@@ -3,11 +3,13 @@ namespace App\Http\Controllers;
 
 use App\Person;
 use App\User;
+use Illuminate\Contracts\Logging\Log;
 use stdClass;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Mail;
 use Dingo\Api\Contract\Http\Request;
 use App\Utils\Enums\ProgressState;
+
 
 class MailController extends Controller
 {
@@ -47,10 +49,13 @@ class MailController extends Controller
 
     public static function sendStatusMail($userYear)
     {
+
         $user = User::where('person_id','=',$userYear->person_id)
             ->join('person', 'user.person_id', 'person.id')
             ->first();
 
+
+        Log::info('testestsets');
         $meeting = new StdClass();
         $meeting->email = $user->email;
         $meeting->firstName = $user->email;
