@@ -247,7 +247,9 @@ class UserController extends Controller
                     ->where('user.employee_id', '=', $user->person_id)
                     ->get();
                 return $cases;
-            } else {
+            } elseif ($user->role == 1) {
+                return $request->input('state');
+            }else {
                 return 'Bad parameters';
             }
         }
