@@ -131,6 +131,7 @@ class QuestionController extends Controller
             if (isset($categoryId)) {
                 $question->category_id = $categoryId;
             }
+
             if (strpos($question->file_names, '|;|') !== false) {
                 $question->file_names = explode('|;|', $question->file_names);
             } else if ($question->file_names === null) {
@@ -285,6 +286,7 @@ class QuestionController extends Controller
                 if (isset($categoryId)) {
                     $question->category_id = $categoryId;
                 }
+
                 if (strpos($question->file_names, '|;|') !== false) {
                     $question->file_names = explode('|;|', $question->file_names);
                 } else if ($question->file_names === null) {
@@ -294,7 +296,10 @@ class QuestionController extends Controller
                 }
 
                 if (empty($question->parent)) {
-
+                    ///
+                    $this->getChildren($question, null, true, false, null, $user);
+                    unset($question->admin_note);
+                    ///
                     array_push($q, $question);
                 }
             }
@@ -320,7 +325,7 @@ class QuestionController extends Controller
         ));
     }
 
-    function getChildren($question, $userYear, $userYearEmpty, $plusChild, $categoryId, $user = null)
+    function getChildren($question, $userYear, $userYearEmpty, $plusChild, $categoryId = null, $user = null)
     {
         if ($question->answer_option == 1) {
             $question['answer_options'] = $question->getOptions()->pluck('text')->toArray();
@@ -406,9 +411,6 @@ class QuestionController extends Controller
                     ) `d`
                     group by `d`.`id`) `a`"))
                         ->get();
-//                ->toSql();
-//                echo $userQuestions;
-//                exit;
                 }
 
                 $answers = null;
