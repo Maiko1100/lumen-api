@@ -74,6 +74,10 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserFileController@getCaseFiles',
             'as' => 'api.files.case'
         ]);
+        $api->get('/files/case/taxruling', [
+            'uses' => 'App\Http\Controllers\UserFileController@getTaxRulingCaseFiles',
+            'as' => 'api.files.casetaxruling'
+        ]);
         $api->post('/file/get', [
             'uses' => 'App\Http\Controllers\UserFileController@getFile',
             'as' => 'api.file.get'
@@ -180,7 +184,7 @@ $api->version('v1', function ($api) {
             'as' => 'api.questioncontroller'
         ]);
 
-        $api->get('/question/30', [
+        $api->post('/question/30', [
             'uses' => 'App\Http\Controllers\QuestionController@get30',
             'as' => 'api.question.30'
         ]);
@@ -208,6 +212,11 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\FeedbackController@saveQuestionFeedBack',
             'as' => 'api.question.file.save'
         ]);
+
+        $api->post('/question/30/feedback/save', [
+            'uses' => 'App\Http\Controllers\FeedbackController@saveTaxRulingQuestionFeedBack',
+            'as' => 'api.question.file.save'
+        ]);
     });
     $api->group([
         'middleware' => 'api.auth',
@@ -228,6 +237,15 @@ $api->version('v1', function ($api) {
         $api->post('/questionplus/delete', [
             'uses' => 'App\Http\Controllers\QuestionPlusController@delete',
             'as' => 'api.QuestionPlusController.delete'
+        ]);
+    });
+
+    $api->group([
+        'middleware' => 'api.auth',
+    ], function ($api) {
+        $api->post('/taxrulingstate/change', [
+            'uses' => 'App\Http\Controllers\UserController@changeTaxRulingState',
+            'as' => 'api.UserController.changeTaxRulingState'
         ]);
     });
 
@@ -299,13 +317,25 @@ $api->version('v1', function ($api) {
             'uses' => 'App\Http\Controllers\UserYearController@assignEmployee',
             'as' => 'api.users.users.employees.assign'
         ]);
+        $api->post('/users/employees/assign/tax', [
+            'uses' => 'App\Http\Controllers\UserController@assignTaxEmployee',
+            'as' => 'api.users.users.employees.assigntax'
+        ]);
         $api->get('/customers/cases', [
             'uses' => 'App\Http\Controllers\UserController@getAllCases',
             'as' => 'api.users.customers.cases'
         ]);
+        $api->get('/customers/taxcases', [
+            'uses' => 'App\Http\Controllers\UserController@getAllTaxCases',
+            'as' => 'api.users.customers.taxcases'
+        ]);
         $api->get('/customers/case', [
             'uses' => 'App\Http\Controllers\UserController@getCaseAndUser',
             'as' => 'api.users.customers.case'
+        ]);
+        $api->get('/customers/case/taxruling', [
+            'uses' => 'App\Http\Controllers\UserController@getTaxRulingCaseAndUser',
+            'as' => 'api.users.customers.casetaxruling'
         ]);
         $api->post('/user/changePassword', [
             'uses' => 'App\Http\Controllers\UserController@updateUserPassword',
