@@ -25,6 +25,7 @@ class UserQuestionController extends Controller
         $questionId = $request->input('id');
         $answer = $request->input('answer');
         $qpid = $request->input('qpid');
+        $personId = $user->person_id;
 
         $uq = null;
         if (isset($year)) {
@@ -52,6 +53,7 @@ class UserQuestionController extends Controller
                     $existingProfileQuestion->question_answer = $answer;
                     $existingProfileQuestion->save();
                 } else {
+                    
                     $profileUserQuestion = new UserQuestion();
                     $profileUserQuestion->person_id = $user->person_id;
                     $profileUserQuestion->question_id = $questionId;
@@ -64,6 +66,7 @@ class UserQuestionController extends Controller
             }
 
             if (isset($qpid)) {
+
                 $existingQuestion = $this->checkPlus($questionId, $qpid, $userYear, $profileQuestionId);
 
                 if (isset($existingQuestion)) {
@@ -85,16 +88,27 @@ class UserQuestionController extends Controller
                     $uq = $userQuestion;
                 }
             } else {
-                $existingQuestion = $this->check($userYear, $questionId, $profileQuestionId);
+                $existingQuestion = $this->check($userYear, $questionId, !$profileQuestionId && !$userYear ? $personId : $profileQuestionId);
+
+
                 if (isset($existingQuestion)) {
                     $existingQuestion->question_answer = $answer;
                     $existingQuestion->save();
 
                     $uq = $existingQuestion;
                 } else {
+                    $q = Question::join('group', 'question.group_id', 'group.id')
+                        ->join('category', 'group.category_id', 'category.id')
+                        ->where('question.id', '=', $questionId)
+                        ->select('category.is30')
+                        ->first();
+
                     $userQuestion = new UserQuestion();
                     $userQuestion->person_id = $user->person_id;
-                    $userQuestion->user_year_id = $userYear->id;
+                    
+                    if($q->is30 !== 1){
+                        $userQuestion->user_year_id = $userYear->id;
+                    }
                     $userQuestion->question_id = $questionId;
                     $userQuestion->question_answer = $answer;
                     $userQuestion->profile_question_id = $profileQuestionId;
@@ -136,7 +150,7 @@ class UserQuestionController extends Controller
                     $uq = $userQuestion;
                 }
 
-                foreach($userYears as $userYear) {
+                foreach ($userYears as $userYear) {
                     $existingQuestion = $this->checkPlus($questionId, $qpid, $userYear, $profileQuestionId);
 
                     if (isset($existingQuestion)) {
@@ -173,7 +187,7 @@ class UserQuestionController extends Controller
                     $uq = $userQuestion;
                 }
 
-                foreach($userYears as $userYear) {
+                foreach ($userYears as $userYear) {
                     $existingQuestion = $this->check($userYear, $questionId);
                     if (isset($existingQuestion)) {
                         $existingQuestion->question_answer = $answer;
@@ -197,8 +211,8 @@ class UserQuestionController extends Controller
 
     private function check($userYear, $questionId, $personId = null)
     {
-
         if (isset($userYear)) {
+
             return UserQuestion::where("question_id", "=", $questionId)
                 ->where("user_year_id", "=", $userYear->id)
                 ->first();
@@ -207,8 +221,8 @@ class UserQuestionController extends Controller
                 ->whereNull("user_year_id")
                 ->where('person_id', '=', $personId)
                 ->first();
-        }
 
+        }
     }
 
     private function checkPlus($questionId, $qpid, $userYear, $personId = null)
@@ -229,7 +243,7 @@ class UserQuestionController extends Controller
 
     private function checkProfile($profileId, $qpid, $user)
     {
-        if(isset($qpid)) {
+        if (isset($qpid)) {
             return UserQuestion::where("profile_question_id", "=", $profileId)
                 ->where("question_plus_id", "=", $qpid)
                 ->where("person_id", "=", $user->person_id)
@@ -243,12 +257,13 @@ class UserQuestionController extends Controller
         }
     }
 
-    public function getProfileData(Request $request) {
+    public function getProfileData(Request $request)
+    {
         $userId = null;
         if ($request->has('user_id')) {
             $userId = $request->input('user_id');
         }
-        if($request->has('user_year_id')) {
+        if ($request->has('user_year_id')) {
             $userYear = UserYear::where('id', '=', $request->input('user_year_id'))
                 ->select('person_id')
                 ->first();
@@ -261,6 +276,7 @@ class UserQuestionController extends Controller
         return UserQuestion::join('question', 'user_question.question_id', 'question.id')
             ->where('user_question.person_id', '=', $userId)
             ->whereNull('user_question.user_year_id')
+            ->whereNotNull('user_question.profile_question_id')
             ->orderBy('user_question.profile_question_id')
             ->select('question.text', 'user_question.question_answer')
             ->get();

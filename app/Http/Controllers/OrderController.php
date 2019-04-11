@@ -96,6 +96,9 @@ class OrderController extends Controller {
             "webhookUrl"  => $this->webhook
         ));
 
+        if ($request->input('paymentString') == 'taxRuling') {
+            $order->user_id = JWTAuth::parseToken()->authenticate()->person_id;
+        }
 
         $order->service_name = $package;
         $order->price = $amount;
@@ -125,6 +128,8 @@ class OrderController extends Controller {
                 return 121;
             case 'taxReturn':
                 return 249;
+            case 'taxRuling':
+                return 450;
             default: 
                 return null;
         }
@@ -139,6 +144,15 @@ class OrderController extends Controller {
         $order->payment_status = $payment->status;
         if ($payment->status == "paid") {
             $order->accepted = date('Y-m-d H:i:s');
+            if($payment->method == "banktransfer"){
+                $user_year = UserYear::where('id' , '=' , $order->user_year_id)->first();
+                if($order->service_name == "taxReturnWithAppointment" || $order->servie_name == "taxReturnPlusPartnerWithAppointment" || $order->servie_name == "taxReturnProvisionalWithAppointment"){
+                    $user_year->status = ProgressState::questionnaireStartedPaid;
+                }else{
+                    $user_year->status = ProgressState::questionnaireReadyToReview;
+                }
+                $user_year->save();
+            }
         } else {
             if ($order->service_name == 'taxReturnWithAppointment' || $order->service_name == 'taxReturnPlusPartnerWithAppointment' || $order->service_name == 'taxReturnProvisionalWithAppointment') {
                 UserYear::find($order->user_year_id)
@@ -199,6 +213,8 @@ class OrderController extends Controller {
                 $userYear->save();
                 return new JsonResponse($service);
             case 'taxAdvice':
+                return new JsonResponse($service);
+            case 'taxRuling':
                 return new JsonResponse($service);
             default:
                 return "package not found";

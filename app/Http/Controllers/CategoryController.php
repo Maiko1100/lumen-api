@@ -25,6 +25,10 @@ class CategoryController extends Controller
 
       return $categories;
   }
+
+  public function getCategoryBy30() {
+          return Category::where("is30", "=", 1)->first();
+  }
   
 }
 
